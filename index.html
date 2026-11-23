@@ -1,0 +1,468 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>มหาโหราศาสตร์ไทย ครบทุกแขนง</title>
+    <script src="https://tailwindcss.com"></script>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #0b1120; color: #f1f5f9; }
+        .glass-card { background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(12px); border: 1px solid rgba(148, 163, 184, 0.15); }
+        .num-cell { transition: all 0.15s ease; cursor: pointer; }
+        .num-cell:hover { transform: scale(1.06); background-color: rgba(255,255,255,0.12); }
+        .hl-sri { border: 2px solid #10b981 !important; background-color: rgba(16, 185, 129, 0.18) !important; color: #34d399 !important; }
+        .hl-kali { border: 2px solid #ef4444 !important; background-color: rgba(239, 68, 68, 0.18) !important; color: #f87171 !important; }
+        .hl-det { border: 2px solid #f59e0b !important; background-color: rgba(245, 158, 11, 0.18) !important; color: #fbbf24 !important; }
+        .rasi-box { border: 1px solid rgba(251, 191, 36, 0.25); min-height: 95px; position: relative; transition: background 0.2s; }
+        .rasi-box:hover { background: rgba(251, 191, 36, 0.08); }
+        .rasi-active { border: 2px solid #fbbf24 !important; background: rgba(251, 191, 36, 0.12) !important; }
+    </style>
+</head>
+<body class="min-h-screen pb-16">
+    <header class="border-b border-slate-800 bg-slate-950/95 sticky top-0 z-40 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-3">
+            <div>
+                <h1 class="text-lg md:text-2xl font-bold bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
+                    ⚜️ มหาโหราศาสตร์ไทย ครบทุกแขนง
+                </h1>
+                <p class="text-[11px] text-slate-400">7 ตัว 9 ฐาน • ลัคนาอันโตนาที • ทักษา • มหาภูติ • กาลโยค • นักษัตร & ราศี</p>
+            </div>
+            <button onclick="calculateAll()" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm shadow transition">
+                คำนวณดวงชะตา
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 mt-6 space-y-6">
+        <section class="glass-card rounded-2xl p-5 shadow-2xl space-y-4">
+            <h2 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2">
+                1. ข้อมูลพื้นดวงเกิด & ตั้งค่าวิธีคำนวณ
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">วัน/เดือน/ปี เกิด (ค.ศ.)</label>
+                    <input type="date" id="dob" value="1992-08-19" onchange="autoDetectAstroDate()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">เวลาเกิด (น.)</label>
+                    <input type="time" id="tob" value="09:45" onchange="calculateAll()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">จังหวัดเกิด (พิกัดคำนวณลัคนา)</label>
+                    <select id="province" onchange="calculateAll()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <option value="13.7563,100.5018,กรุงเทพมหานคร">กรุงเทพมหานคร</option>
+                        <option value="18.7883,98.9853,เชียงใหม่">เชียงใหม่</option>
+                        <option value="19.9105,99.8406,เชียงราย">เชียงราย</option>
+                        <option value="16.4322,102.8236,ขอนแก่น">ขอนแก่น</option>
+                        <option value="14.9799,102.0978,นครราชสีมา">นครราชสีมา</option>
+                        <option value="15.2287,104.8564,อุบลราชธานี">อุบลราชธานี</option>
+                        <option value="13.3611,100.9847,ชลบุรี">ชลบุรี</option>
+                        <option value="9.1382,99.3217,สุราษฎร์ธานี">สุราษฎร์ธานี</option>
+                        <option value="7.0086,100.4747,สงขลา">สงขลา</option>
+                        <option value="7.8804,98.3923,ภูเก็ต">ภูเก็ต</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-amber-300 mb-1">วิธีคำนวณหาลัคนา</label>
+                    <select id="ascMethod" onchange="calculateAll()" class="w-full bg-slate-900 border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-amber-200">
+                        <option value="anto_standard">อันโตนาทีสามัญ (เริ่ม 06:00 น.)</option>
+                        <option value="anto_lmt">อันโตนาทีสามัญ + ตัดเวลาท้องถิ่น (LMT)</option>
+                        <option value="anto_lat">อันโตนาทีตามละติจูด/อาทิตย์อุทัยจริง</option>
+                        <option value="lahiri">สมผุสดาวจริง (นิรายนะ - ลาหิรี)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-800/80">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">วันเกิดโหราศาสตร์ (ตัด 06:00 น.)</label>
+                    <select id="thaiDay" onchange="calculateAll()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <option value="1">1 - วันอาทิตย์</option>
+                        <option value="2">2 - วันจันทร์</option>
+                        <option value="3">3 - วันอังคาร</option>
+                        <option value="4">4 - วันพุธ (กลางวัน)</option>
+                        <option value="8">8 - วันพุธกลางคืน (ราหู)</option>
+                        <option value="5">5 - วันพฤหัสบดี</option>
+                        <option value="6">6 - วันศุกร์</option>
+                        <option value="7">7 - วันเสาร์</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">เดือนเกิด (จันทรคติไทย)</label>
+                    <select id="thaiMonth" onchange="calculateAll()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <option value="1">เดือน 1 (อ้าย)</option>
+                        <option value="2">เดือน 2 (ยี่)</option>
+                        <option value="3">เดือน 3</option>
+                        <option value="4">เดือน 4</option>
+                        <option value="5">เดือน 5</option>
+                        <option value="6">เดือน 6</option>
+                        <option value="7">เดือน 7</option>
+                        <option value="8">เดือน 8</option>
+                        <option value="9">เดือน 9</option>
+                        <option value="10">เดือน 10</option>
+                        <option value="11">เดือน 11</option>
+                        <option value="12">เดือน 12</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ปีนักษัตร (ตัดช่วงสงกรานต์/เดือน 5)</label>
+                    <select id="thaiYear" onchange="calculateAll()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                        <option value="1">1 - ปีชวด (หนู)</option>
+                        <option value="2">2 - ปีฉลู (วัว)</option>
+                        <option value="3">3 - ปีขาล (เสือ)</option>
+                        <option value="4">4 - ปีเถาะ (กระต่าย)</option>
+                        <option value="5">5 - ปีมะโรง (งูใหญ่)</option>
+                        <option value="6">6 - ปีมะเส็ง (งูเล็ก)</option>
+                        <option value="7">7 - ปีมะเมีย (ม้า)</option>
+                        <option value="8">8 - ปีมะแม (แพะ)</option>
+                        <option value="9">9 - ปีวอก (ลิง)</option>
+                        <option value="10">10 - ปีระกา (ไก่)</option>
+                        <option value="11">11 - ปีจอ (หมา)</option>
+                        <option value="12">12 - ปีกุน (หมู)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-emerald-400 mb-1">พ.ศ. ปัจจุบันที่ต้องการพยากรณ์ (จร)</label>
+                    <input type="number" id="targetYearBE" value="2569" onchange="calculateAll()" class="w-full bg-slate-900 border border-emerald-500/40 rounded-lg px-3 py-2 text-sm text-emerald-300">
+                </div>
+            </div>
+        </section>
+
+        <!-- การ์ดสรุปข้อมูลดวงชะตา -->
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-3" id="summaryCards"></section>
+
+        <!-- พื้นที่แสดงผลหลัก -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-7 space-y-6">
+                <div class="glass-card rounded-2xl p-5 shadow-xl overflow-x-auto">
+                    <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                        <h3 class="text-base font-bold text-amber-400">ตารางเลข 7 ตัว 9 ฐาน (คลิกตัวเลขเพื่อดูความหมาย)</h3>
+                        <div class="flex gap-2 text-[11px]">
+                            <span class="px-2 py-0.5 rounded hl-sri">ศรีจร</span>
+                            <span class="px-2 py-0.5 rounded hl-det">เดชจร</span>
+                            <span class="px-2 py-0.5 rounded hl-kali">กาลกิณีจร</span>
+                        </div>
+                    </div>
+                    <table class="w-full text-center border-collapse min-w-[540px]" id="table7Tua"></table>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="glass-card rounded-2xl p-4">
+                        <h4 class="text-sm font-bold text-amber-400 mb-2">ผังมหาภูติ (กำเนิด)</h4>
+                        <div id="mahaphutBox" class="grid grid-cols-3 gap-2 text-center text-sm"></div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4">
+                        <h4 class="text-sm font-bold text-amber-400 mb-2">กาลโยคประจำปีจร (<span id="kalayokYearLabel"></span>)</h4>
+                        <div id="kalayokBox" class="space-y-1.5 text-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 space-y-6">
+                <div class="glass-card rounded-2xl p-5 shadow-xl">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-base font-bold text-amber-400">ดวงจักรราศี 12 ราศี (อีแปะไทย)</h3>
+                        <span id="ascMethodBadge" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-amber-300"></span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1 text-xs" id="zodiacWheel"></div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-5 border-amber-500/30">
+                    <h3 class="text-sm font-bold text-amber-400 mb-2">📖 คำพยากรณ์เจาะลึก</h3>
+                    <div id="meaningBox" class="text-sm text-slate-300 leading-relaxed">
+                        คลิกที่ตัวเลขในตาราง 7 ตัว 9 ฐาน หรือช่องราศีเพื่อดูความหมายของภพ ดาว และทักษาที่กระทบกัน
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+<script>
+const DAY_NAMES = { 1: 'อาทิตย์ (๑)', 2: 'จันทร์ (๒)', 3: 'อังคาร (๓)', 4: 'พุธ (๔)', 5: 'พฤหัสบดี (๕)', 6: 'ศุกร์ (๖)', 7: 'เสาร์ (๗)', 8: 'ราหู (๘)' };
+const PLANET_SYMBOLS = { 1: '๑', 2: '๒', 3: '๓', 4: '๔', 5: '๕', 6: '๖', 7: '๗', 8: '๘' };
+const ZODIAC_NAMES = ['เมษ', 'พฤษภ', 'เมถุน', 'กรกฎ', 'สิงห์', 'กันย์', 'ตุลย์', 'พิจิก', 'ธนู', 'มังกร', 'กุมภ์', 'มีน'];
+const YEAR_ANIMALS = ['ชวด', 'ฉลู', 'ขาล', 'เถาะ', 'มะโรง', 'มะเส็ง', 'มะเมีย', 'มะแม', 'วอก', 'ระกา', 'จอ', 'กุน'];
+const TAKSA_SEQ =;
+const TAKSA_ROLES = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
+const BASE_NAMES = ['ฐาน 1 (วัน)', 'ฐาน 2 (เดือน)', 'ฐาน 3 (ปี)', 'ฐาน 4 (ผลบวก)', 'ฐาน 5 (กำลังดาว)', 'ฐาน 6 (ฐานบวก)', 'ฐาน 7 (ฐานบวก)', 'ฐาน 8 (ฐานบวก)', 'ฐาน 9 (สรุป)'];
+const HOUSE_NAMES = [
+    ['อัตตะ', 'หินะ', 'ธานัง', 'ปิตา', 'มาตา', 'โภคา', 'มัชฌิมา'],
+    ['ตะนุ', 'กดุมภะ', 'สหัชชะ', 'พันธุ', 'ปุตตะ', 'อริ', 'ปัตนิ'],
+    ['มรณะ', 'สุภะ', 'กัมมะ', 'ลาภะ', 'พยายะ', 'ทาสา', 'ทาสี']
+];
+const PLANET_POWER = { 1: 6, 2: 15, 3: 8, 4: 17, 5: 19, 6: 21, 7: 10 };
+const ANTO_STANDARD =;
+
+function mod7(n) { return ((n - 1) % 7 + 7) % 7 + 1; }
+
+function autoDetectAstroDate() {
+    const dobVal = document.getElementById('dob').value;
+    const tobVal = document.getElementById('tob').value;
+    if (!dobVal) return;
+
+    const parts = dobVal.split('-').map(Number);
+    const y = parts[0], m = parts[1], d = parts[2];
+    const tParts = (tobVal || '09:00').split(':').map(Number);
+    const hh = tParts[0];
+    const dateObj = new Date(y, m - 1, d);
+    let dow = dateObj.getDay();
+
+    if (hh < 6) dow = (dow + 6) % 7;
+
+    let astroDay = dow === 0 ? 1 : dow + 1;
+    if (astroDay === 4 && (hh >= 18 || hh < 6)) astroDay = 8;
+    document.getElementById('thaiDay').value = astroDay;
+
+    let astroYearIdx = ((y - 1900) % 12 + 12) % 12;
+    if (m < 4 || (m === 4 && d < 14)) astroYearIdx = (astroYearIdx + 11) % 12;
+    document.getElementById('thaiYear').value = astroYearIdx + 1;
+
+    let approxMonth = m + 1;
+    if (approxMonth > 12) approxMonth -= 12;
+    document.getElementById('thaiMonth').value = approxMonth;
+
+    calculateAll();
+}
+
+function calcTaksa(birthDay, age) {
+    const startIdx = TAKSA_SEQ.indexOf(birthDay);
+    const currentIdx = age > 1 ? (startIdx + (age - 1)) % 8 : startIdx;
+    const roleMap = {};
+    for (let i = 0; i < 8; i++) {
+        const p = TAKSA_SEQ[(currentIdx + i) % 8];
+        roleMap[p] = TAKSA_ROLES[i];
+    }
+    return roleMap;
+}
+
+function calcKalayok(yearBE) {
+    const js = yearBE - 1181;
+    return {
+        dharmachai: ((js * 5 + 3) % 7) + 1,
+        athibodi: ((js * 5 + 6) % 7) + 1,
+        ubat: ((js * 5 + 2) % 7) + 1,
+        lokawinart: ((js * 5 + 4) % 7) + 1
+    };
+}
+
+function calcAscendantAndPlanets(dobVal, tobVal, lat, lon, method) {
+    const parts = dobVal.split('-').map(Number);
+    const y = parts[0], m = parts[1], d = parts[2];
+    const tParts = tobVal.split(':').map(Number);
+    const hh = tParts[0], mm = tParts[1];
+    const utcDate = new Date(Date.UTC(y, m - 1, d, hh - 7, mm));
+
+    const ayanamsa = 23.85 + (y - 2000) * 0.0139;
+    const bodies = [
+        { id: 1, body: 'Sun' }, { id: 2, body: 'Moon' }, { id: 3, body: 'Mars' },
+        { id: 4, body: 'Mercury' }, { id: 5, body: 'Jupiter' }, { id: 6, body: 'Venus' }, { id: 7, body: 'Saturn' }
+    ];
+
+    const planetPositions = {};
+    let sunRasi = 0;
+
+    bodies.forEach(function(b) {
+        const vec = Astronomy.GeoVector(b.body, utcDate, true);
+        const ecl = Astronomy.Ecliptic(vec);
+        const siderealLon = (ecl.elon - ayanamsa + 360) % 360;
+        const rasiIdx = Math.floor(siderealLon / 30);
+        planetPositions[b.id] = rasiIdx;
+        if (b.id === 1) sunRasi = rasiIdx;
+    });
+
+    let ascRasi = sunRasi;
+    let methodText = '';
+
+    if (method === 'lahiri') {
+        const gst = Astronomy.SiderealTime(utcDate);
+        const lst = (gst + lon / 15 + 24) % 24;
+        const ramc = lst * 15 * Math.PI / 180;
+        const eps = 23.4393 * Math.PI / 180;
+        const latRad = lat * Math.PI / 180;
+        let ascDeg = Math.atan2(Math.cos(ramc), -Math.sin(ramc) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps)) * 180 / Math.PI;
+        ascDeg = (ascDeg + 360 - ayanamsa + 360) % 360;
+        ascRasi = Math.floor(ascDeg / 30);
+        methodText = 'สมผุสลาหิรี';
+    } else {
+        let totalMinutes = hh * 60 + mm;
+        let sunriseMinutes = 360;
+
+        if (method === 'anto_lmt') {
+            totalMinutes += (lon - 105) * 4;
+            methodText = 'อันโตนาที + LMT';
+        } else if (method === 'anto_lat') {
+            totalMinutes += (lon - 105) * 4;
+            const dayOfYear = Math.floor((new Date(y, m - 1, d) - new Date(y, 0, 0)) / 86400000);
+            const sunOffset = Math.sin((dayOfYear - 80) * 2 * Math.PI / 365) * (lat * 1.4);
+            sunriseMinutes = 360 - sunOffset;
+            methodText = 'อันโตนาทีพิกัดจริง';
+        } else {
+            methodText = 'อันโตนาทีสามัญ';
+        }
+
+        let elapsed = (totalMinutes - sunriseMinutes + 1440) % 1440;
+        let currRasi = sunRasi;
+        while (elapsed > 0) {
+            const dur = ANTO_STANDARD[currRasi];
+            if (elapsed >= dur) {
+                elapsed -= dur;
+                currRasi = (currRasi + 1) % 12;
+            } else {
+                break;
+            }
+        }
+        ascRasi = currRasi;
+    }
+
+    return { ascRasi: ascRasi, sunRasi: sunRasi, planetPositions: planetPositions, methodText: methodText };
+}
+function calculateAll() {
+    const dobVal = document.getElementById('dob').value;
+    const tobVal = document.getElementById('tob').value;
+    const provParts = document.getElementById('province').value.split(',');
+    const latStr = provParts[0], lonStr = provParts[1], provName = provParts[2];
+    const method = document.getElementById('ascMethod').value;
+
+    const dVal = parseInt(document.getElementById('thaiDay').value);
+    const mVal = parseInt(document.getElementById('thaiMonth').value);
+    const yVal = parseInt(document.getElementById('thaiYear').value);
+    const targetBE = parseInt(document.getElementById('targetYearBE').value);
+
+    const birthYearBE = parseInt(dobVal.split('-')[0]) + 543;
+    const age = Math.max(1, targetBE - birthYearBE + 1);
+
+    const d7 = mod7(dVal);
+    const m7 = mod7(mVal);
+    const y7 = mod7(yVal);
+
+    const r1 = [0,1,2,3,4,5,6].map(function(i) { return mod7(d7 + i); });
+    const r2 = [0,1,2,3,4,5,6].map(function(i) { return mod7(m7 + i); });
+    const r3 = [0,1,2,3,4,5,6].map(function(i) { return mod7(y7 + i); });
+    const r4 = r1.map(function(_, i) { return r1[i] + r2[i] + r3[i]; });
+    const r5 = r4.map(function(n) { return PLANET_POWER[mod7(n)]; });
+    const r6 = r4.map(function(n, i) { return mod7(n + r5[i]); });
+    const r7 = r6.map(function(n, i) { return mod7(n + r5[i]); });
+    const r8 = r7.map(function(n, i) { return mod7(n + r5[i]); });
+    const r9 = r8.map(function(n, i) { return mod7(n + r5[i]); });
+    const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
+
+    const taksaBirth = calcTaksa(dVal, 1);
+    const taksaCurrent = calcTaksa(dVal, age);
+    const kalayok = calcKalayok(targetBE);
+    const astro = calcAscendantAndPlanets(dobVal, tobVal, parseFloat(latStr), parseFloat(lonStr), method);
+
+    const sriPlanet = Object.keys(taksaCurrent).find(function(k) { return taksaCurrent[k] === 'ศรี'; });
+    const kaliPlanet = Object.keys(taksaCurrent).find(function(k) { return taksaCurrent[k] === 'กาลกิณี'; });
+
+    document.getElementById('summaryCards').innerHTML =
+        '<div class="glass-card p-3.5 rounded-xl border-l-4 border-amber-400">' +
+            '<div class="text-[11px] text-slate-400">ปีนักษัตร / ราศีเกิด</div>' +
+            '<div class="text-base font-bold text-amber-300 mt-0.5">ปี' + YEAR_ANIMALS[yVal - 1] + ' • ราศี' + ZODIAC_NAMES[astro.sunRasi] + '</div>' +
+        '</div>' +
+        '<div class="glass-card p-3.5 rounded-xl border-l-4 border-yellow-400">' +
+            '<div class="text-[11px] text-slate-400">ลัคนาราศี (' + provName + ')</div>' +
+            '<div class="text-base font-bold text-yellow-300 mt-0.5">ลัคนาราศี' + ZODIAC_NAMES[astro.ascRasi] + '</div>' +
+        '</div>' +
+        '<div class="glass-card p-3.5 rounded-xl border-l-4 border-emerald-400">' +
+            '<div class="text-[11px] text-slate-400">อายุย่าง / ศรีจร</div>' +
+            '<div class="text-base font-bold text-emerald-300 mt-0.5">' + age + ' ปี • ดาว' + sriPlanet + '</div>' +
+        '</div>' +
+        '<div class="glass-card p-3.5 rounded-xl border-l-4 border-rose-400">' +
+            '<div class="text-[11px] text-slate-400">กาลกิณีจรประจำปี</div>' +
+            '<div class="text-base font-bold text-rose-400 mt-0.5">ดาว' + kaliPlanet + '</div>' +
+        '</div>' +
+        '<div class="glass-card p-3.5 rounded-xl border-l-4 border-sky-400">' +
+            '<div class="text-[11px] text-slate-400">ธงชัย / อธิบดี (' + targetBE + ')</div>' +
+            '<div class="text-base font-bold text-sky-300 mt-0.5">' + DAY_NAMES[kalayok.dharmachai].split(' ')[0] + ' / ' + DAY_NAMES[kalayok.athibodi].split(' ')[0] + '</div>' +
+        '</div>';
+
+    let tblHtml = '<tbody>';
+    rows.forEach(function(row, rIdx) {
+        tblHtml += '<tr class="border-b border-slate-800/70">';
+        tblHtml += '<td class="py-2 px-2 text-left text-[11px] text-slate-400 font-medium">' + BASE_NAMES[rIdx] + '</td>';
+        row.forEach(function(val, cIdx) {
+            const pNum = mod7(val);
+            const role = taksaCurrent[pNum];
+            let hlClass = 'bg-slate-900/70 border border-slate-700/60';
+            if (role === 'ศรี') hlClass = 'hl-sri';
+            else if (role === 'กาลกิณี') hlClass = 'hl-kali';
+            else if (role === 'เดช') hlClass = 'hl-det';
+
+            const houseLabel = rIdx < 3 ? '<div class="text-[10px] text-slate-400 mt-0.5">' + HOUSE_NAMES[rIdx][cIdx] + '</div>' : '';
+            const hName = rIdx < 3 ? HOUSE_NAMES[rIdx][cIdx] : BASE_NAMES[rIdx];
+            tblHtml += '<td class="p-1">' +
+                '<div onclick="showMeaning(\'' + hName + '\',' + pNum + ',\'' + role + '\',\'' + taksaBirth[pNum] + '\',' + val + ')" class="num-cell rounded-lg py-1.5 px-1 ' + hlClass + '">' +
+                    '<div class="text-sm font-bold">' + val + '</div>' + houseLabel +
+                '</div></td>';
+        });
+        tblHtml += '</tr>';
+    });
+    tblHtml += '</tbody>';
+    document.getElementById('table7Tua').innerHTML = tblHtml;
+
+    const mpGrid = [
+        { label: 'มรณะ', idx: 2 }, { label: 'อริ', idx: 5 }, { label: 'ทาสี', idx: 6 },
+        { label: 'ปิตา', idx: 3 }, { label: 'อัตตะ (ตนุ)', idx: 0 }, { label: 'ทาสา', idx: 4 },
+        { label: 'หินะ', idx: 1 }, { label: 'ธานัง', idx: 2 }, { label: 'โภคา', idx: 5 }
+    ];
+    document.getElementById('mahaphutBox').innerHTML = mpGrid.map(function(item) {
+        return '<div class="bg-slate-900/80 border border-slate-800 rounded-lg p-2">' +
+            '<div class="text-[10px] text-slate-400">' + item.label + '</div>' +
+            '<div class="text-base font-bold text-amber-300">' + r1[item.idx] + '</div></div>';
+    }).join('');
+
+    document.getElementById('kalayokYearLabel').innerText = targetBE;
+    document.getElementById('kalayokBox').innerHTML =
+        '<div class="flex justify-between p-1.5 rounded bg-emerald-500/10 text-emerald-300"><span>ธงชัย (โชคลาภสูงสุด):</span><b>' + DAY_NAMES[kalayok.dharmachai] + '</b></div>' +
+        '<div class="flex justify-between p-1.5 rounded bg-sky-500/10 text-sky-300"><span>อธิบดี (อำนาจ/ตำแหน่ง):</span><b>' + DAY_NAMES[kalayok.athibodi] + '</b></div>' +
+        '<div class="flex justify-between p-1.5 rounded bg-amber-500/10 text-amber-300"><span>อุบาทว์ (เรื่องวุ่นวาย):</span><b>' + DAY_NAMES[kalayok.ubat] + '</b></div>' +
+        '<div class="flex justify-between p-1.5 rounded bg-rose-500/10 text-rose-300"><span>โลกาวินาศ (จุดแตกหัก):</span><b>' + DAY_NAMES[kalayok.lokawinart] + '</b></div>';
+
+    document.getElementById('ascMethodBadge').innerText = astro.methodText;
+    const gridOrder = [11, 0, 1, 2, 10, -1, -1, 3, 9, -2, -2, 4, 8, 7, 6, 5];
+    let wheelHtml = '';
+    gridOrder.forEach(function(rIdx) {
+        if (rIdx === -1) {
+            wheelHtml += '<div class="bg-slate-950/60 border border-slate-800/40 flex items-center justify-center text-[11px] text-slate-500">ดวงไทย</div>';
+        } else if (rIdx === -2) {
+            wheelHtml += '<div class="bg-slate-950/60 border border-slate-800/40 flex items-center justify-center text-[11px] text-amber-500/70">ลัคนา: ' + ZODIAC_NAMES[astro.ascRasi] + '</div>';
+        } else {
+            const isAsc = rIdx === astro.ascRasi;
+            const planetsHere = Object.keys(astro.planetPositions)
+                .filter(function(pId) { return astro.planetPositions[pId] === rIdx; })
+                .map(function(pId) { return '<span class="inline-block px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 font-bold text-xs">' + PLANET_SYMBOLS[pId] + '</span>'; })
+                .join(' ');
+            wheelHtml += '<div class="rasi-box p-2 rounded ' + (isAsc ? 'rasi-active' : 'bg-slate-900/50') + '">' +
+                '<div class="flex justify-between items-center text-[10px] text-slate-400 mb-1">' +
+                    '<span>' + ZODIAC_NAMES[rIdx] + '</span>' +
+                    (isAsc ? '<span class="px-1 bg-amber-500 text-slate-950 font-bold rounded">ลั</span>' : '') +
+                '</div>' +
+                '<div class="flex flex-wrap gap-1 mt-1">' + (planetsHere || '<span class="text-slate-700">-</span>') + '</div></div>';
+        }
+    });
+    document.getElementById('zodiacWheel').innerHTML = wheelHtml;
+}
+
+function showMeaning(house, planetNum, roleCurrent, roleBirth, rawVal) {
+    const desc = roleCurrent === 'ศรี' ? '(ให้คุณโดดเด่น มีโชคลาภและความสำเร็จ)' :
+                 roleCurrent === 'กาลกิณี' ? '(ควรระมัดระวังอุปสรรคหรือความขัดแย้งในเรื่องนี้)' :
+                 '(ส่งผลตามกำลังดาวและภพที่สถิต)';
+    document.getElementById('meaningBox').innerHTML =
+        '<div class="space-y-2">' +
+            '<div class="text-base font-bold text-amber-300">ภพ/ตำแหน่ง: ' + house + ' | เลขกำลัง: ' + rawVal + ' (ดาว' + DAY_NAMES[planetNum] + ')</div>' +
+            '<div class="flex gap-2 text-xs">' +
+                '<span class="px-2 py-1 rounded bg-slate-800 text-slate-200">ทักษาเดิม: <b>' + roleBirth + '</b></span>' +
+                '<span class="px-2 py-1 rounded bg-amber-500/20 text-amber-300">ทักษาจรปีนี้: <b>' + roleCurrent + '</b></span>' +
+            '</div>' +
+            '<p class="text-slate-300 pt-1">' +
+                '• <b>ความหมายตำแหน่ง:</b> ภพ <b>' + house + '</b> มีดาว <b>' + DAY_NAMES[planetNum] + '</b> สถิตอยู่ ส่งผลโดยตรงต่อเรื่อง' + house + 'ของเจ้าชะตา<br>' +
+                '• <b>เกณฑ์ทักษาจร:</b> ปีนี้ดาวดวงนี้ตกภูมิ <b>"' + roleCurrent + '"</b> ' + desc +
+            '</p>' +
+        '</div>';
+}
+
+window.onload = autoDetectAstroDate;
+</script>
+</body>
+</html>
