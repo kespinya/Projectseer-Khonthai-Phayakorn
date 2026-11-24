@@ -126,23 +126,25 @@
         <!-- โหมด 2: เลข 7 ตัว 9 ฐาน -->
         <section id="mode-7tua" class="mode-section">
             <div class="card-light card-cream">
-                <div class="mode-header">
-                    <h2 style="color:#B91C1C;font-size:19px;">🔢 คัมภีร์เลข 7 ตัว 9 ฐาน & ตารางอายุจร 21 ปี</h2>
-                    <button onclick="syncForm7Tua()" style="padding:6px 14px;border-radius:99px;border:1.5px solid #059669;background:#ECFDF5;color:#065F46;font-size:12px;font-weight:700;cursor:pointer;">🔄 ดึงวันเกิดจากโหมด 1 อัตโนมัติ</button>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group"><label>☀️ วันเกิดโหราศาสตร์</label><select id="t7_day" class="form-control"><option value="1">1 - วันอาทิตย์</option><option value="2">2 - วันจันทร์</option><option value="3">3 - วันอังคาร</option><option value="4">4 - วันพุธกลางวัน</option><option value="8">8 - วันพุธกลางคืน</option><option value="5" selected>5 - วันพฤหัสบดี</option><option value="6">6 - วันศุกร์</option><option value="7">7 - วันเสาร์</option></select></div>
-        <section id="mode-7tua" class="mode-section">
+                        <section id="mode-7tua" class="mode-section">
             <div class="card-light card-cream">
                 <div class="mode-header">
                     <h2 style="color:#B91C1C;font-size:19px;">🔢 คัมภีร์เลข 7 ตัว 9 ฐาน & ตารางอายุจร 21 ปี</h2>
-                    <button onclick="syncForm7Tua()" style="padding:6px 14px;border-radius:99px;border:1.5px solid #059669;background:#ECFDF5;color:#065F46;font-size:12px;font-weight:700;cursor:pointer;">🔄 ดึงวันเกิดจากโหมด 1 อัตโนมัติ</button>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <select id="t7_calType" onchange="syncForm7Tua()" style="padding:6px 12px;border-radius:99px;border:1.5px solid #D97706;background:#FFFBEB;color:#92400E;font-size:12px;font-weight:700;cursor:pointer;">
+                            <option value="lunar">🌙 ระบบจันทรคติ (ปฏิทิน 100 ปี)</option>
+                            <option value="solar">☀️ ระบบสุริยคติ (นับตามเดือนสากล)</option>
+                        </select>
+                        <button onclick="syncForm7Tua()" style="padding:6px 14px;border-radius:99px;border:1.5px solid #059669;background:#ECFDF5;color:#065F46;font-size:12px;font-weight:700;cursor:pointer;">🔄 ดึงวันเกิดจากโหมด 1</button>
+                    </div>
                 </div>
                 <div class="form-grid" id="form7TuaContainer"></div>
                 <button onclick="render7TuaModeUI()" class="btn-action">📜 ตั้งตารางเลข 7 ตัว 9 ฐาน & มหาภูติ</button>
             </div>
             <div id="t7_result" class="card-light" style="display:none;"></div>
         </section>
+
+               
 
         <section id="mode-taksa" class="mode-section">
             <div class="card-light card-cream">
@@ -239,17 +241,25 @@
         }
 
         function syncForm7Tua() {
-            const dob = document.getElementById('z_dob').value;
-            const tob = document.getElementById('z_tob').value;
-            const res = getThaiLunarCalendar100Y(dob, tob);
-            document.getElementById('t7_day').value = res.astroDay;
-            document.getElementById('t7_month').value = res.astroMonth;
-            document.getElementById('t7_year').value = res.astroYear;
-            document.getElementById('t7_birthBE').value = res.birthYearBE;
-            document.getElementById('tk_day').value = res.astroDay;
-            document.getElementById('tk_age').value = 2569 - res.birthYearBE + 1;
-            document.getElementById('qk_dob').value = dob;
-            render7TuaModeUI();
+    const dob = document.getElementById('z_dob').value;
+    const tob = document.getElementById('z_tob').value;
+    const calType = document.getElementById('t7_calType') ? document.getElementById('t7_calType').value : 'lunar';
+    const res = getThaiLunarCalendar100Y(dob, tob);
+    const [y, m] = dob.split('-').map(Number);
+
+    document.getElementById('t7_day').value = res.astroDay;
+    document.getElementById('t7_month').value = (calType === 'solar') ? ((m % 12) + 1) : res.astroMonth;
+    document.getElementById('t7_year').value = res.astroYear;
+    document.getElementById('t7_birthBE').value = res.birthYearBE;
+
+    if (document.getElementById('tk_day')) {
+        document.getElementById('tk_day').value = res.astroDay;
+        document.getElementById('tk_age').value = 2569 - res.birthYearBE + 1;
+    }
+    if (document.getElementById('qk_dob')) {
+        document.getElementById('qk_dob').value = dob;
+    }
+    render7TuaModeUI();
         }
 
         const CAT_QUOTES = [
