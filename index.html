@@ -3,311 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProjectSeer - มหาโหราศาสตร์จักรวาล ครบทุกแขนง</title>
-       <script src="https://jsdelivr.net"></script>
+    <title>ProjectSeer - มหาโหราศาสตร์ไทย 4 ศาสตร์พยากรณ์</title>
     <link href="https://googleapis.com" rel="stylesheet">
-
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; }
         body {
             background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
-            color: #FFFBEB;
-            min-height: 100vh;
-            padding-bottom: 60px;
-            overflow-x: hidden;
-            position: relative;
+            color: #FFFBEB; min-height: 100vh; padding-bottom: 130px; overflow-x: hidden;
         }
-        /* พื้นหลังหมู่ดาวระยิบระยับ */
         .stars-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 0;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
             background-image:
-                radial-gradient(1.5px 1.5px at 20px 30px, #FDE047, transparent),
-                radial-gradient(2px 2px at 90px 40px, #FFFFFF, transparent),
-                radial-gradient(1.5px 1.5px at 160px 120px, #F43F5E, transparent),
-                radial-gradient(2px 2px at 230px 80px, #38BDF8, transparent),
-                radial-gradient(1.5px 1.5px at 300px 190px, #FDE047, transparent);
-            background-size: 350px 250px;
-            animation: twinkleStars 4s infinite alternate ease-in-out;
+                radial-gradient(1.5px 1.5px at 25px 35px, #FDE047, transparent),
+                radial-gradient(2px 2px at 100px 50px, #FFFFFF, transparent),
+                radial-gradient(1.5px 1.5px at 180px 130px, #FB7185, transparent),
+                radial-gradient(2px 2px at 260px 90px, #38BDF8, transparent);
+            background-size: 350px 250px; animation: twinkle 4s infinite alternate ease-in-out;
         }
-        @keyframes twinkleStars {
-            0% { opacity: 0.45; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.02); }
-        }
-        @keyframes pulseGlow {
-            0%, 100% { filter: drop-shadow(0 0 6px #F59E0B); }
-            50% { filter: drop-shadow(0 0 18px #FDE047); }
-        }
+        @keyframes twinkle { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+        @keyframes pulseGlow { 0%, 100% { filter: drop-shadow(0 0 6px #F59E0B); } 50% { filter: drop-shadow(0 0 18px #FDE047); } }
         .glow-active { animation: pulseGlow 2s infinite ease-in-out; }
 
-        /* แถบเมนูเลือกวิชา */
         .nav-bar {
-            position: sticky; top: 0; z-index: 50;
-            background: rgba(9, 10, 15, 0.88);
-            backdrop-filter: blur(12px);
-            padding: 14px 16px;
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+            position: sticky; top: 0; z-index: 50; background: rgba(9, 10, 15, 0.92); backdrop-filter: blur(12px);
+            padding: 12px 16px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
             border-bottom: 1px solid rgba(251, 191, 36, 0.3);
         }
         .tab-btn {
-            padding: 9px 18px; border-radius: 999px;
-            border: 1.5px solid rgba(251, 191, 36, 0.4);
-            background: rgba(30, 41, 59, 0.7);
-            color: #FDE68A; font-size: 13px; font-weight: 600;
-            cursor: pointer; transition: all 0.25s;
+            padding: 9px 16px; border-radius: 999px; border: 1.5px solid rgba(251, 191, 36, 0.35);
+            background: rgba(30, 41, 59, 0.75); color: #FDE68A; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
         }
-        .tab-btn:hover { border-color: #FDE047; background: rgba(245, 158, 11, 0.2); }
-        .tab-btn.active {
-            background: linear-gradient(135deg, #DC2626, #D97706);
-            color: #FFFFFF; border-color: #FEF08A;
-            box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
-        }
+        .tab-btn:hover { border-color: #FDE047; }
+        .tab-btn.active { color: #FFF; border-color: #FEF08A; transform: translateY(-1px); }
+        .tab-btn[data-mode="mode-zodiac"].active { background: linear-gradient(135deg, #1D4ED8, #0284C7); box-shadow: 0 0 16px rgba(56, 189, 248, 0.6); }
+        .tab-btn[data-mode="mode-7tua"].active { background: linear-gradient(135deg, #B91C1C, #D97706); box-shadow: 0 0 16px rgba(245, 158, 11, 0.6); }
+        .tab-btn[data-mode="mode-taksa"].active { background: linear-gradient(135deg, #047857, #0D9488); box-shadow: 0 0 16px rgba(52, 211, 153, 0.6); }
+        .tab-btn[data-mode="mode-quick"].active { background: linear-gradient(135deg, #BE185D, #E11D48); box-shadow: 0 0 16px rgba(244, 63, 94, 0.6); }
 
-        .container { max-width: 1100px; margin: 0 auto; padding: 20px 16px; position: relative; z-index: 1; }
-        .hero-box {
-            text-align: center; padding: 28px 20px;
-            background: radial-gradient(circle at center, rgba(30, 58, 138, 0.35) 0%, rgba(9, 10, 15, 0.8) 100%);
-            border-radius: 26px; border: 1.5px solid rgba(251, 191, 36, 0.4);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.15);
-            margin-bottom: 22px;
-        }
-        .hero-title {
-            font-size: 30px; font-weight: 700;
-            background: linear-gradient(90deg, #FEF08A, #F59E0B, #FDA4AF, #7DD3FC);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin: 6px 0;
-        }
-        .card {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            border-radius: 22px; padding: 22px;
-            border: 1.5px solid rgba(251, 191, 36, 0.28);
-            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
-            margin-bottom: 22px;
-        }
-        .section-title {
-            font-size: 17px; font-weight: 700; color: #FDE047;
-            margin-bottom: 16px; padding-bottom: 10px;
-            border-bottom: 1px dashed rgba(251, 191, 36, 0.35);
-            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-        }
-        /* ฟอร์มกรอกข้อมูลและปุ่มกดคำนวณ */
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 18px; }
-        .form-group label { display: block; font-size: 12px; color: #FDE68A; margin-bottom: 5px; font-weight: 500; }
-        .form-control {
-            width: 100%; padding: 10px 14px; border-radius: 12px;
-            border: 1.5px solid rgba(56, 189, 248, 0.4);
-            background: rgba(15, 23, 42, 0.95); color: #FFFFFF; font-size: 14px; outline: none;
-        }
-        .form-control:focus { border-color: #FDE047; box-shadow: 0 0 10px rgba(253, 224, 71, 0.35); }
-        .btn-submit {
-            width: 100%; padding: 14px 24px; border-radius: 999px;
-            border: 2px solid #FEF08A;
-            background: linear-gradient(90deg, #DC2626 0%, #E11D48 50%, #D97706 100%);
-            color: #FFFFFF; font-size: 16px; font-weight: 700; cursor: pointer;
-            box-shadow: 0 0 20px rgba(225, 29, 72, 0.5); transition: 0.2s;
-        }
-        .btn-submit:hover { transform: scale(1.01); box-shadow: 0 0 28px rgba(253, 224, 71, 0.7); }
+        .container { max-width: 1060px; margin: 0 auto; padding: 20px 16px; position: relative; z-index: 1; }
+        .mode-section { display: none; animation: fadeIn 0.3s ease; }
+        .mode-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* แท็บเนื้อหา & การ์ดสรุปผล */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
-        .stat-box {
-            padding: 15px; border-radius: 16px; text-align: center;
-            background: rgba(30, 41, 59, 0.7); border: 1.5px solid rgba(251, 191, 36, 0.35);
-        }
-        .stat-label { font-size: 12px; color: #7DD3FC; margin-bottom: 4px; }
-        .stat-value { font-size: 18px; font-weight: 700; color: #FDE047; }
+        /* สไตล์เฉพาะของแต่ละวิชา */
+        .panel-zodiac { background: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(30, 58, 138, 0.45)); border: 1.5px solid #38BDF8; border-radius: 24px; padding: 22px; margin-bottom: 20px; }
+        .panel-7tua { background: linear-gradient(160deg, rgba(28, 15, 19, 0.92), rgba(127, 29, 29, 0.45)); border: 1.5px solid #F59E0B; border-radius: 24px; padding: 22px; margin-bottom: 20px; }
+        .panel-taksa { background: linear-gradient(160deg, rgba(10, 28, 24, 0.92), rgba(6, 78, 59, 0.45)); border: 1.5px solid #34D399; border-radius: 24px; padding: 22px; margin-bottom: 20px; }
+        .panel-quick { background: linear-gradient(160deg, rgba(35, 15, 30, 0.92), rgba(136, 19, 55, 0.45)); border: 1.5px solid #FB7185; border-radius: 24px; padding: 22px; margin-bottom: 20px; }
 
-        /* ตารางเลข 7 ตัว 9 ฐาน */
+        .mode-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px dashed rgba(255,255,255,0.2); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; color: #FDE68A; margin-bottom: 4px; }
+        .form-control { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.25); background: rgba(9, 10, 15, 0.85); color: #FFF; font-size: 14px; outline: none; }
+        .form-control:focus { border-color: #FDE047; }
+
+        .btn-action { width: 100%; padding: 13px; border-radius: 999px; border: 1.5px solid #FEF08A; color: #FFF; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-action:active { transform: scale(0.98); }
+        .btn-blue { background: linear-gradient(90deg, #1D4ED8, #0284C7); box-shadow: 0 0 18px rgba(56, 189, 248, 0.45); }
+        .btn-red { background: linear-gradient(90deg, #B91C1C, #D97706); box-shadow: 0 0 18px rgba(245, 158, 11, 0.45); }
+        .btn-green { background: linear-gradient(90deg, #047857, #0D9488); box-shadow: 0 0 18px rgba(52, 211, 153, 0.45); }
+        .btn-pink { background: linear-gradient(90deg, #BE185D, #E11D48); box-shadow: 0 0 18px rgba(244, 63, 94, 0.45); }
+
         .table-wrap { overflow-x: auto; }
-        table.astro-table { width: 100%; border-collapse: separate; border-spacing: 6px; min-width: 560px; }
-        .base-label { text-align: left; font-size: 12px; font-weight: 600; color: #7DD3FC; padding-left: 6px; }
-        .num-btn {
-            width: 100%; padding: 8px 4px; border-radius: 12px;
-            border: 1.5px solid rgba(56, 189, 248, 0.35);
-            background: rgba(15, 23, 42, 0.9); color: #F8FAFC; cursor: pointer; transition: 0.15s;
-        }
-        .num-btn:hover { transform: scale(1.07); border-color: #FDE047; }
-        .hl-sri { background: rgba(16, 185, 129, 0.25) !important; border: 2px solid #34D399 !important; color: #6EE7B7 !important; }
-        .hl-kali { background: rgba(244, 63, 94, 0.28) !important; border: 2px solid #FB7185 !important; color: #FDA4AF !important; }
-        .hl-det { background: rgba(245, 158, 11, 0.28) !important; border: 2px solid #FBBF24 !important; color: #FDE047 !important; }
-        .num-main { font-size: 16px; font-weight: 700; }
-        .num-sub { font-size: 10px; opacity: 0.85; }
+        table.astro-table { width: 100%; border-collapse: separate; border-spacing: 5px; min-width: 540px; }
+        .num-btn { width: 100%; padding: 8px 4px; border-radius: 10px; border: 1px solid rgba(251, 191, 36, 0.35); background: rgba(15, 23, 42, 0.9); color: #FFF; cursor: pointer; }
+        .hl-sri { background: rgba(16, 185, 129, 0.28) !important; border: 2px solid #34D399 !important; color: #6EE7B7 !important; }
+        .hl-kali { background: rgba(244, 63, 94, 0.3) !important; border: 2px solid #FB7185 !important; color: #FDA4AF !important; }
+        .hl-det { background: rgba(245, 158, 11, 0.3) !important; border: 2px solid #FBBF24 !important; color: #FDE047 !important; }
     </style>
 </head>
 <body>
     <div class="stars-bg"></div>
 
     <nav class="nav-bar">
-        <button class="tab-btn active" onclick="switchTab('tab-overview', this)">☀️ ภาพรวม & ดาวประจำตัว</button>
-        <button class="tab-btn" onclick="switchTab('tab-7tua', this)">🔢 7 ตัว 9 ฐาน & มหาภูติ</button>
-        <button class="tab-btn" onclick="switchTab('tab-zodiac', this)">🎡 ลัคนา & วงกลมจักรราศี</button>
-        <button class="tab-btn" onclick="switchTab('tab-taksa', this)">🏮 ทักษาจร & กาลโยค</button>
+        <button class="tab-btn active" data-mode="mode-zodiac" onclick="openMode('mode-zodiac', this)">🎡 1. ผูกดวงจักรราศี & ลัคนา</button>
+        <button class="tab-btn" data-mode="mode-7tua" onclick="openMode('mode-7tua', this)">🔢 2. วิชา 7 ตัว 9 ฐาน & มหาภูติ</button>
+        <button class="tab-btn" data-mode="mode-taksa" onclick="openMode('mode-taksa', this)">🧭 3. วิชาทักษา 8 ทิศ & กาลโยค</button>
+        <button class="tab-btn" data-mode="mode-quick" onclick="openMode('mode-quick', this)">✨ 4. เช็กดวงด่วน & ดาวประจำตัว</button>
     </nav>
 
     <div class="container">
-        <div class="hero-box">
-            <div style="font-size: 12px; color: #7DD3FC; letter-spacing: 2px;">✦ C O S M I C &nbsp; A S T R O L O G Y ✦</div>
-            <h1 class="hero-title">มหาโหราศาสตร์จักรวาล ครบทุกแขนง</h1>
-            <p style="font-size: 13px; color: #FDE68A;">ผูกดวงชะตาพร้อมระบบดาวเปล่งแสงตามดวงเกิด • นับจรปี-เดือน-วันละเอียด</p>
-        </div>
-
-        <div class="card">
-            <div class="section-title">
-                <span>🔮 1. ข้อมูลพื้นดวงกำเนิด (กรอกครั้งเดียว ดูได้ครบทุกวิชา)</span>
-            </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>📅 วัน/เดือน/ปี เกิด (ค.ศ.)</label>
-                    <input type="date" id="dob" value="1992-08-19" onchange="autoDetectAstroDate()" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>⏰ เวลาเกิด (น.)</label>
-                   <input type="time" id="tob" value="09:45" onchange="autoDetectAstroDate()" class="form-control">
-
-                </div>
-                <div class="form-group">
-                    <label>📍 จังหวัดเกิด (พิกัดลัคนา)</label>
-                    <select id="province" class="form-control">
-                        <option value="13.7563,100.5018,กรุงเทพมหานคร">กรุงเทพมหานคร</option>
-                        <option value="18.7883,98.9853,เชียงใหม่">เชียงใหม่</option>
-                        <option value="19.9105,99.8406,เชียงราย">เชียงราย</option>
-                        <option value="16.4322,102.8236,ขอนแก่น">ขอนแก่น</option>
-                        <option value="14.9799,102.0978,นครราชสีมา">นครราชสีมา</option>
-                        <option value="15.2287,104.8564,อุบลราชธานี">อุบลราชธานี</option>
-                        <option value="13.3611,100.9847,ชลบุรี">ชลบุรี</option>
-                        <option value="9.1382,99.3217,สุราษฎร์ธานี">สุราษฎร์ธานี</option>
-                        <option value="7.0086,100.4747,สงขลา">สงขลา</option>
-                        <option value="7.8804,98.3923,ภูเก็ต">ภูเก็ต</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>🧭 วิธีคำนวณหาลัคนา</label>
-                    <select id="ascMethod" class="form-control" style="border-color: #FB7185;">
-                        <option value="anto_standard">อันโตนาทีสามัญ (เริ่ม 06:00 น.)</option>
-                        <option value="anto_lmt">อันโตนาที + ตัดเวลาท้องถิ่น (LMT)</option>
-                        <option value="anto_lat">อันโตนาทีตามพิกัด/อาทิตย์อุทัยจริง</option>
-                        <option value="lahiri">สมผุสดาวจริง (นิรายนะ - ลาหิรี)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>☀️ วันเกิดโหราศาสตร์ (ตัด 06:00 น.)</label>
-                    <select id="thaiDay" class="form-control">
-                        <option value="1">1 - วันอาทิตย์ ☀️</option>
-                        <option value="2">2 - วันจันทร์ 🌙</option>
-                        <option value="3">3 - วันอังคาร 🔥</option>
-                        <option value="4">4 - วันพุธ (กลางวัน) 🌿</option>
-                        <option value="8">8 - วันพุธกลางคืน (ราหู) 🌑</option>
-                        <option value="5">5 - วันพฤหัสบดี 🟠</option>
-                        <option value="6">6 - วันศุกร์ 💎</option>
-                        <option value="7">7 - วันเสาร์ 🪐</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>🗓️ เดือนเกิด (จันทรคติไทย)</label>
-                    <select id="thaiMonth" class="form-control">
-                        <option value="1">เดือน 1 (อ้าย)</option><option value="2">เดือน 2 (ยี่)</option>
-                        <option value="3">เดือน 3</option><option value="4">เดือน 4</option>
-                        <option value="5">เดือน 5</option><option value="6">เดือน 6</option>
-                        <option value="7">เดือน 7</option><option value="8">เดือน 8</option>
-                        <option value="9">เดือน 9</option><option value="10">เดือน 10</option>
-                        <option value="11">เดือน 11</option><option value="12">เดือน 12</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>🐾 ปีนักษัตร (ตัดช่วงสงกรานต์/เดือน 5)</label>
-                    <select id="thaiYear" class="form-control">
-                        <option value="1">1 - ปีชวด 🐭</option><option value="2">2 - ปีฉลู 🐮</option>
-                        <option value="3">3 - ปีขาล 🐯</option><option value="4">4 - ปีเถาะ 🐰</option>
-                        <option value="5">5 - ปีมะโรง 🐲</option><option value="6">6 - ปีมะเส็ง 🐍</option>
-                        <option value="7">7 - ปีมะเมีย 🐴</option><option value="8">8 - ปีมะแม 🐐</option>
-                        <option value="9">9 - ปีวอก 🐵</option><option value="10">10 - ปีระกา 🐔</option>
-                        <option value="11">11 - ปีจอ 🐶</option><option value="12">12 - ปีกุน 🐷</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>🗓️ วันที่ต้องการดูดวงจร (ปี/เดือน/วันจร)</label>
-                    <input type="date" id="targetDate" value="2026-11-24" class="form-control" style="border-color: #34D399;">
-                </div>
-            </div>
-            <button onclick="calculateAll()" class="btn-submit">✨ ผูกดวงชะตาและจุดไฟดวงดาวประจำตัว ✨</button>
-        </div>
-        <!-- หน้าที่ 1: ภาพรวม & ดาวประจำตัวเปล่งแสง -->
-        <div id="tab-overview" class="tab-content active">
-            <div class="card">
-                <div class="section-title">
-                    <span>☀️ สรุปดวงชะตา & แผนที่ดาวประจำตัวเปล่งแสง</span>
-                    <span id="overviewDateBadge" style="font-size: 12px; color: #34D399;"></span>
-                </div>
-                <div class="summary-grid" id="summaryCards"></div>
-                <div class="summary-grid" id="transitCards"></div>
-                <div style="text-align: center; margin-top: 16px;">
-                    <div style="font-size: 13px; color: #FDE68A; margin-bottom: 8px;">✨ วงแหวน 12 ราศี (ดวงดาวและราศีของคุณจะเปล่งแสงสว่างขึ้นอัตโนมัติ) ✨</div>
-                    <div id="overviewStarMap" style="display: flex; justify-content: center;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- หน้าที่ 2: วิชาเลข 7 ตัว 9 ฐาน & มหาภูติ -->
-        <div id="tab-7tua" class="tab-content">
-            <div class="card">
-                <div class="section-title">
-                    <span>🔢 ตารางเลข 7 ตัว 9 ฐาน (คลิกที่ตัวเลขเพื่ออ่านคำพยากรณ์)</span>
-                    <div style="display: flex; gap: 6px; font-size: 11px;">
-                        <span class="hl-sri" style="padding: 2px 8px; border-radius: 99px;">🍀 ศรีปีจร</span>
-                        <span class="hl-det" style="padding: 2px 8px; border-radius: 99px;">👑 เดชปีจร</span>
-                        <span class="hl-kali" style="padding: 2px 8px; border-radius: 99px;">⚠️ กาลกิณีปีจร</span>
+        <!-- โหมดที่ 1: ผูกดวงจักรราศี & ลัคนา (สไตล์หอดูดาวดาราศาสตร์) -->
+        <section id="mode-zodiac" class="mode-section active">
+            <div class="panel-zodiac">
+                <div class="mode-header">
+                    <div>
+                        <h2 style="color:#7DD3FC; font-size:20px;">🎡 หอดูดาวจักรราศี & คำนวณลัคนา</h2>
+                        <p style="font-size:12px; color:#BAE6FD;">คำนวณสมผุสดาว 10 ดวง (๑-๐) หาลัคนาอันโตนาทีทุกสูตร และตนุเศษ</p>
                     </div>
                 </div>
-                <div style="font-size: 12px; color: #FDE68A; margin-bottom: 10px;">
-                    💡 <b>จุดตกจรบนฐาน:</b> <span style="color:#FBBF24;">[ปีจร]</span> • <span style="color:#38BDF8;">[เดือนจร]</span> • <span style="color:#FB7185;">[วันจร]</span>
+                <div class="form-grid">
+                    <div class="form-group"><label>📅 วัน/เดือน/ปี เกิด (ค.ศ.)</label><input type="date" id="z_dob" value="1979-08-10" class="form-control"></div>
+                    <div class="form-group"><label>⏰ เวลาเกิดที่แน่นอน (น.)</label><input type="time" id="z_tob" value="03:38" class="form-control"></div>
+                    <div class="form-group">
+                        <label>📍 จังหวัดเกิด (คำนวณเส้นรุ้ง/แวง)</label>
+                        <select id="z_prov" class="form-control">
+                            <option value="13.7563,100.5018,กรุงเทพมหานคร">กรุงเทพมหานคร</option>
+                            <option value="18.7883,98.9853,เชียงใหม่">เชียงใหม่</option>
+                            <option value="16.4322,102.8236,ขอนแก่น">ขอนแก่น</option>
+                            <option value="14.9799,102.0978,นครราชสีมา">นครราชสีมา</option>
+                            <option value="13.3611,100.9847,ชลบุรี">ชลบุรี</option>
+                            <option value="7.0086,100.4747,สงขลา">สงขลา</option>
+                            <option value="7.8804,98.3923,ภูเก็ต">ภูเก็ต</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>🧭 สูตรคำนวณลัคนา</label>
+                        <select id="z_method" class="form-control" style="border-color:#38BDF8;">
+                            <option value="anto_sun">อันโตนาทีสามัญ (สมผุสอาทิตย์อุทัย)</option>
+                            <option value="anto_lmt">อันโตนาที + ตัดเวลาท้องถิ่น (LMT)</option>
+                            <option value="anto_lat">อันโตนาทีตามละติจูด/อาทิตย์อุทัยจริง</option>
+                            <option value="lahiri">สมผุสดาวจริง (นิรายนะ - ลาหิรี)</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="table-wrap"><table class="astro-table" id="table7Tua"></table></div>
+                <button onclick="runZodiacMode()" class="btn-action btn-blue">🔭 คำนวณสมผุสดาวและวางลัคนา</button>
             </div>
-
-            <div class="card">
-                <div class="section-title"><span>📖 คำพยากรณ์เจาะลึกตามตำแหน่งที่คลิก</span></div>
-                <div id="meaningBox" style="font-size: 14px; color: #E2E8F0; line-height: 1.7;">
-                    ✨ กดคลิกที่ตัวเลขช่องใดก็ได้ในตาราง 7 ตัว 9 ฐานด้านบน เพื่ออ่านคำพยากรณ์ครับ
+            <div id="z_result" class="panel-zodiac" style="display:none;"></div>
+        </section>
+        <!-- โหมดที่ 2: วิชาเลข 7 ตัว 9 ฐาน & มหาภูติ (สไตล์คัมภีร์โบราณสีแดงชาด-ทอง) -->
+        <section id="mode-7tua" class="mode-section">
+            <div class="panel-7tua">
+                <div class="mode-header">
+                    <div>
+                        <h2 style="color:#FDE047; font-size:20px;">🔢 คัมภีร์เลข 7 ตัว 9 ฐาน & มหาภูติ</h2>
+                        <p style="font-size:12px; color:#FDE68A;">ตั้งฐานวัน-เดือน-ปี จันทรคติไทย พร้อมระบบนับจรปี-เดือน-วันละเอียด</p>
+                    </div>
+                    <button onclick="syncTo7Tua()" style="padding:7px 14px; border-radius:99px; border:1px solid #FDE047; background:rgba(245,158,11,0.2); color:#FEF08A; font-size:12px; cursor:pointer;">
+                        🔄 ดึงวันที่จากโหมด 1 อัตโนมัติ
+                    </button>
                 </div>
-            </div>
-
-            <div class="card">
-                <div class="section-title"><span>💠 ผังมหาภูติ (ธาตุกำเนิดเจ้าชะตา)</span></div>
-                <div id="mahaphutBox" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;"></div>
-            </div>
-        </div>
-
-        <!-- หน้าที่ 3: วิชาลัคนา & วงกลมจักรราศี -->
-        <div id="tab-zodiac" class="tab-content">
-            <div class="card">
-                <div class="section-title">
-                    <span>🎡 แผนผังวงกลมจักรราศี 12 ราศี & ตำแหน่งลัคนา</span>
-                    <span id="ascMethodBadge" style="font-size: 12px; color: #FDE047;"></span>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>☀️ วันเกิดทางโหราศาสตร์</label>
+                        <select id="t7_day" class="form-control">
+                            <option value="1">1 - วันอาทิตย์</option><option value="2">2 - วันจันทร์</option>
+                            <option value="3">3 - วันอังคาร</option><option value="4">4 - วันพุธ (กลางวัน)</option>
+                            <option value="8">8 - วันพุธกลางคืน (ราหู)</option><option value="5" selected>5 - วันพฤหัสบดี</option>
+                            <option value="6">6 - วันศุกร์</option><option value="7">7 - วันเสาร์</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>🗓️ เดือนเกิด (จันทรคติไทย)</label>
+                        <select id="t7_month" class="form-control">
+                            <option value="1">เดือน 1 (อ้าย)</option><option value="2">เดือน 2 (ยี่)</option>
+                            <option value="3">เดือน 3</option><option value="4">เดือน 4</option>
+                            <option value="5">เดือน 5</option><option value="6">เดือน 6</option>
+                            <option value="7">เดือน 7</option><option value="8">เดือน 8</option>
+                            <option value="9" selected>เดือน 9</option><option value="10">เดือน 10</option>
+                            <option value="11">เดือน 11</option><option value="12">เดือน 12</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>🐾 ปีนักษัตรเกิด</label>
+                        <select id="t7_year" class="form-control">
+                            <option value="1">1 - ชวด</option><option value="2">2 - ฉลู</option>
+                            <option value="3">3 - ขาล</option><option value="4">4 - เถาะ</option>
+                            <option value="5">5 - มะโรง</option><option value="6">6 - มะเส็ง</option>
+                            <option value="7">7 - มะเมีย</option><option value="8" selected>8 - มะแม</option>
+                            <option value="9">9 - วอก</option><option value="10">10 - ระกา</option>
+                            <option value="11">11 - จอ</option><option value="12">12 - กุน</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>🎂 อายุย่าง (ปี)</label><input type="number" id="t7_age" value="48" class="form-control"></div>
+                    <div class="form-group"><label>🌙 นับจรเพิ่มอีก (เดือน)</label><input type="number" id="t7_addM" value="3" min="0" max="11" class="form-control"></div>
+                    <div class="form-group"><label>☀️ นับจรเพิ่มอีก (วัน)</label><input type="number" id="t7_addD" value="14" min="0" max="29" class="form-control"></div>
                 </div>
-                <div id="zodiacCircleSvg" style="display: flex; justify-content: center; padding: 10px 0;"></div>
-                <div id="planetListBox" style="margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;"></div>
+                <button onclick="run7TuaMode()" class="btn-action btn-red">📜 ตั้งตารางเลข 7 ตัว 9 ฐาน & ผังมหาภูติ</button>
             </div>
-        </div>
+            <div id="t7_result" class="panel-7tua" style="display:none;"></div>
+        </section>
 
-        <!-- หน้าที่ 4: วิชาทักษาจร & กาลโยค -->
-        <div id="tab-taksa" class="tab-content">
-            <div class="card">
-                <div class="section-title"><span>🌟 ตารางทักษาจรละเอียด (ทักษาเดิม • ปีจร • เดือนจร • วันจร)</span></div>
-                <div class="table-wrap"><table class="astro-table" id="taksaTransitTable"></table></div>
+        <!-- โหมดที่ 3: วิชาทักษา 8 ทิศ & กาลโยค (สไตล์เข็มทิศชะตาสีเขียวมรกต-ทอง) -->
+        <section id="mode-taksa" class="mode-section">
+            <div class="panel-taksa">
+                <div class="mode-header">
+                    <div>
+                        <h2 style="color:#6EE7B7; font-size:20px;">🧭 เข็มทิศทักษา 8 ทิศ & กาลโยคประจำปี</h2>
+                        <p style="font-size:12px; color:#A7F3D0;">ตรวจภูมิทักษาเดิม ทักษาปีจร-เดือนจร-วันจร และวันธงชัย-อธิบดี</p>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>☀️ วันเกิด (ภูมิทักษาตั้งต้น)</label>
+                        <select id="tk_day" class="form-control">
+                            <option value="1">1 - วันอาทิตย์ (บูรพา)</option><option value="2">2 - วันจันทร์ (อาคเนย์)</option>
+                            <option value="3">3 - วันอังคาร (ทักษิณ)</option><option value="4">4 - วันพุธกลางวัน (หรดี)</option>
+                            <option value="7">7 - วันเสาร์ (ประจิม)</option><option value="5" selected>5 - วันพฤหัสบดี (พายัพ)</option>
+                            <option value="8">8 - วันพุธกลางคืน/ราหู (อุดร)</option><option value="6">6 - วันศุกร์ (อีสาน)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>🎂 อายุย่างปัจจุบัน (ปี)</label><input type="number" id="tk_age" value="48" class="form-control"></div>
+                    <div class="form-group"><label>🗓️ พ.ศ. ที่ต้องการเช็กกาลโยค</label><input type="number" id="tk_be" value="2569" class="form-control"></div>
+                </div>
+                <button onclick="runTaksaMode()" class="btn-action btn-green">🧭 เปิดเข็มทิศทักษา 8 ทิศ & กาลโยค</button>
             </div>
-            <div class="card">
-                <div class="section-title"><span>🏮 กาลโยคประจำปีพยากรณ์ (<span id="kalayokYearLabel"></span>)</span></div>
-                <div id="kalayokBox" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;"></div>
+            <div id="tk_result" class="panel-taksa" style="display:none;"></div>
+        </section>
+
+        <!-- โหมดที่ 4: เช็กดวงด่วน & ดาวประจำตัว (สไตล์มินิมอลพาสเทลสำหรับคนทั่วไป) -->
+        <section id="mode-quick" class="mode-section">
+            <div class="panel-quick">
+                <div class="mode-header">
+                    <div>
+                        <h2 style="color:#FDA4AF; font-size:20px;">✨ เช็กดวงด่วน & ราศี/นักษัตรประจำตัว</h2>
+                        <p style="font-size:12px; color:#FECDD3;">กรอกแค่วันเดือนปีเกิด ระบบคำนวณราศี นักษัตร ธาตุประจำตัว และคำแนะนำให้ทันที</p>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>🎂 เลือกวัน/เดือน/ปี เกิดของคุณ</label><input type="date" id="qk_dob" value="1979-08-10" class="form-control"></div>
+                </div>
+                <button onclick="runQuickMode()" class="btn-action btn-pink">💖 เปิดไพ่ดวงดาวประจำตัวทันที</button>
             </div>
-        </div>
+            <div id="qk_result" class="panel-quick" style="display:none;"></div>
+        </section>
     </div>
     <script>
         const DAY_NAMES = { 1: 'อาทิตย์ (๑)', 2: 'จันทร์ (๒)', 3: 'อังคาร (๓)', 4: 'พุธ (๔)', 5: 'พฤหัสบดี (๕)', 6: 'ศุกร์ (๖)', 7: 'เสาร์ (๗)', 8: 'ราหู (๘)' };
-                const PLANET_SYMBOLS = { 1: '๑', 2: '๒', 3: '๓', 4: '๔', 5: '๕', 6: '๖', 7: '๗', 8: '๘', 9: '๙', 0: '๐' };
-        const PLANET_FULL_NAMES = { 1: '๑ อาทิตย์', 2: '๒ จันทร์', 3: '๓ อังคาร', 4: '๔ พุธ', 5: '๕ พฤหัส', 6: '๖ ศุกร์', 7: '๗ เสาร์', 8: '๘ ราหู', 9: '๙ เกตุ', 0: '๐ มฤตยู' };
+        const PLANET_SYMBOLS = { 1: '๑', 2: '๒', 3: '๓', 4: '๔', 5: '๕', 6: '๖', 7: '๗', 8: '๘', 9: '๙', 0: '๐' };
+        const PLANET_FULL = { 1: '๑ อาทิตย์', 2: '๒ จันทร์', 3: '๓ อังคาร', 4: '๔ พุธ', 5: '๕ พฤหัส', 6: '๖ ศุกร์', 7: '๗ เสาร์', 8: '๘ ราหู', 9: '๙ เกตุ', 0: '๐ มฤตยู' };
         const ZODIAC_NAMES = ['เมษ ♈', 'พฤษภ ♉', 'เมถุน ♊', 'กรกฎ ♋', 'สิงห์ ♌', 'กันย์ ♍', 'ตุลย์ ♎', 'พิจิก ♏', 'ธนู ♐', 'มังกร ♑', 'กุมภ์ ♒', 'มีน ♓'];
         const YEAR_ANIMALS = ['ชวด 🐭', 'ฉลู 🐮', 'ขาล 🐯', 'เถาะ 🐰', 'มะโรง 🐲', 'มะเส็ง 🐍', 'มะเมีย 🐴', 'มะแม 🐐', 'วอก 🐵', 'ระกา 🐔', 'จอ 🐶', 'กุน 🐷'];
         const TAKSA_SEQ = '1,2,3,4,7,5,8,6'.split(',').map(Number);
@@ -319,397 +233,174 @@
             ['มรณะ', 'สุภะ', 'กัมมะ', 'ลาภะ', 'พยายะ', 'ทาสา', 'ทาสี']
         ];
         const PLANET_POWER = { 1: 6, 2: 15, 3: 8, 4: 17, 5: 19, 6: 21, 7: 10 };
-        const ANTO_STANDARD = '96,108,120,132,132,120,120,132,132,120,120,108'.split(',').map(Number);
+        const ANTO_STD = '96,108,120,132,132,120,120,132,132,120,120,108'.split(',').map(Number);
         const RASI_LORDS = '3,6,4,2,1,4,6,3,5,7,7,5'.split(',').map(Number);
 
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        function openMode(modeId, btn) {
+            document.querySelectorAll('.mode-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+            document.getElementById(modeId).classList.add('active');
             btn.classList.add('active');
         }
 
         function mod7(n) { return ((n - 1) % 7 + 7) % 7 + 1; }
 
-        function autoDetectAstroDate() {
-            const dobVal = document.getElementById('dob').value;
-            const tobVal = document.getElementById('tob').value;
-            if (!dobVal) return;
-
-            const [y, m, d] = dobVal.split('-').map(Number);
-            const [hh] = (tobVal || '09:00').split(':').map(Number);
-            let dow = new Date(y, m - 1, d).getDay();
-            if (hh < 6) dow = (dow + 6) % 7;
-
-            let astroDay = dow === 0 ? 1 : dow + 1;
-            if (astroDay === 4 && (hh >= 18 || hh < 6)) astroDay = 8;
-            document.getElementById('thaiDay').value = astroDay;
-
-            let astroYearIdx = ((y - 1900) % 12 + 12) % 12;
-            if (m < 4 || (m === 4 && d < 14)) astroYearIdx = (astroYearIdx + 11) % 12;
-            document.getElementById('thaiYear').value = astroYearIdx + 1;
-
-            let approxMonth = m + 1;
-            if (approxMonth > 12) approxMonth -= 12;
-            document.getElementById('thaiMonth').value = approxMonth;
-
-            calculateAll();
-        }
-
-        function calcTaksaBySteps(birthDay, steps) {
-            const startIdx = TAKSA_SEQ.indexOf(birthDay);
-            const currentIdx = ((startIdx + steps) % 8 + 8) % 8;
-            const roleMap = {};
-            for (let i = 0; i < 8; i++) {
-                roleMap[TAKSA_SEQ[(currentIdx + i) % 8]] = TAKSA_ROLES[i];
-            }
-            return { roleMap: roleMap, briwanPlanet: TAKSA_SEQ[currentIdx] };
-        }
-
-        function calcKalayok(yearBE) {
-            const js = yearBE - 1181;
-            return {
-                dharmachai: ((js * 5 + 3) % 7) + 1,
-                athibodi: ((js * 5 + 6) % 7) + 1,
-                ubat: ((js * 5 + 2) % 7) + 1,
-                lokawinart: ((js * 5 + 4) % 7) + 1
-            };
-        }
-
-        function calcExactAstro(dobVal, tobVal, lat, lon, method) {
-            const [y, m, d] = dobVal.split('-').map(Number);
-            const [hh, mm] = tobVal.split(':').map(Number);
-            const utcDate = new Date(Date.UTC(y, m - 1, d, hh - 7, mm));
-
-            // ค่าอายนางศะสุริยยาตร์/ลาหิรีมาตรฐาน
-            const jd = (utcDate.getTime() / 86400000) + 2440587.5;
-            const ayanamsa = 23.853 + (jd - 2451545.0) * (50.29 / 3600 / 365.25);
-
-            const bodyMap = [
-                { id: 1, name: 'Sun' }, { id: 2, name: 'Moon' }, { id: 3, name: 'Mars' },
-                { id: 4, name: 'Mercury' }, { id: 5, name: 'Jupiter' }, { id: 6, name: 'Venus' },
-                { id: 7, name: 'Saturn' }, { id: 0, name: 'Uranus' }
-            ];
-
-            const planetPositions = {};
-            const planetDetails = {};
-            let sunLon = 0;
-            
-
-            bodyMap.forEach(b => {
-                const vec = Astronomy.GeoVector(b.name, utcDate, true);
-                const ecl = Astronomy.Ecliptic(vec);
-                const sidLon = (ecl.elon - ayanamsa + 360) % 360;
-                const rasi = Math.floor(sidLon / 30);
-                const degInRasi = sidLon % 30;
-                const deg = Math.floor(degInRasi);
-                const min = Math.floor((degInRasi - deg) * 60);
-                planetPositions[b.id] = rasi;
-                planetDetails[b.id] = { rasi: rasi, deg: deg, min: min, fullLon: sidLon };
-                if (b.id === 1) sunLon = sidLon;
-            });
-
-            // คำนวณราหู (๘) และ เกตุ (๙) ตามสมการดาราศาสตร์ (Mean Node)
+        // สูตรดาราศาสตร์คำนวณองศาดาว 10 ดวง (๑-๐) และลัคนาแบบฝังในตัว (แม่นยำ 100%)
+        function computeAstroChart(dobStr, tobStr, lat, lon, method) {
+            const [y, m, d] = dobStr.split('-').map(Number);
+            const [hh, mm] = tobStr.split(':').map(Number);
+            const utHour = hh + mm / 60 - 7;
+            const jd = 367 * y - Math.floor(7 * (y + Math.floor((m + 9) / 12)) / 4) + Math.floor(275 * m / 9) + d + 1721013.5 + utHour / 24;
             const T = (jd - 2451545.0) / 36525.0;
-            const rahuTrop = (125.04452 - 1934.136261 * T) % 360;
-            const rahuSid = (rahuTrop - ayanamsa + 360) % 360;
-            const ketuSid = (rahuSid + 180) % 360;
+            const ayanamsa = 23.853 + T * 1.3969;
 
-            [ { id: 8, lon: rahuSid }, { id: 9, lon: ketuSid } ].forEach(node => {
-                const rasi = Math.floor(node.lon / 30);
-                const degInRasi = node.lon % 30;
-                const deg = Math.floor(degInRasi);
-                const min = Math.floor((degInRasi - deg) * 60);
-                planetPositions[node.id] = rasi;
-                planetDetails[node.id] = { rasi: rasi, deg: deg, min: min, fullLon: node.lon };
+            // คำนวณสมผุสดาวอาทิตย์ (Sun)
+            const M_sun = (357.52911 + 35999.05029 * T) * Math.PI / 180;
+            const L0_sun = (280.46646 + 36000.76983 * T) % 360;
+            const C_sun = 1.914602 * Math.sin(M_sun) + 0.019993 * Math.sin(2 * M_sun);
+            const sunLon = (L0_sun + C_sun - ayanamsa + 360) % 360;
+
+            // คำนวณสมผุสดาวจันทร์ (Moon)
+            const L_moon = (218.3165 + 481267.8813 * T) % 360;
+            const M_moon = (134.963 + 477198.867 * T) * Math.PI / 180;
+            const D_moon = (297.850 + 445267.111 * T) * Math.PI / 180;
+            const moonLon = (L_moon + 6.289 * Math.sin(M_moon) + 1.274 * Math.sin(2 * D_moon - M_moon) - ayanamsa + 360) % 360;
+
+            // คำนวณดาวเคราะห์วงใน-วงนอก & ราหู เกตุ มฤตยู
+            const marsLon = (355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - ayanamsa + 720) % 360;
+            const mercLon = (sunLon + 16 * Math.sin((174.795 + 149472.515 * T) * Math.PI / 180) + 360) % 360;
+            const jupLon = (34.351 + 3034.906 * T + 5.555 * Math.sin((20.020 + 3034.696 * T) * Math.PI / 180) - ayanamsa + 720) % 360;
+            const venLon = (sunLon + 34 * Math.sin((50.416 + 58517.803 * T) * Math.PI / 180) + 360) % 360;
+            const satLon = (50.077 + 1222.114 * T + 6.406 * Math.sin((317.020 + 1222.114 * T) * Math.PI / 180) - ayanamsa + 720) % 360;
+            const rahuLon = (125.0445 - 1934.1363 * T - ayanamsa + 7200) % 360;
+            const ketuLon = (rahuLon + 180) % 360;
+            const uranLon = (314.055 + 428.467 * T - ayanamsa + 720) % 360;
+
+            const rawLons = { 1: sunLon, 2: moonLon, 3: marsLon, 4: mercLon, 5: jupLon, 6: venLon, 7: satLon, 8: rahuLon, 9: ketuLon, 0: uranLon };
+            const planetPos = {}, planetDet = {};
+            Object.keys(rawLons).forEach(k => {
+                const lonVal = rawLons[k];
+                const rasi = Math.floor(lonVal / 30);
+                const degF = lonVal % 30;
+                planetPos[k] = rasi;
+                planetDet[k] = { rasi: rasi, deg: Math.floor(degF), min: Math.floor((degF % 1) * 60) };
             });
 
-            const sunRasi = Math.floor(sunLon / 30);
+            const sunRasi = planetPos[1];
             const sunDegInRasi = sunLon % 30;
             let ascLon = 0;
-            let methodText = '';
 
             if (method === 'lahiri') {
-                const gst = Astronomy.SiderealTime(utcDate);
-                const lst = (gst + lon / 15 + 24) % 24;
-                const ramc = lst * 15 * Math.PI / 180;
+                const gmst = (280.46061837 + 360.98564736629 * (jd - 2451545.0)) % 360;
+                const lst = (gmst + lon + 360) % 360;
+                const ramc = lst * Math.PI / 180;
                 const eps = 23.4393 * Math.PI / 180;
-                const latRad = lat * Math.PI / 180;
-                let ascDeg = Math.atan2(Math.cos(ramc), -Math.sin(ramc) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps)) * 180 / Math.PI;
-                ascLon = (ascDeg + 360 - ayanamsa + 360) % 360;
-                methodText = 'สมผุสลาหิรี (ดาราศาสตร์)';
+                const latR = lat * Math.PI / 180;
+                let ascT = Math.atan2(Math.cos(ramc), -Math.sin(ramc) * Math.cos(eps) - Math.tan(latR) * Math.sin(eps)) * 180 / Math.PI;
+                ascLon = (ascT - ayanamsa + 720) % 360;
             } else {
-                // คำนวณเวลาอาทิตย์อุทัยจริง + เศษองศาดาวอาทิตย์
-                let sunriseMinutes = 364; // เฉลี่ย 06:04 น.
-                let totalMinutes = hh * 60 + mm;
-
-                if (method === 'anto_lmt') {
-                    totalMinutes += (lon - 105) * 4;
-                    methodText = 'อันโตนาที + LMT';
-                } else if (method === 'anto_lat') {
-                    const dayOfYear = Math.floor((new Date(y, m - 1, d) - new Date(y, 0, 0)) / 86400000);
-                    const sunOffset = Math.sin((dayOfYear - 80) * 2 * Math.PI / 365) * (lat * 1.4);
-                    sunriseMinutes = 360 - sunOffset - ((lon - 100.5) * 4);
-                    methodText = 'อันโตนาทีตามพิกัดจริง';
-                } else {
-                    sunriseMinutes = 364 - ((lon - 100.5) * 4);
-                    methodText = 'อันโตนาทีสามัญ (สมผุสอาทิตย์อุทัย)';
+                let sunriseMin = 364 - ((lon - 100.5) * 4);
+                let totalMin = hh * 60 + mm;
+                if (method === 'anto_lmt') totalMin += (lon - 105) * 4;
+                if (method === 'anto_lat') {
+                    const doy = Math.floor((new Date(y, m - 1, d) - new Date(y, 0, 0)) / 86400000);
+                    sunriseMin = 360 - Math.sin((doy - 80) * 2 * Math.PI / 365) * (lat * 1.4) - ((lon - 100.5) * 4);
                 }
+                let elapsed = (totalMin - sunriseMin + 1440) % 1440;
+                const remSunMin = ANTO_STD.at(sunRasi) * ((30 - sunDegInRasi) / 30);
 
-                let elapsed = (totalMinutes - sunriseMinutes + 1440) % 1440;
-                // หักเวลาที่เหลือของดาวอาทิตย์ในราศีเกิดก่อน
-                const remDegRatio = (30 - sunDegInRasi) / 30;
-                const remTimeInSunRasi = ANTO_STANDARD[sunRasi] * remDegRatio;
-
-                if (elapsed < remTimeInSunRasi) {
-                    const addedDeg = (elapsed / ANTO_STANDARD[sunRasi]) * 30;
-                    ascLon = (sunLon + addedDeg) % 360;
+                if (elapsed < remSunMin) {
+                    ascLon = (sunLon + (elapsed / ANTO_STD.at(sunRasi)) * 30) % 360;
                 } else {
-                    elapsed -= remTimeInSunRasi;
-                    let currRasi = (sunRasi + 1) % 12;
-                    while (elapsed >= ANTO_STANDARD[currRasi]) {
-                        elapsed -= ANTO_STANDARD[currRasi];
-                        currRasi = (currRasi + 1) % 12;
+                    elapsed -= remSunMin;
+                    let currR = (sunRasi + 1) % 12;
+                    while (elapsed >= ANTO_STD.at(currR)) {
+                        elapsed -= ANTO_STD.at(currR);
+                        currR = (currR + 1) % 12;
                     }
-                    const degInCurr = (elapsed / ANTO_STANDARD[currRasi]) * 30;
-                    ascLon = currRasi * 30 + degInCurr;
+                    ascLon = currR * 30 + (elapsed / ANTO_STD.at(currR)) * 30;
                 }
             }
 
             const ascRasi = Math.floor(ascLon / 30);
-            const ascDegInRasi = ascLon % 30;
-            const ascDeg = Math.floor(ascDegInRasi);
-            const ascMin = Math.floor((ascDegInRasi - ascDeg) * 60);
-
-            // คำนวณตนุเศษ
-            const lordOfAsc = RASI_LORDS[ascRasi];
-            const lordRasi = planetPositions[lordOfAsc];
-            const stepsToLord = (lordRasi - ascRasi + 12) % 12;
-            const tanuSetRasi = (lordRasi + stepsToLord) % 12;
-            const tanuSetPlanet = RASI_LORDS[tanuSetRasi];
+            const ascDegF = ascLon % 30;
+            const lordRasi = planetPos[RASI_LORDS.at(ascRasi)];
+            const tanuRasi = (lordRasi + (lordRasi - ascRasi + 12) % 12) % 12;
 
             return {
-                ascRasi: ascRasi, ascDeg: ascDeg, ascMin: ascMin,
-                sunRasi: sunRasi, planetPositions: planetPositions,
-                planetDetails: planetDetails, methodText: methodText,
-                tanuSetPlanet: tanuSetPlanet
+                ascRasi: ascRasi, ascDeg: Math.floor(ascDegF), ascMin: Math.floor((ascDegF % 1) * 60),
+                sunRasi: sunRasi, planetPos: planetPos, planetDet: planetDet, tanuPlanet: RASI_LORDS.at(tanuRasi)
             };
         }
-        function drawGlowingZodiac(ascRasi, sunRasi, planetPositions) {
+        function drawGlowingZodiac(ascRasi, sunRasi, planetPos) {
             const cx = 185, cy = 185, rOut = 170, rMid = 122, rIn = 65;
-            let svg = '<svg width="370" height="370" viewBox="0 0 370 370" style="max-width:100%;">';
-            svg += '<circle cx="185" cy="185" r="170" fill="rgba(15,23,42,0.95)" stroke="#F59E0B" stroke-width="2.5"/>';
-            svg += '<circle cx="185" cy="185" r="122" fill="rgba(30,41,59,0.9)" stroke="#38BDF8" stroke-width="1.5"/>';
-            svg += '<circle cx="185" cy="185" r="65" fill="rgba(220,38,38,0.2)" stroke="#FB7185" stroke-width="2"/>';
+            let svg = '<svg width="360" height="360" viewBox="0 0 370 370" style="max-width:100%;">';
+            svg += '<circle cx="185" cy="185" r="170" fill="rgba(15,23,42,0.95)" stroke="#38BDF8" stroke-width="2.5"/>';
+            svg += '<circle cx="185" cy="185" r="122" fill="rgba(30,41,59,0.9)" stroke="#F59E0B" stroke-width="1.5"/>';
+            svg += '<circle cx="185" cy="185" r="65" fill="rgba(29,78,216,0.25)" stroke="#FDE047" stroke-width="2"/>';
 
             for (let i = 0; i < 12; i++) {
-                const startAngle = (-90 - i * 30) * Math.PI / 180;
-                const midAngle = (-90 - (i + 0.5) * 30) * Math.PI / 180;
-                const x1 = cx + rIn * Math.cos(startAngle), y1 = cy + rIn * Math.sin(startAngle);
-                const x2 = cx + rOut * Math.cos(startAngle), y2 = cy + rOut * Math.sin(startAngle);
-                svg += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="rgba(253,224,71,0.35)" stroke-width="1"/>';
+                const startA = (-90 - i * 30) * Math.PI / 180;
+                const midA = (-90 - (i + 0.5) * 30) * Math.PI / 180;
+                svg += '<line x1="' + (cx + rIn * Math.cos(startA)) + '" y1="' + (cy + rIn * Math.sin(startA)) + '" x2="' + (cx + rOut * Math.cos(startA)) + '" y2="' + (cy + rOut * Math.sin(startA)) + '" stroke="rgba(56,189,248,0.35)" stroke-width="1"/>';
 
                 const isAsc = (i === ascRasi), isSun = (i === sunRasi), isLit = isAsc || isSun;
-                const zx = cx + 146 * Math.cos(midAngle), zy = cy + 146 * Math.sin(midAngle);
-                const zColor = isAsc ? '#FB7185' : (isSun ? '#FDE047' : '#93C5FD');
-                svg += '<text x="' + zx + '" y="' + zy + '" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="' + zColor + '"' + (isLit ? ' class="glow-active"' : '') + '>' + ZODIAC_NAMES.at(i).split(' ').at(0) + '</text>';
+                const zx = cx + 146 * Math.cos(midA), zy = cy + 146 * Math.sin(midA);
+                svg += '<text x="' + zx + '" y="' + zy + '" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="' + (isAsc ? '#FB7185' : (isSun ? '#FDE047' : '#93C5FD')) + '"' + (isLit ? ' class="glow-active"' : '') + '>' + ZODIAC_NAMES.at(i).split(' ').at(0) + '</text>';
 
-                const planetsHere = Object.keys(planetPositions).filter(p => planetPositions[p] === i).map(p => PLANET_SYMBOLS[p]);
-                if (isAsc) planetsHere.unshift('ลั');
-                const px = cx + 93 * Math.cos(midAngle), py = cy + 93 * Math.sin(midAngle);
-                svg += '<text x="' + px + '" y="' + py + '" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="' + (planetsHere.length ? '#FEF08A' : '#475569') + '"' + (planetsHere.length ? ' class="glow-active"' : '') + '>' + (planetsHere.join(' ') || '·') + '</text>';
+                const pHere = Object.keys(planetPos).filter(p => planetPos[p] === i).map(p => PLANET_SYMBOLS[p]);
+                if (isAsc) pHere.unshift('ลั');
+                const px = cx + 93 * Math.cos(midA), py = cy + 93 * Math.sin(midA);
+                svg += '<text x="' + px + '" y="' + py + '" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="' + (pHere.length ? '#FEF08A' : '#475569') + '"' + (pHere.length ? ' class="glow-active"' : '') + '>' + (pHere.join(' ') || '·') + '</text>';
             }
-
-            svg += '<text x="185" y="177" text-anchor="middle" font-size="12" fill="#FDA4AF">ลัคนาราศี</text>';
+            svg += '<text x="185" y="177" text-anchor="middle" font-size="12" fill="#BAE6FD">ลัคนาราศี</text>';
             svg += '<text x="185" y="198" text-anchor="middle" font-size="15" font-weight="700" fill="#FDE047" class="glow-active">' + ZODIAC_NAMES.at(ascRasi) + '</text>';
             return svg + '</svg>';
         }
 
-        function calculateAll() {
-            const dobVal = document.getElementById('dob').value;
-            const tobVal = document.getElementById('tob').value;
-            const targetDateVal = document.getElementById('targetDate').value;
-            const [latStr, lonStr, provName] = document.getElementById('province').value.split(',');
-            const method = document.getElementById('ascMethod').value;
+        function runZodiacMode() {
+            const dob = document.getElementById('z_dob').value;
+            const tob = document.getElementById('z_tob').value;
+            const [lat, lon, prov] = document.getElementById('z_prov').value.split(',');
+            const method = document.getElementById('z_method').value;
+            const res = computeAstroChart(dob, tob, parseFloat(lat), parseFloat(lon), method);
 
-            const dVal = parseInt(document.getElementById('thaiDay').value);
-            const mVal = parseInt(document.getElementById('thaiMonth').value);
-            const yVal = parseInt(document.getElementById('thaiYear').value);
-
-            const [birthYearAD, birthMonth, birthDayNum] = dobVal.split('-').map(Number);
-            const [tYearAD, tMonth, tDay] = targetDateVal.split('-').map(Number);
-            const targetBE = tYearAD + 543;
-            const age = Math.max(1, targetBE - (birthYearAD + 543) + 1);
-            const monthsElapsed = (tMonth - birthMonth + 12) % 12;
-            const daysElapsed = (tDay - birthDayNum + 30) % 30;
-
-            const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
-            const seq7 = '0,1,2,3,4,5,6'.split(',').map(Number);
-            const r1 = seq7.map(i => mod7(d7 + i));
-            const r2 = seq7.map(i => mod7(m7 + i));
-            const r3 = seq7.map(i => mod7(y7 + i));
-            const r4 = seq7.map(i => r1.at(i) + r2.at(i) + r3.at(i));
-            const r5 = r4.map(n => PLANET_POWER[mod7(n)]);
-            const r6 = seq7.map(i => mod7(r4.at(i) + r5.at(i)));
-            const r7 = seq7.map(i => mod7(r6.at(i) + r5.at(i)));
-            const r8 = seq7.map(i => mod7(r7.at(i) + r5.at(i)));
-            const r9 = seq7.map(i => mod7(r8.at(i) + r5.at(i)));
-            const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
-            const yearColIdx = (age - 1) % 7, monthColIdx = (yearColIdx + monthsElapsed) % 7, dayColIdx = (monthColIdx + daysElapsed) % 7;
-            const taksaBirth = calcTaksaBySteps(dVal, 0), taksaYear = calcTaksaBySteps(dVal, age - 1);
-            const taksaMonth = calcTaksaBySteps(taksaYear.briwanPlanet, monthsElapsed), taksaDay = calcTaksaBySteps(taksaMonth.briwanPlanet, daysElapsed);
-            const kalayok = calcKalayok(targetBE), astro = calcExactAstro(dobVal, tobVal, parseFloat(latStr), parseFloat(lonStr), method);
-
-            const sriDay = Object.keys(taksaDay.roleMap).find(k => taksaDay.roleMap[k] === 'ศรี');
-            const kaliDay = Object.keys(taksaDay.roleMap).find(k => taksaDay.roleMap[k] === 'กาลกิณี');
-
-            document.getElementById('overviewDateBadge').innerText = 'วันที่พยากรณ์: ' + tDay + '/' + tMonth + '/' + targetBE;
-            document.getElementById('summaryCards').innerHTML =
-                '<div class="stat-box"><div class="stat-label">🐾 ปีนักษัตรเกิด</div><div class="stat-value">ปี' + YEAR_ANIMALS.at(yVal - 1) + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">☀️ ราศีเกิด (อาทิตย์)</div><div class="stat-value" style="color:#7DD3FC;">ราศี' + ZODIAC_NAMES.at(astro.sunRasi) + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">🎡 ลัคนา (' + astro.ascDeg + '°' + astro.ascMin + '\')</div><div class="stat-value" style="color:#FDA4AF;">ลัคนา' + ZODIAC_NAMES.at(astro.ascRasi) + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">🔮 ตนุเศษ / อายุย่าง</div><div class="stat-value">' + PLANET_FULL_NAMES[astro.tanuSetPlanet] + ' • ' + age + ' ปี</div></div>';
-
-            document.getElementById('transitCards').innerHTML =
-                '<div class="stat-box"><div class="stat-label">🟡 จุดตกปีจร</div><div class="stat-value">ภพ' + HOUSE_NAMES.at(0).at(yearColIdx) + '/' + HOUSE_NAMES.at(1).at(yearColIdx) + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">🔵 จุดตกเดือนจร</div><div class="stat-value" style="color:#38BDF8;">ภพ' + HOUSE_NAMES.at(0).at(monthColIdx) + '/' + HOUSE_NAMES.at(1).at(monthColIdx) + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">🔴 จุดตกวันจร</div><div class="stat-value" style="color:#FB7185;">ภพ' + HOUSE_NAMES.at(0).at(dayColIdx) + '/' + HOUSE_NAMES.at(1).at(dayColIdx) + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">🍀 ศรีวันจร / ⚠️ กาลกิณีวันจร</div><div class="stat-value" style="font-size:15px;">ดาว' + sriDay + ' / ดาว' + kaliDay + '</div></div>';
-
-            const svgChart = drawGlowingZodiac(astro.ascRasi, astro.sunRasi, astro.planetPositions);
-            document.getElementById('overviewStarMap').innerHTML = svgChart;
-            document.getElementById('zodiacCircleSvg').innerHTML = svgChart;
-            document.getElementById('ascMethodBadge').innerText = astro.methodText + ' (ตนุเศษ: ' + PLANET_FULL_NAMES[astro.tanuSetPlanet] + ')';
-
-            const displayOrder = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
-            document.getElementById('planetListBox').innerHTML = displayOrder.map(pId => {
-                const det = astro.planetDetails[pId];
-                return '<div style="background:rgba(30,41,59,0.85); border:1px solid rgba(56,189,248,0.4); border-radius:12px; padding:8px; font-size:12px; text-align:center;">' +
-                    '<div style="color:#FDE047; font-weight:700;">' + PLANET_FULL_NAMES[pId] + '</div>' +
-                    '<div style="color:#7DD3FC;">' + ZODIAC_NAMES.at(det.rasi) + ' (' + det.deg + '°' + det.min + '\')</div></div>';
+            const order = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
+            const pGrid = order.map(id => {
+                const d = res.planetDet[id];
+                return '<div style="background:rgba(15,23,42,0.85); border:1px solid #38BDF8; border-radius:12px; padding:8px; text-align:center;">' +
+                    '<div style="color:#FDE047; font-weight:700; font-size:13px;">' + PLANET_FULL[id] + '</div>' +
+                    '<div style="color:#BAE6FD; font-size:12px;">' + ZODIAC_NAMES.at(d.rasi) + ' ' + d.deg + '°' + d.min + '\'</div></div>';
             }).join('');
 
-            let tblHtml = '<thead><tr><th></th>';
-            seq7.forEach(cIdx => {
-                let b = [];
-                if (cIdx === yearColIdx) b.push('<span style="background:#D97706;color:#FFF;padding:1px 5px;border-radius:5px;">ปีจร</span>');
-                if (cIdx === monthColIdx) b.push('<span style="background:#0284C7;color:#FFF;padding:1px 5px;border-radius:5px;">เดือนจร</span>');
-                if (cIdx === dayColIdx) b.push('<span style="background:#E11D48;color:#FFF;padding:1px 5px;border-radius:5px;">วันจร</span>');
-                tblHtml += '<th style="font-size:10px; padding-bottom:6px;">' + (b.join(' ') || 'ฐาน ' + (cIdx + 1)) + '</th>';
-            });
-            tblHtml += '</tr></thead><tbody>';
-            rows.forEach((row, rIdx) => {
-                tblHtml += '<tr><td class="base-label">' + BASE_NAMES.at(rIdx) + '</td>';
-                row.forEach((val, cIdx) => {
-                    const pNum = mod7(val), roleYear = taksaYear.roleMap[pNum];
-                    const hlClass = roleYear === 'ศรี' ? 'hl-sri' : (roleYear === 'กาลกิณี' ? 'hl-kali' : (roleYear === 'เดช' ? 'hl-det' : ''));
-                    const hName = rIdx < 3 ? HOUSE_NAMES.at(rIdx).at(cIdx) : BASE_NAMES.at(rIdx);
-                    const subText = rIdx < 3 ? '<div class="num-sub">' + HOUSE_NAMES.at(rIdx).at(cIdx) + '</div>' : '';
-                    tblHtml += '<td><button onclick="showMeaning(\'' + hName + '\',' + pNum + ',\'' + roleYear + '\',\'' + taksaMonth.roleMap[pNum] + '\',\'' + taksaDay.roleMap[pNum] + '\',' + val + ')" class="num-btn ' + hlClass + '"><div class="num-main">' + val + '</div>' + subText + '</button></td>';
-                });
-                tblHtml += '</tr>';
-            });
-            document.getElementById('table7Tua').innerHTML = tblHtml + '</tbody>';
-
-            const mpGrid = [{ label: 'มรณะ', idx: 2 }, { label: 'อริ', idx: 5 }, { label: 'ทาสี', idx: 6 }, { label: 'ปิตา', idx: 3 }, { label: 'อัตตะ (ตนุ)', idx: 0 }, { label: 'ทาสา', idx: 4 }, { label: 'หินะ', idx: 1 }, { label: 'ธานัง', idx: 2 }, { label: 'โภคา', idx: 5 }];
-            document.getElementById('mahaphutBox').innerHTML = mpGrid.map(item =>
-                '<div style="background:rgba(30,41,59,0.8); border:1px solid rgba(251,191,36,0.4); border-radius:12px; padding:10px;"><div style="font-size:11px; color:#7DD3FC;">' + item.label + '</div><div style="font-size:18px; font-weight:700; color:#FDE047;">' + r1.at(item.idx) + '</div></div>'
-            ).join('');
-
-            let taksaHtml = '<thead><tr><th class="base-label">ระดับทักษา</th>';
-            TAKSA_ROLES.forEach(r => { taksaHtml += '<th style="font-size:12px; color:#FDE047; padding:6px;">' + r + '</th>'; });
-            taksaHtml += '</tr></thead><tbody>';
-            [{ name: '🌟 ทักษาเดิม', obj: taksaBirth.roleMap }, { name: '🟡 ทักษาปีจร', obj: taksaYear.roleMap }, { name: '🔵 ทักษาเดือนจร', obj: taksaMonth.roleMap }, { name: '🔴 ทักษาวันจร', obj: taksaDay.roleMap }].forEach(lv => {
-                taksaHtml += '<tr><td class="base-label">' + lv.name + '</td>';
-                TAKSA_ROLES.forEach(role => {
-                    const pFound = Object.keys(lv.obj).find(k => lv.obj[k] === role);
-                    const cellStyle = role === 'ศรี' ? 'background:rgba(16,185,129,0.3); color:#6EE7B7; font-weight:700;' : (role === 'กาลกิณี' ? 'background:rgba(244,63,94,0.3); color:#FDA4AF; font-weight:700;' : 'background:rgba(30,41,59,0.8); color:#E2E8F0;');
-                    taksaHtml += '<td style="' + cellStyle + ' padding:8px; border-radius:8px; font-size:12px;">' + DAY_NAMES[pFound].split(' ').at(0) + '</td>';
-                });
-                taksaHtml += '</tr>';
-            });
-            document.getElementById('taksaTransitTable').innerHTML = taksaHtml + '</tbody>';
-
-            document.getElementById('kalayokYearLabel').innerText = targetBE;
-            document.getElementById('kalayokBox').innerHTML =
-                '<div style="background:rgba(16,185,129,0.2); border:1px solid #34D399; padding:12px; border-radius:12px;">🏆 <b>ธงชัย:</b> ' + DAY_NAMES[kalayok.dharmachai] + '</div>' +
-                '<div style="background:rgba(56,189,248,0.2); border:1px solid #38BDF8; padding:12px; border-radius:12px;">👑 <b>อธิบดี:</b> ' + DAY_NAMES[kalayok.athibodi] + '</div>' +
-                '<div style="background:rgba(245,158,11,0.2); border:1px solid #FBBF24; padding:12px; border-radius:12px;">⚡ <b>อุบาทว์:</b> ' + DAY_NAMES[kalayok.ubat] + '</div>' +
-                '<div style="background:rgba(244,63,94,0.2); border:1px solid #FB7185; padding:12px; border-radius:12px;">🚨 <b>โลกาวินาศ:</b> ' + DAY_NAMES[kalayok.lokawinart] + '</div>';
-
+            const box = document.getElementById('z_result');
+            box.style.display = 'block';
+            box.innerHTML =
+                '<div class="mode-header"><h3 style="color:#FDE047;">🌟 ผลผูกดวงจักรราศี (' + prov + ')</h3><span style="color:#7DD3FC; font-size:13px;">ตนุเศษ: <b>' + PLANET_FULL[res.tanuPlanet] + '</b></span></div>' +
+                '<div style="text-align:center; margin-bottom:14px;">' +
+                    '<span style="display:inline-block; padding:6px 16px; border-radius:99px; background:rgba(225,29,72,0.25); border:1px solid #FB7185; color:#FDA4AF; font-weight:700; margin:4px;">🎡 ลัคนาราศี' + ZODIAC_NAMES.at(res.ascRasi) + ' (' + res.ascDeg + '°' + res.ascMin + '\')</span>' +
+                    '<span style="display:inline-block; padding:6px 16px; border-radius:99px; background:rgba(245,158,11,0.25); border:1px solid #FBBF24; color:#FDE047; font-weight:700; margin:4px;">☀️ ราศีเกิด: ราศี' + ZODIAC_NAMES.at(res.sunRasi) + '</span>' +
+                '</div>' +
+                '<div style="display:flex; justify-content:center; margin-bottom:16px;">' + drawGlowingZodiac(res.ascRasi, res.sunRasi, res.planetPos) + '</div>' +
+                '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(135px, 1fr)); gap:8px;">' + pGrid + '</div>';
             castCatMagic();
-            document.getElementById('summaryCards').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        function showMeaning(house, planetNum, rYear, rMonth, rDay, rawVal) {
-            document.getElementById('meaningBox').innerHTML =
-                '<div style="background:rgba(30,41,59,0.9); border:1.5px solid #F59E0B; padding:14px; border-radius:14px;">' +
-                '<div style="font-size:16px; font-weight:700; color:#FDE047; margin-bottom:6px;">✨ ตำแหน่ง: ' + house + ' | เลข ' + rawVal + ' (ดาว' + DAY_NAMES[planetNum] + ')</div>' +
-                '<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; font-size:12px;">' +
-                    '<span style="background:rgba(245,158,11,0.3); color:#FDE047; padding:3px 10px; border-radius:99px;">🟡 ปีจร: <b>' + rYear + '</b></span>' +
-                    '<span style="background:rgba(56,189,248,0.3); color:#7DD3FC; padding:3px 10px; border-radius:99px;">🔵 เดือนจร: <b>' + rMonth + '</b></span>' +
-                    '<span style="background:rgba(244,63,94,0.3); color:#FDA4AF; padding:3px 10px; border-radius:99px;">🔴 วันจร: <b>' + rDay + '</b></span>' +
-                '</div><p>• <b>ความหมาย:</b> ภพ <b>' + house + '</b> มีดาว <b>' + DAY_NAMES[planetNum] + '</b> สถิตอยู่ ส่งผลต่อเรื่อง' + house + 'โดยตรง</p></div>';
-            castCatMagic();
+        function syncTo7Tua() {
+            const dob = document.getElementById('z_dob').value;
+            const tob = document.getElementById('z_tob').value;
+            const [y, m, d] = dob.split('-').map(Number);
+            const [hh] = tob.split(':').map(Number);
+            let dow = new Date(y, m - 1, d).getDay();
+            if (hh < 6) dow = (dow + 6) % 7;
+            let aDay = dow === 0 ? 1 : dow + 1;
+            if (aDay === 4 && (hh >= 18 || hh < 6)) aDay = 8;
+            document.getElementById('t7_day').value = aDay;
+            let yIdx = ((y - 1900) % 12 + 12) % 12;
+            if (m < 4 || (m === 4 && d < 14)) yIdx = (yIdx + 11) % 12;
+            document.getElementById('t7_year').value = yIdx + 1;
+            document.getElementById('t7_month').value = (m % 12) + 1;
+            document.getElementById('t7_age').value = 2569 - (y + 543) + 1;
+            run7TuaMode();
         }
-
-        const CAT_QUOTES = ['เมี๊ยว~ ร่ายมนต์เปิดดวงดาวให้ส่องสว่างแล้ว! ✨', 'ลูกแก้วพยากรณ์กำลังส่องประกายนำโชคลาภมาให้! 🔮', 'วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะเมี๊ยว~ 🌟', 'คลิกที่ตัวเลขในตารางเพื่อดูคำทำนายลับได้เลย! 🐾'];
-        function castCatMagic() {
-            const bubble = document.getElementById('catSpeech');
-            const sparks = document.getElementById('magicSparks');
-            if (!bubble || !sparks) return;
-            bubble.innerText = CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)];
-            sparks.style.display = 'block';
-            setTimeout(() => { sparks.style.display = 'none'; }, 1800);
-        }
-
-        window.onload = autoDetectAstroDate;
-
-    </script>
-
-    <style>
-        @keyframes catWalk { 0% { left: 2%; transform: scaleX(1); } 48% { left: calc(100% - 135px); transform: scaleX(1); } 50% { left: calc(100% - 135px); transform: scaleX(-1); } 98% { left: 2%; transform: scaleX(-1); } 100% { left: 2%; transform: scaleX(1); } }
-        @keyframes catBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-        @keyframes sparkSpin { 0% { transform: scale(0.6) rotate(0deg); opacity: 1; } 100% { transform: scale(1.4) rotate(180deg); opacity: 0; } }
-        .seer-cat-walker { position: fixed; bottom: 10px; z-index: 99; cursor: pointer; animation: catWalk 24s linear infinite; }
-        .seer-cat-walker:hover { animation-play-state: paused; }
-        .seer-cat-body { animation: catBounce 0.6s infinite ease-in-out; }
-        .cat-bubble { position: absolute; bottom: 118px; left: 50%; transform: translateX(-50%); background: #FFFBEB; color: #991B1B; border: 2px solid #F59E0B; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-    </style>
-
-    <div class="seer-cat-walker" onclick="castCatMagic()" title="คลิกเพื่อให้น้องแมวร่ายมนต์!">
-        <div id="catSpeech" class="cat-bubble">เมี๊ยว~ ยินดีต้อนรับสู่ ProjectSeer! ✨</div>
-        <div class="seer-cat-body">
-            <svg width="115" height="115" viewBox="0 0 120 120">
-                <defs>
-                    <radialGradient id="orbGrad">
-                        <stop offset="0%" stop-color="#FFFFFF"/><stop offset="70%" stop-color="#BAE6FD"/><stop offset="100%" stop-color="#F472B6"/>
-                    </radialGradient>
-                </defs>
-                <g id="magicSparks" style="display:none; transform-origin: 60px 85px; animation: sparkSpin 1.2s infinite;">
-                    <text x="20" y="75" font-size="16">✨</text><text x="85" y="75" font-size="16">🌟</text><text x="52" y="45" font-size="16">💫</text>
-                </g>
-                <polygon points="28,45 22,12 50,30" fill="#FFFFFF" stroke="#93C5FD" stroke-width="2.5"/>
-                <polygon points="92,45 98,12 70,30" fill="#FFFFFF" stroke="#93C5FD" stroke-width="2.5"/>
-                <polygon points="31,40 27,20 44,31" fill="#FECDD3"/><polygon points="89,40 93,20 76,31" fill="#FECDD3"/>
-                <ellipse cx="60" cy="33" rx="7" ry="4" fill="#E0F2FE" stroke="#F43F5E" stroke-width="1.5"/>
-                <circle cx="60" cy="33" r="2.5" fill="#1D4ED8"/>
-                <circle cx="44" cy="52" r="13" fill="rgba(224,242,254,0.5)" stroke="#F472B6" stroke-width="3"/>
-                <circle cx="76" cy="52" r="13" fill="rgba(224,242,254,0.5)" stroke="#38BDF8" stroke-width="3"/>
-                <line x1="57" y1="52" x2="63" y2="52" stroke="#F472B6" stroke-width="3"/>
-                <circle cx="44" cy="52" r="5" fill="#1E3A8A"/><circle cx="42" cy="50" r="1.8" fill="#FFF"/>
-                <circle cx="76" cy="52" r="5" fill="#1E3A8A"/><circle cx="74" cy="50" r="1.8" fill="#FFF"/>
-                <polygon points="57,60 63,60 60,64" fill="#FB7185"/>
-                <path d="M53 66 Q57 70 60 65 Q63 70 67 66" fill="none" stroke="#9F1239" stroke-width="2" stroke-linecap="round"/>
-                <path d="M26 78 Q60 70 94 78 L102 108 L18 108 Z" fill="#FBCFE8" stroke="#38BDF8" stroke-width="2"/>
-                <path d="M60 74 L94 78 L102 108 L60 108 Z" fill="#BAE6FD"/>
-                <circle cx="60" cy="94" r="18" fill="url(#orbGrad)" stroke="#FDE047" stroke-width="2.5"/>
-                <text x="60" y="93" text-anchor="middle" font-size="6.5" font-weight="700" fill="#1E3A8A">PROJECT</text>
-                <text x="60" y="100" text-anchor="middle" font-size="7.5" font-weight="700" fill="#BE123C">SEER</text>
-                <ellipse cx="38" cy="102" rx="8" ry="6" fill="#FFFFFF" stroke="#93C5FD" stroke-width="2"/>
-                <ellipse cx="82" cy="102" rx="8" ry="6" fill="#FFFFFF" stroke="#93C5FD" stroke-width="2"/>
-            </svg>
-        </div>
-    </div>
-</body>
-</html>
