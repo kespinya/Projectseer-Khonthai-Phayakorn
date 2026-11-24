@@ -286,13 +286,12 @@ function generateAIZodiacReading(res) {
     const dhanamLord = ASTRO_CONST.LORDS.at(dhanamRasi);
     const dhanamLordPos = res.planetPos[dhanamLord];
     const dhanamBhava = (dhanamLordPos - res.ascRasi + 12) % 12;
-    const ketuBhava = (res.planetPos - res.ascRasi + 12) % 12;
+    const ketuBhava = (res.planetPos['9'] - res.ascRasi + 12) % 12;
 
-    // ตรวจมาตรฐานดาวเด่นในดวง
     let specialStars = [];
-    if (res.planetPos === 3) specialStars.push('๕ พฤหัสได้ตำแหน่ง "มหาอุจจ์" (ปัญญาและผู้ใหญ่อุปถัมภ์สูงสุด)');
-    if (res.planetPos === 3) specialStars.push('๖ ศุกร์ได้ตำแหน่ง "ราชาโชค" (มีเสน่ห์และโชคลาภทางการเงินไม่ขาด)');
-    if (res.planetPos === 3) specialStars.push('๑ อาทิตย์ได้ตำแหน่ง "มหาจักร" (สร้างฐานะและเกียรติยศได้ยิ่งใหญ่ด้วยตนเอง)');
+    if (res.planetPos['5'] === 3) specialStars.push('๕ พฤหัสได้ตำแหน่ง "มหาอุจจ์" (ปัญญาและผู้ใหญ่อุปถัมภ์สูงสุด)');
+    if (res.planetPos['6'] === 3) specialStars.push('๖ ศุกร์ได้ตำแหน่ง "ราชาโชค" (มีเสน่ห์และโชคลาภทางการเงินไม่ขาด)');
+    if (res.planetPos['1'] === 3) specialStars.push('๑ อาทิตย์ได้ตำแหน่ง "มหาจักร" (สร้างฐานะและเกียรติยศได้ยิ่งใหญ่ด้วยตนเอง)');
 
     return `
         <div style="margin-top:18px;background:linear-gradient(135deg,#FFFBEB,#ECFDF5);border:2px solid #10B981;border-radius:18px;padding:18px;text-align:left;line-height:1.65;">
