@@ -304,3 +304,55 @@ function generateAIZodiacReading(res) {
             ${specialStars.length ? `<div style="background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:12px;padding:10px;margin-top:8px;font-size:13px;color:#92400E;">👑 <b>มาตรฐานดาวเด่นในดวง:</b> ${specialStars.join(' • ')}</div>` : ''}
         </div>`;
 }
+const AI_ASTRO_DB = {
+    RASI_TRAIT: [
+        'กล้าหาญ เป็นผู้นำ คิดเร็วทำเร็ว มีไฟในการบุกเบิกสิ่งใหม่',
+        'หนักแน่น มั่นคง รักความสงบ ชอบสร้างฐานะให้เป็นปึกแผ่น',
+        'ช่างเจรจา ไหวพริบดี ปรับตัวเก่ง เรียนรู้ไว มีเสน่ห์ในการสื่อสาร',
+        'อ่อนโยน รักครอบครัว ดูแลเอาใจใส่เก่ง มีสัญชาตญาณแม่นยำ',
+        'สง่างาม มีบารมี รักเกียรติยศ ชอบช่วยเหลือผู้อื่นและเป็นจุดสนใจ',
+        'ละเอียดรอบคอบ ช่างสังเกต มีระเบียบวินัย และวิเคราะห์เก่ง',
+        'รักความยุติธรรม มีมนุษยสัมพันธ์ดี เข้ากับคนง่าย มีรสนิยม',
+        'ลึกลับ น่าค้นหา มีความมุ่งมั่นสูง ใจเด็ดและอ่านใจคนเก่ง',
+        'รักอิสระ มองโลกในแง่ดี ใฝ่หาความรู้และคุณธรรม ชอบเดินทาง',
+        'อดทนสูง มีความรับผิดชอบ วางแผนระยะยาวเก่ง สร้างความสำเร็จจากความเพียร',
+        'มีความคิดสร้างสรรค์ ทันสมัย รักเพื่อนพ้อง ชอบช่วยเหลือสังคม',
+        'มีเมตตา จินตนาการสูง เข้าใจความรู้สึกผู้อื่น มีเซนส์ทางจิตวิญญาณ'
+    ],
+    PLANET_MEANING: {
+        1: 'เกียรติยศ ชื่อเสียง ความเป็นผู้นำ และการได้รับความไว้วางใจจากผู้ใหญ่',
+        2: 'เสน่ห์เมตตา การเงินหมุนเวียน การบริการ และความผูกพันในครอบครัว',
+        3: 'ความขยันขันแข็ง การลงมือทำ การแข่งขัน และชัยชนะจากการฟันฝ่า',
+        4: 'การเจรจาธุรกิจ เอกสารสัญญา การค้าขาย และการสื่อสารที่สร้างรายได้',
+        5: 'สติปัญญา ผู้ใหญ่อุปถัมภ์ ความสำเร็จที่มั่นคง และโชคลาภด้านการศึกษา/การงาน',
+        6: 'ความรัก ความสุขสมหวัง ศิลปะความงาม และโชคลาภทางการเงิน',
+        7: 'ความรับผิดชอบงานใหญ่ อสังหาริมทรัพย์ ความอดทน และผลตอบแทนระยะยาว',
+        8: 'ไหวพริบพลิกแพลง งานออนไลน์/ต่างประเทศ และโชคลาภแบบไม่คาดฝัน',
+        9: 'สิ่งศักดิ์สิทธิ์คุ้มครอง ลางสังหรณ์แม่นยำ ความสำเร็จแบบปาฏิหาริย์ และงานเบื้องหลัง'
+    }
+};
+
+function generateAIZodiacReading(res) {
+    const ascText = AI_ASTRO_DB.RASI_TRAIT.at(res.ascRasi);
+    const tanuText = AI_ASTRO_DB.PLANET_MEANING[res.tanuPlanet] || '';
+    const dhanamRasi = (res.ascRasi + 1) % 12;
+    const dhanamLord = ASTRO_CONST.LORDS.at(dhanamRasi);
+    const dhanamLordPos = res.planetPos[dhanamLord];
+    const dhanamBhava = (dhanamLordPos - res.ascRasi + 12) % 12;
+    const ketuBhava = (res.planetPos['9'] - res.ascRasi + 12) % 12;
+
+    let specialStars = [];
+    if (res.planetPos['5'] === 3) specialStars.push('๕ พฤหัสได้ตำแหน่ง "มหาอุจจ์" (ปัญญาและผู้ใหญ่อุปถัมภ์สูงสุด)');
+    if (res.planetPos['6'] === 3) specialStars.push('๖ ศุกร์ได้ตำแหน่ง "ราชาโชค" (มีเสน่ห์และโชคลาภทางการเงินไม่ขาด)');
+    if (res.planetPos['1'] === 3) specialStars.push('๑ อาทิตย์ได้ตำแหน่ง "มหาจักร" (สร้างฐานะและเกียรติยศได้ยิ่งใหญ่ด้วยตนเอง)');
+
+    return `
+        <div style="margin-top:18px;background:linear-gradient(135deg,#FFFBEB,#ECFDF5);border:2px solid #10B981;border-radius:18px;padding:18px;text-align:left;line-height:1.65;">
+            <div style="font-size:16px;font-weight:700;color:#065F46;margin-bottom:10px;">🤖 บทวิเคราะห์ดวงชะตาอัตโนมัติ (ProjectSeer AI Insight)</div>
+            <p style="font-size:13.5px;color:#1E3A8A;margin-bottom:8px;">• <b>บุคลิกและวาสนา (ลัคนาราศี${ASTRO_CONST.ZODIACS.at(res.ascRasi).split(' ').at(0)}):</b> พื้นดวงเป็นคน${ascText} เสวยนักษัตร <b>${res.ascNakshatra}</b> ส่งผลให้มีจังหวะชีวิตที่โดดเด่นและมีเสน่ห์เฉพาะตัว</p>
+            <p style="font-size:13.5px;color:#1E3A8A;margin-bottom:8px;">• <b>จิตใจและเป้าหมายหลัก (ตนุเศษ: ${ASTRO_CONST.FULL_NAMES[res.tanuPlanet]}):</b> จิตใจมุ่งเน้นเรื่อง${tanuText}</p>
+            <p style="font-size:13.5px;color:#1E3A8A;margin-bottom:8px;">• <b>การเงินและทรัพย์สิน (เจ้าเรือนกฎุมพะ):</b> ดาวการเงินคือ <b>${ASTRO_CONST.FULL_NAMES[dhanamLord]}</b> โคจรสถิตในภพ <b>"${BHAVA_NAMES.at(dhanamBhava)}"</b> หมายถึงรายได้หลักมักมาจากเรื่อง${BHAVA_NAMES.at(dhanamBhava)}และการบริหารจัดการด้วยตนเอง</p>
+            <p style="font-size:13.5px;color:#1E3A8A;margin-bottom:8px;">• <b>จุดส่งเสริมพิเศษ (ดาว ๙ เกตุ):</b> สถิตในภพ <b>"${BHAVA_NAMES.at(ketuBhava)}"</b> มีสิ่งศักดิ์สิทธิ์คุ้มครองและมีไหวพริบพิเศษในเรื่อง${BHAVA_NAMES.at(ketuBhava)}</p>
+            ${specialStars.length ? `<div style="background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:12px;padding:10px;margin-top:8px;font-size:13px;color:#92400E;">👑 <b>มาตรฐานดาวเด่นในดวง:</b> ${specialStars.join(' • ')}</div>` : ''}
+        </div>`;
+}
