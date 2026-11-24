@@ -215,60 +215,71 @@
             </svg>
         </div>
     </div>
-    <script src="astro-engine.js"></script>
+       <script src="astro-engine.js"></script>
     <script src="ui-render.js"></script>
     <script>
         function buildDynamicForms() {
-                        document.getElementById('formTaksaContainer').innerHTML = `
-                <div class="form-group"><label>☀️ วันเกิด</label><select id="tk_day" class="form-control">${daysOpt}</select></div>
-                <div class="form-group"><label>⚧️ เพศ (ทิศทักษา)</label><select id="tk_gender" onchange="renderTaksaModeUI()" class="form-control"><option value="male">👨 เพศชาย (เวียนขวา)</option><option value="female" selected>👩 เพศหญิง (เวียนซ้าย)</option><option value="lgbtq">🌈 LGBTQ+ (เวียนซ้าย)</option><option value="unspecified">✨ ไม่ระบุเพศ (เวียนซ้าย)</option></select></div>
-                <div class="form-group"><label>🎂 อายุย่างปัจจุบัน (ปี)</label><input type="number" id="tk_age" value="48" class="form-control"></div>
-                <div class="form-group"><label>🗓️ พ.ศ. พยากรณ์</label><input type="number" id="tk_be" value="2569" class="form-control"></div>`;
+            const daysOpt = '<option value="1">1 - วันอาทิตย์</option><option value="2">2 - วันจันทร์</option><option value="3">3 - วันอังคาร</option><option value="4">4 - วันพุธกลางวัน</option><option value="8">8 - วันพุธกลางคืน (ราหู)</option><option value="5" selected>5 - วันพฤหัสบดี</option><option value="6">6 - วันศุกร์</option><option value="7">7 - วันเสาร์</option>';
+            const genderOpt = '<option value="male">👨 เพศชาย</option><option value="female" selected>👩 เพศหญิง</option><option value="lgbtq">🌈 LGBTQ+</option><option value="unspecified">✨ ไม่ระบุเพศ</option>';
+            let monthsOpt = '';
+            for (let i = 1; i <= 12; i++) monthsOpt += `<option value="${i}" ${i === 9 ? 'selected' : ''}>เดือน ${i}</option>`;
+            const animals = ['ชวด', 'ฉลู', 'ขาล', 'เถาะ', 'มะโรง', 'มะเส็ง', 'มะเมีย', 'มะแม', 'วอก', 'ระกา', 'จอ', 'กุน'];
+            let yearsOpt = animals.map((a, idx) => `<option value="${idx + 1}" ${idx === 7 ? 'selected' : ''}>${idx + 1} - ปี${a}</option>`).join('');
 
+            const f7 = document.getElementById('form7TuaContainer');
+            if (f7) {
+                f7.innerHTML = `
+                    <div class="form-group"><label>☀️ วันเกิดโหราศาสตร์</label><select id="t7_day" class="form-control">${daysOpt}</select></div>
+                    <div class="form-group"><label>🗓️ เดือนเกิด</label><select id="t7_month" class="form-control">${monthsOpt}</select></div>
+                    <div class="form-group"><label>🐾 ปีนักษัตรเกิด</label><select id="t7_year" class="form-control">${yearsOpt}</select></div>
+                    <div class="form-group"><label>🎂 พ.ศ. เกิด</label><input type="number" id="t7_birthBE" value="2522" class="form-control"></div>
+                    <div class="form-group"><label>🎯 พ.ศ. ปัจจุบัน (จร)</label><input type="number" id="t7_targetBE" value="2569" class="form-control"></div>
+                    <div class="form-group"><label>🌙 นับจรเพิ่ม (เดือน / วัน)</label><div style="display:flex;gap:6px;"><input type="number" id="t7_addM" value="3" class="form-control"><input type="number" id="t7_addD" value="14" class="form-control"></div></div>`;
+            }
 
-            document.getElementById('form7TuaContainer').innerHTML = `
-                <div class="form-group"><label>☀️ วันเกิดโหราศาสตร์</label><select id="t7_day" class="form-control">${daysOpt}</select></div>
-                <div class="form-group"><label>🗓️ เดือนเกิด</label><select id="t7_month" class="form-control">${monthsOpt}</select></div>
-                <div class="form-group"><label>🐾 ปีนักษัตรเกิด</label><select id="t7_year" class="form-control">${yearsOpt}</select></div>
-                <div class="form-group"><label>🎂 พ.ศ. เกิด</label><input type="number" id="t7_birthBE" value="2522" class="form-control"></div>
-                <div class="form-group"><label>🎯 พ.ศ. ปัจจุบัน (จร)</label><input type="number" id="t7_targetBE" value="2569" class="form-control"></div>
-                <div class="form-group"><label>🌙 นับจรเพิ่ม (เดือน / วัน)</label><div style="display:flex;gap:6px;"><input type="number" id="t7_addM" value="3" class="form-control"><input type="number" id="t7_addD" value="14" class="form-control"></div></div>`;
-
-            document.getElementById('formTaksaContainer').innerHTML = `
-                <div class="form-group"><label>☀️ วันเกิด</label><select id="tk_day" class="form-control">${daysOpt}</select></div>
-                <div class="form-group"><label>🎂 อายุย่างปัจจุบัน (ปี)</label><input type="number" id="tk_age" value="48" class="form-control"></div>
-                <div class="form-group"><label>🗓️ พ.ศ. พยากรณ์</label><input type="number" id="tk_be" value="2569" class="form-control"></div>`;
+            const ftk = document.getElementById('formTaksaContainer');
+            if (ftk) {
+                ftk.innerHTML = `
+                    <div class="form-group"><label>☀️ วันเกิด</label><select id="tk_day" class="form-control">${daysOpt}</select></div>
+                    <div class="form-group"><label>⚧️ เพศ</label><select id="tk_gender" class="form-control">${genderOpt}</select></div>
+                    <div class="form-group"><label>🎂 อายุย่างปัจจุบัน (ปี)</label><input type="number" id="tk_age" value="48" class="form-control"></div>
+                    <div class="form-group"><label>🗓️ พ.ศ. พยากรณ์</label><input type="number" id="tk_be" value="2569" class="form-control"></div>`;
+            }
         }
 
         function switchMode(id, btn) {
+            // สลับหน้าแท็บทันทีก่อนคำนวณ เพื่อไม่ให้หน้าเว็บค้าง
             document.querySelectorAll('.mode-section').forEach(el => { el.style.display = 'none'; el.classList.remove('active'); });
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             const target = document.getElementById(id);
             if (target) { target.style.display = 'block'; target.classList.add('active'); }
             if (btn) btn.classList.add('active');
-            if (id === 'mode-7tua') syncForm7Tua();
-            if (id === 'mode-taksa') { syncForm7Tua(); renderTaksaModeUI(); }
-            if (id === 'mode-quick') { syncForm7Tua(); renderQuickModeUI(); }
+
+            try {
+                if (id === 'mode-7tua') syncForm7Tua();
+                if (id === 'mode-taksa') { syncForm7Tua(); renderTaksaModeUI(); }
+                if (id === 'mode-quick') { syncForm7Tua(); renderQuickModeUI(); }
+            } catch (err) { console.log(err); }
         }
 
         function syncForm7Tua() {
-            const dob = document.getElementById('z_dob').value;
-            const tob = document.getElementById('z_tob')ue;
-            const calType = document.getElementById('t7_calType') ? document.getElementById('t7_calType').value : 'lunar';
+            const dobEl = document.getElementById('z_dob');
+            if (!dobEl) return;
+            const dob = dobEl.value;
+            const tob = document.getElementById('z_tob')?.value || '03:38';
+            const calType = document.getElementById('t7_calType')?.value || 'lunar';
             const res = getThaiLunarCalendar100Y(dob, tob);
             const [y, m] = dob.split('-').map(Number);
-            const genderVal = document.getElementById('z_gender') ? document.getElementById('z_gender').value : 'female';
-            if (document.getElementById('tk_gender')) document.getElementById('tk_gender').value = genderVal;
 
+            if (document.getElementById('t7_day')) document.getElementById('t7_day').value = res.astroDay;
+            if (document.getElementById('t7_month')) document.getElementById('t7_month').value = (calType === 'solar') ? ((m % 12) + 1) : res.astroMonth;
+            if (document.getElementById('t7_year')) document.getElementById('t7_year').value = res.astroYear;
+            if (document.getElementById('t7_birthBE')) document.getElementById('t7_birthBE').value = res.birthYearBE;
+            if (document.getElementById('tk_day')) document.getElementById('tk_day').value = res.astroDay;
+            if (document.getElementById('tk_age')) document.getElementById('tk_age').value = 2569 - res.birthYearBE + 1;
+            if (document.getElementById('qk_dob')) document.getElementById('qk_dob').value = dob;
 
-            document.getElementById('t7_day').value = res.astroDay;
-            document.getElementById('t7_month').value = (calType === 'solar') ? ((m % 12) + 1) : res.astroMonth;
-            document.getElementById('t7_year').value = res.astroYear;
-            document.getElementById('t7_birthBE').value = res.birthYearBE;
-            document.getElementById('tk_day').value = res.astroDay;
-            document.getElementById('tk_age').value = 2569 - res.birthYearBE + 1;
-            document.getElementById('qk_dob').value = dob;
-            render7TuaModeUI();
+            if (typeof render7TuaModeUI === 'function') render7TuaModeUI();
         }
 
         const CAT_QUOTES = ['เมี๊ยว~ ร่ายมนต์เปิดดวงดาวให้ส่องสว่างแล้ว! ✨', 'ลูกแก้วพยากรณ์กำลังส่องประกายนำโชคลาภมาให้! 🔮', 'วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะเมี๊ยว~ 🌟', 'ลองกดสลับดูทั้ง 4 ศาสตร์พยากรณ์ด้านบนได้เลย! 🐾'];
@@ -281,9 +292,8 @@
 
         window.onload = function() {
             buildDynamicForms();
-            renderZodiacModeUI();
+            if (typeof renderZodiacModeUI === 'function') renderZodiacModeUI();
         };
     </script>
 </body>
 </html>
-                           
