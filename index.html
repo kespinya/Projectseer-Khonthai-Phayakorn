@@ -95,19 +95,19 @@
         <section id="mode-zodiac" class="mode-section active">
             <div class="card-light card-cream">
                 <div class="mode-header"><h2 style="color:#B91C1C;font-size:19px;">🎡 หอดูดาวจักรราศี นวางค์จักร & คำนวณลัคนา</h2></div>
-                <div class="form-grid">
+                               <div class="form-grid">
                     <div class="form-group"><label>📅 วัน/เดือน/ปี เกิด (ค.ศ.)</label><input type="date" id="z_dob" value="1979-08-10" class="form-control"></div>
                     <div class="form-group"><label>⏰ เวลาเกิดที่แน่นอน (น.)</label><input type="time" id="z_tob" value="03:38" class="form-control"></div>
                     <div class="form-group">
-                        <div class="form-group">
-    <label>⚧️ เพศ (กำหนดทิศเดินทักษา)</label>
-    <select id="z_gender" onchange="syncForm7Tua()" class="form-control">
-        <option value="male">👨 เพศชาย (ทักษาเวียนขวา)</option>
-        <option value="female" selected>👩 เพศหญิง (ทักษาเวียนซ้าย)</option>
-        <option value="lgbtq">🌈 LGBTQ+ (ทักษาเวียนซ้าย)</option>
-        <option value="unspecified">✨ ไม่ระบุเพศ (ทักษาเวียนซ้าย)</option>
-    </select>
-</div>
+                        <label>⚧️ เพศ</label>
+                        <select id="z_gender" class="form-control">
+                            <option value="male">👨 เพศชาย</option>
+                            <option value="female" selected>👩 เพศหญิง</option>
+                            <option value="lgbtq">🌈 LGBTQ+</option>
+                            <option value="unspecified">✨ ไม่ระบุเพศ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>📍 จังหวัดเกิด</label>
                         <select id="z_prov" class="form-control">
                             <option value="13.7563,100.5018,กรุงเทพมหานคร">กรุงเทพมหานคร</option>
@@ -124,6 +124,14 @@
                             <option value="anto_lmt">อันโตนาที + ตัดเวลาท้องถิ่น (LMT)</option>
                             <option value="anto_lat">อันโตนาทีตามพิกัดจริง</option>
                             <option value="lahiri">สมผุสดาวจริง (นิรายนะ - ลาหิรี)</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="renderZodiacModeUI()" class="btn-action">🔭 คำนวณสมผุสดาว 10 ดวงและวางลัคนา</button>
+            </div>
+            <div id="z_result" class="card-light" style="display:none;"></div>
+        </section>
+
                         </select>
                     </div>
                 </div>
