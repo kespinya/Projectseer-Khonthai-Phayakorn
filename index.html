@@ -404,3 +404,177 @@
             document.getElementById('t7_age').value = 2569 - (y + 543) + 1;
             run7TuaMode();
         }
+        function calcTaksaSteps(bDay, steps) {
+            const sIdx = TAKSA_SEQ.indexOf(bDay);
+            const cIdx = ((sIdx + steps) % 8 + 8) % 8;
+            const map = {};
+            for (let i = 0; i < 8; i++) map[TAKSA_SEQ[(cIdx + i) % 8]] = TAKSA_ROLES[i];
+            return { map: map, briwan: TAKSA_SEQ[cIdx] };
+        }
+
+        function run7TuaMode() {
+            const dVal = parseInt(document.getElementById('t7_day').value);
+            const mVal = parseInt(document.getElementById('t7_month').value);
+            const yVal = parseInt(document.getElementById('t7_year').value);
+            const age = parseInt(document.getElementById('t7_age').value) || 1;
+            const addM = parseInt(document.getElementById('t7_addM').value) || 0;
+            const addD = parseInt(document.getElementById('t7_addD').value) || 0;
+
+            const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
+            const seq7 = '0,1,2,3,4,5,6'.split(',').map(Number);
+            const r1 = seq7.map(i => mod7(d7 + i));
+            const r2 = seq7.map(i => mod7(m7 + i));
+            const r3 = seq7.map(i => mod7(y7 + i));
+            const r4 = seq7.map(i => r1.at(i) + r2.at(i) + r3.at(i));
+            const r5 = r4.map(n => PLANET_POWER[mod7(n)]);
+            const r6 = seq7.map(i => mod7(r4.at(i) + r5.at(i)));
+            const r7 = seq7.map(i => mod7(r6.at(i) + r5.at(i)));
+            const r8 = seq7.map(i => mod7(r7.at(i) + r5.at(i)));
+            const r9 = seq7.map(i => mod7(r8.at(i) + r5.at(i)));
+            const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
+
+            const yCol = (age - 1) % 7, mCol = (yCol + addM) % 7, dCol = (mCol + addD) % 7;
+            const tkY = calcTaksaSteps(dVal, age - 1);
+
+            let tbl = '<thead><tr><th></th>';
+            seq7.forEach(c => {
+                let tag = [];
+                if (c === yCol) tag.push('<span style="background:#D97706;color:#FFF;padding:1px 5px;border-radius:4px;">ปีจร</span>');
+                if (c === mCol) tag.push('<span style="background:#0284C7;color:#FFF;padding:1px 5px;border-radius:4px;">เดือนจร</span>');
+                if (c === dCol) tag.push('<span style="background:#E11D48;color:#FFF;padding:1px 5px;border-radius:4px;">วันจร</span>');
+                tbl += '<th style="font-size:10px;padding-bottom:6px;">' + (tag.join(' ') || 'ฐาน ' + (c + 1)) + '</th>';
+            });
+            tbl += '</tr></thead><tbody>';
+
+            rows.forEach((row, rIdx) => {
+                tbl += '<tr><td style="font-size:12px;color:#FDE68A;font-weight:600;text-align:left;padding-left:6px;">' + BASE_NAMES.at(rIdx) + '</td>';
+                row.forEach((val, cIdx) => {
+                    const p = mod7(val), role = tkY.map[p];
+                    const cls = role === 'ศรี' ? 'hl-sri' : (role === 'กาลกิณี' ? 'hl-kali' : (role === 'เดช' ? 'hl-det' : ''));
+                    const hName = rIdx < 3 ? HOUSE_NAMES.at(rIdx).at(cIdx) : BASE_NAMES.at(rIdx);
+                    const sub = rIdx < 3 ? '<div style="font-size:10px;opacity:0.8;">' + hName + '</div>' : '';
+                    tbl += '<td><button onclick="alert(\'ภพ/ฐาน: ' + hName + ' | ดาว' + DAY_NAMES[p] + ' (ทักษาปีจร: ' + role + ')\')" class="num-btn ' + cls + '"><div style="font-size:16px;font-weight:700;">' + val + '</div>' + sub + '</button></td>';
+                });
+                tbl += '</tr>';
+            });
+            tbl += '</tbody>';
+
+            const mp = [{ l: 'มรณะ', i: 2 }, { l: 'อริ', i: 5 }, { l: 'ทาสี', i: 6 }, { l: 'ปิตา', i: 3 }, { l: 'อัตตะ (ตนุ)', i: 0 }, { l: 'ทาสา', i: 4 }, { l: 'หินะ', i: 1 }, { l: 'ธานัง', i: 2 }, { l: 'โภคา', i: 5 }];
+            const mpHtml = mp.map(x => '<div style="background:rgba(15,23,42,0.85);border:1px solid #F59E0B;border-radius:12px;padding:10px;text-align:center;"><div style="font-size:11px;color:#FDE68A;">' + x.l + '</div><div style="font-size:18px;font-weight:700;color:#FFF;">' + r1.at(x.i) + '</div></div>').join('');
+
+            const box = document.getElementById('t7_result');
+            box.style.display = 'block';
+            box.innerHTML = '<div class="mode-header"><h3 style="color:#FDE047;">📜 ตารางเลข 7 ตัว 9 ฐาน (คลิกตัวเลขเพื่อดูความหมาย)</h3></div>' +
+                '<div class="table-wrap"><table class="astro-table">' + tbl + '</table></div>' +
+                '<h4 style="color:#FDE047;margin:18px 0 10px;">💠 ผังมหาภูติ (ธาตุกำเนิด)</h4>' +
+                '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">' + mpHtml + '</div>';
+            castCatMagic();
+        }
+
+        function runTaksaMode() {
+            const dVal = parseInt(document.getElementById('tk_day').value);
+            const age = parseInt(document.getElementById('tk_age').value) || 1;
+            const be = parseInt(document.getElementById('tk_be').value) || 2569;
+            const tkB = calcTaksaSteps(dVal, 0), tkY = calcTaksaSteps(dVal, age - 1);
+            const js = be - 1181;
+            const dh = ((js * 5 + 3) % 7) + 1, at = ((js * 5 + 6) % 7) + 1, ub = ((js * 5 + 2) % 7) + 1, lo = ((js * 5 + 4) % 7) + 1;
+
+            let rowsHtml = '';
+            TAKSA_ROLES.forEach(role => {
+                const pB = Object.keys(tkB.map).find(k => tkB.map[k] === role);
+                const pY = Object.keys(tkY.map).find(k => tkY.map[k] === role);
+                const bg = role === 'ศรี' ? 'rgba(16,185,129,0.25)' : (role === 'กาลกิณี' ? 'rgba(244,63,94,0.25)' : 'rgba(15,23,42,0.8)');
+                rowsHtml += '<div style="background:' + bg + ';border:1px solid #34D399;border-radius:14px;padding:12px;text-align:center;">' +
+                    '<div style="font-size:13px;font-weight:700;color:#6EE7B7;">' + role + '</div>' +
+                    '<div style="font-size:12px;color:#FFF;margin-top:4px;">เดิม: ดาว' + DAY_NAMES[pB].split(' ').at(0) + '</div>' +
+                    '<div style="font-size:13px;font-weight:700;color:#FDE047;">จรปีนี้: ดาว' + DAY_NAMES[pY].split(' ').at(0) + '</div></div>';
+            });
+
+            const box = document.getElementById('tk_result');
+            box.style.display = 'block';
+            box.innerHTML = '<div class="mode-header"><h3 style="color:#6EE7B7;">🧭 ภูมิทักษา 8 ทิศ (อายุย่าง ' + age + ' ปี)</h3></div>' +
+                '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px;">' + rowsHtml + '</div>' +
+                '<h4 style="color:#6EE7B7;margin-bottom:10px;">🏮 กาลโยคประจำปี พ.ศ. ' + be + '</h4>' +
+                '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">' +
+                '<div style="background:rgba(16,185,129,0.2);border:1px solid #34D399;padding:12px;border-radius:12px;">🏆 <b>ธงชัย:</b> ' + DAY_NAMES[dh] + '</div>' +
+                '<div style="background:rgba(56,189,248,0.2);border:1px solid #38BDF8;padding:12px;border-radius:12px;">👑 <b>อธิบดี:</b> ' + DAY_NAMES[at] + '</div>' +
+                '<div style="background:rgba(245,158,11,0.2);border:1px solid #FBBF24;padding:12px;border-radius:12px;">⚡ <b>อุบาทว์:</b> ' + DAY_NAMES[ub] + '</div>' +
+                '<div style="background:rgba(244,63,94,0.2);border:1px solid #FB7185;padding:12px;border-radius:12px;">🚨 <b>โลกาวินาศ:</b> ' + DAY_NAMES[lo] + '</div></div>';
+            castCatMagic();
+        }
+
+        function runQuickMode() {
+            const dob = document.getElementById('qk_dob').value;
+            const [y, m, d] = dob.split('-').map(Number);
+            const res = computeAstroChart(dob, '12:00', 13.75, 100.5, 'anto_sun');
+            let yIdx = ((y - 1900) % 12 + 12) % 12;
+            if (m < 4 || (m === 4 && d < 14)) yIdx = (yIdx + 11) % 12;
+
+            const box = document.getElementById('qk_result');
+            box.style.display = 'block';
+            box.innerHTML = '<div style="text-align:center;padding:10px;">' +
+                '<div style="font-size:48px;margin-bottom:8px;" class="glow-active">🔮✨🌟</div>' +
+                '<h3 style="color:#FDA4AF;font-size:22px;margin-bottom:8px;">คุณเกิดปี' + YEAR_ANIMALS.at(yIdx) + ' • ราศี' + ZODIAC_NAMES.at(res.sunRasi) + '</h3>' +
+                '<p style="color:#FECDD3;font-size:14px;max-width:520px;margin:0 auto 16px;">ดาวประจำราศีเกิดของคุณคือ <b>' + PLANET_FULL[RASI_LORDS.at(res.sunRasi)] + '</b> ส่งผลให้เป็นคนมีเสน่ห์ ไหวพริบดี และมีเซนส์แม่นยำ</p>' +
+                '<div style="display:flex;justify-content:center;">' + drawGlowingZodiac(res.sunRasi, res.sunRasi, res.planetPos) + '</div></div>';
+            castCatMagic();
+        }
+        const CAT_QUOTES = [
+            'เมี๊ยว~ ร่ายมนต์เปิดดวงดาวให้ส่องสว่างแล้ว! ✨',
+            'ลูกแก้วพยากรณ์กำลังส่องประกายนำโชคลาภมาให้! 🔮',
+            'วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะเมี๊ยว~ 🌟',
+            'ลองสลับกดดูทั้ง 4 ศาสตร์พยากรณ์ด้านบนได้เลย! 🐾'
+        ];
+        function castCatMagic() {
+            const bubble = document.getElementById('catSpeech');
+            const sparks = document.getElementById('magicSparks');
+            if (!bubble || !sparks) return;
+            bubble.innerText = CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)];
+            sparks.style.display = 'block';
+            setTimeout(() => { sparks.style.display = 'none'; }, 1800);
+        }
+        window.onload = function() { runZodiacMode(); };
+            <style>
+        @keyframes catWalkPos { 0%, 100% { left: 2%; } 50% { left: calc(100% - 135px); } }
+        @keyframes catFlipDir { 0%, 49% { transform: scaleX(1); } 50%, 99% { transform: scaleX(-1); } 100% { transform: scaleX(1); } }
+        @keyframes catBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+        @keyframes sparkSpin { 0% { transform: scale(0.6) rotate(0deg); opacity: 1; } 100% { transform: scale(1.4) rotate(180deg); opacity: 0; } }
+        .seer-cat-walker { position: fixed; bottom: 10px; z-index: 99; cursor: pointer; animation: catWalkPos 24s linear infinite; }
+        .seer-cat-walker:hover { animation-play-state: paused; }
+        .seer-cat-body { animation: catBounce 0.6s infinite ease-in-out; }
+        .seer-cat-body svg { animation: catFlipDir 24s linear infinite; }
+        .cat-bubble { position: absolute; bottom: 118px; left: 50%; transform: translateX(-50%); background: #FFFBEB; color: #991B1B; border: 2px solid #F59E0B; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    </style>
+
+    <div class="seer-cat-walker" onclick="castCatMagic()" title="คลิกเพื่อให้น้องแมวร่ายมนต์!">
+        <div id="catSpeech" class="cat-bubble">เมี๊ยว~ ยินดีต้อนรับสู่ ProjectSeer! ✨</div>
+        <div class="seer-cat-body">
+            <svg width="115" height="115" viewBox="0 0 120 120">
+                <defs><radialGradient id="orbGrad"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="70%" stop-color="#BAE6FD"/><stop offset="100%" stop-color="#F472B6"/></radialGradient></defs>
+                <g id="magicSparks" style="display:none; transform-origin: 60px 85px; animation: sparkSpin 1.2s infinite;">
+                    <text x="20" y="75" font-size="16">✨</text><text x="85" y="75" font-size="16">🌟</text><text x="52" y="45" font-size="16">💫</text>
+                </g>
+                <polygon points="28,45 22,12 50,30" fill="#FFFFFF" stroke="#93C5FD" stroke-width="2.5"/>
+                <polygon points="92,45 98,12 70,30" fill="#FFFFFF" stroke="#93C5FD" stroke-width="2.5"/>
+                <polygon points="31,40 27,20 44,31" fill="#FECDD3"/><polygon points="89,40 93,20 76,31" fill="#FECDD3"/>
+                <ellipse cx="60" cy="33" rx="7" ry="4" fill="#E0F2FE" stroke="#F43F5E" stroke-width="1.5"/>
+                <circle cx="60" cy="33" r="2.5" fill="#1D4ED8"/>
+                <circle cx="44" cy="52" r="13" fill="rgba(224,242,254,0.5)" stroke="#F472B6" stroke-width="3"/>
+                <circle cx="76" cy="52" r="13" fill="rgba(224,242,254,0.5)" stroke="#38BDF8" stroke-width="3"/>
+                <line x1="57" y1="52" x2="63" y2="52" stroke="#F472B6" stroke-width="3"/>
+                <circle cx="44" cy="52" r="5" fill="#1E3A8A"/><circle cx="42" cy="50" r="1.8" fill="#FFF"/>
+                <circle cx="76" cy="52" r="5" fill="#1E3A8A"/><circle cx="74" cy="50" r="1.8" fill="#FFF"/>
+                <polygon points="57,60 63,60 60,64" fill="#FB7185"/>
+                <path d="M53 66 Q57 70 60 65 Q63 70 67 66" fill="none" stroke="#9F1239" stroke-width="2" stroke-linecap="round"/>
+                <path d="M26 78 Q60 70 94 78 L102 108 L18 108 Z" fill="#FBCFE8" stroke="#38BDF8" stroke-width="2"/>
+                <path d="M60 74 L94 78 L102 108 L60 108 Z" fill="#BAE6FD"/>
+                <circle cx="60" cy="94" r="18" fill="url(#orbGrad)" stroke="#FDE047" stroke-width="2.5"/>
+                <text x="60" y="93" text-anchor="middle" font-size="6.5" font-weight="700" fill="#1E3A8A">PROJECT</text>
+                <text x="60" y="100" text-anchor="middle" font-size="7.5" font-weight="700" fill="#BE123C">SEER</text>
+                <ellipse cx="38" cy="102" rx="8" ry="6" fill="#FFFFFF" stroke="#93C5FD" stroke-width="2"/>
+                <ellipse cx="82" cy="102" rx="8" ry="6" fill="#FFFFFF" stroke="#93C5FD" stroke-width="2"/>
+            </svg>
+        </div>
+    </div>
+</body>
+</html>
