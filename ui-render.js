@@ -101,7 +101,7 @@ function renderZodiacModeUI() {
                         <th style="padding:10px;">ดาว</th><th style="padding:10px;">สถิตราศี</th><th style="padding:10px;">องศา ลิปดา</th><th style="padding:10px;">นวางค์</th><th style="padding:10px;">นักษัตร / ฤกษ์</th>
                     </tr>
                 </thead>
-                               <tbody>${tableRows}</tbody>
+            <tbody>${tableRows}</tbody>
             </table>
         </div>
         ${generateAIZodiacReading(res)}`;
