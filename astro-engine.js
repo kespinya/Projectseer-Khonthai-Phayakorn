@@ -85,23 +85,19 @@ function computeFullAstrology(dobStr, tobStr, lat, lon, method) {
     const T = (jd - 2451545.0) / 36525.0;
     const ayanamsa = 23.853 + T * 1.3969;
 
-    const M_sun = (357.52911 + 35999.05029 * T) * Math.PI / 180;
-    const L0_sun = 280.46646 + 36000.76983 * T;
-    const sunLon = norm360(L0_sun + 1.914602 * Math.sin(M_sun) + 0.019993 * Math.sin(2 * M_sun) - ayanamsa);
-
-    const L_moon = 218.3165 + 481267.8813 * T;
-    const M_moon = (134.963 + 477198.867 * T) * Math.PI / 180;
-    const D_moon = (297.850 + 445267.111 * T) * Math.PI / 180;
-    const moonLon = norm360(L_moon + 6.289 * Math.sin(M_moon) + 1.274 * Math.sin(2 * D_moon - M_moon) - ayanamsa);
-
-    const marsLon = norm360(355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - ayanamsa);
-    const mercLon = norm360(sunLon + 16 * Math.sin((174.795 + 149472.515 * T) * Math.PI / 180));
-    const jupLon = norm360(34.351 + 3034.906 * T + 5.555 * Math.sin((20.020 + 3034.696 * T) * Math.PI / 180) - ayanamsa);
-    const venLon = norm360(sunLon + 34 * Math.sin((50.416 + 58517.803 * T) * Math.PI / 180));
-    const satLon = norm360(50.077 + 1222.114 * T + 6.406 * Math.sin((317.020 + 1222.114 * T) * Math.PI / 180) - ayanamsa);
-    const rahuLon = norm360(125.0445 - 1934.1363 * T - ayanamsa);
-    const ketuLon = norm360(rahuLon + 180);
-    const uranLon = norm360(314.055 + 428.467 * T - ayanamsa);
+       // คำนวณสมผุสดาวตามคัมภีร์สุริยยาตร์ไทย (แยกวิถีโคจรดาวเกตุ ๙ ออกจากราหู ๘)
+    const d2000 = jd - 2451545.0;
+    const sunLon = norm360(257.33 + 0.98564736 * d2000 + 1.915 * Math.sin(norm360(357.53 + 0.9856003 * d2000) * Math.PI / 180));
+    const moonLon = norm360(194.45 + 13.176396 * d2000 + 6.29 * Math.sin(norm360(134.96 + 13.064993 * d2000) * Math.PI / 180));
+    const marsLon = norm360(331.58 + 0.524033 * d2000 + 10.69 * Math.sin(norm360(19.37 + 0.524021 * d2000) * Math.PI / 180));
+    const mercLon = norm360(sunLon + 18.5 * Math.sin(norm360(174.80 + 4.092334 * d2000) * Math.PI / 180));
+    const jupLon = norm360(10.50 + 0.083091 * d2000 + 5.55 * Math.sin(norm360(20.02 + 0.083085 * d2000) * Math.PI / 180));
+    const venLon = norm360(sunLon + 22.0 * Math.sin(norm360(50.42 + 1.602130 * d2000) * Math.PI / 180));
+    const satLon = norm360(26.22 + 0.033460 * d2000 + 6.41 * Math.sin(norm360(317.02 + 0.033444 * d2000) * Math.PI / 180));
+    const rahuLon = norm360(101.18 - 0.052954 * d2000);
+    // ดาวเกตุไทย (๙) โคจรเดินหน้าเฉลี่ย ~0.05299 องศา/วัน (สถิตภพกัมมะ ราศีมีน)
+    const ketuLon = norm360(113.50 + 0.052992 * d2000);
+    const uranLon = norm360(290.15 + 0.011732 * d2000);
 
     const rawLons = { 1: sunLon, 2: moonLon, 3: marsLon, 4: mercLon, 5: jupLon, 6: venLon, 7: satLon, 8: rahuLon, 9: ketuLon, 0: uranLon };
     const planetPos = {}, planetDet = {}, navamsaPos = {};
