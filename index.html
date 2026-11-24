@@ -190,7 +190,7 @@
         </div>
     </div>
 
-    <script src="astro-engine.js"></script>
+        <script src="astro-engine.js"></script>
     <script src="ui-render.js"></script>
     <script>
         function buildDynamicForms() {
@@ -200,161 +200,72 @@
             const animals = ['ชวด', 'ฉลู', 'ขาล', 'เถาะ', 'มะโรง', 'มะเส็ง', 'มะเมีย', 'มะแม', 'วอก', 'ระกา', 'จอ', 'กุน'];
             let yearsOpt = animals.map((a, idx) => `<option value="${idx + 1}" ${idx === 7 ? 'selected' : ''}>${idx + 1} - ปี${a}</option>`).join('');
 
-            document.getElementById('form7TuaContainer').innerHTML = `
-                <div class="form-group"><label>☀️ วันเกิดโหราศาสตร์</label><select id="t7_day" class="form-control">${daysOpt}</select></div>
-                <div class="form-group"><label>🗓️ เดือนเกิด (จันทรคติ)</label><select id="t7_month" class="form-control">${monthsOpt}</select></div>
-                <div class="form-group"><label>🐾 ปีนักษัตรเกิด</label><select id="t7_year" class="form-control">${yearsOpt}</select></div>
-                <div class="form-group"><label>🎂 พ.ศ. เกิด</label><input type="number" id="t7_birthBE" value="2522" class="form-control"></div>
-                <div class="form-group"><label>🎯 พ.ศ. ปัจจุบัน (จร)</label><input type="number" id="t7_targetBE" value="2569" class="form-control"></div>
-                <div class="form-group"><label>🌙 นับจรเพิ่ม (เดือน / วัน)</label><div style="display:flex;gap:6px;"><input type="number" id="t7_addM" value="3" class="form-control"><input type="number" id="t7_addD" value="14" class="form-control"></div></div>`;
+            const f7 = document.getElementById('form7TuaContainer');
+            if (f7) {
+                f7.innerHTML = `
+                    <div class="form-group"><label>☀️ วันเกิดโหราศาสตร์</label><select id="t7_day" class="form-control">${daysOpt}</select></div>
+                    <div class="form-group"><label>🗓️ เดือนเกิด (จันทรคติ)</label><select id="t7_month" class="form-control">${monthsOpt}</select></div>
+                    <div class="form-group"><label>🐾 ปีนักษัตรเกิด</label><select id="t7_year" class="form-control">${yearsOpt}</select></div>
+                    <div class="form-group"><label>🎂 พ.ศ. เกิด</label><input type="number" id="t7_birthBE" value="2522" class="form-control"></div>
+                    <div class="form-group"><label>🎯 พ.ศ. ปัจจุบัน (จร)</label><input type="number" id="t7_targetBE" value="2569" class="form-control"></div>
+                    <div class="form-group"><label>🌙 นับจรเพิ่ม (เดือน / วัน)</label><div style="display:flex;gap:6px;"><input type="number" id="t7_addM" value="3" class="form-control"><input type="number" id="t7_addD" value="14" class="form-control"></div></div>`;
+            }
 
-            document.getElementById('formTaksaContainer').innerHTML = `
-                <div class="form-group"><label>☀️ วันเกิด</label><select id="tk_day" class="form-control">${daysOpt}</select></div>
-                <div class="form-group"><label>🎂 อายุย่างปัจจุบัน (ปี)</label><input type="number" id="tk_age" value="48" class="form-control"></div>
-                <div class="form-group"><label>🗓️ พ.ศ. พยากรณ์</label><input type="number" id="tk_be" value="2569" class="form-control"></div>`;
+            const ftk = document.getElementById('formTaksaContainer');
+            if (ftk) {
+                ftk.innerHTML = `
+                    <div class="form-group"><label>☀️ วันเกิด</label><select id="tk_day" class="form-control">${daysOpt}</select></div>
+                    <div class="form-group"><label>🎂 อายุย่างปัจจุบัน (ปี)</label><input type="number" id="tk_age" value="48" class="form-control"></div>
+                    <div class="form-group"><label>🗓️ พ.ศ. พยากรณ์</label><input type="number" id="tk_be" value="2569" class="form-control"></div>`;
+            }
         }
 
         function switchMode(id, btn) {
-            document.querySelectorAll('.mode-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.mode-section').forEach(el => {
+                el.style.display = 'none';
+                el.classList.remove('active');
+            });
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
+            const target = document.getElementById(id);
+            if (target) {
+                target.style.display = 'block';
+                target.classList.add('active');
+            }
+            if (btn) btn.classList.add('active');
+
+            if (id === 'mode-7tua') render7TuaModeUI();
+            if (id === 'mode-taksa') renderTaksaModeUI();
+            if (id === 'mode-quick') renderQuickModeUI();
         }
+
         function syncForm7Tua() {
-            const res = autoConvertSolarToThai(document.getElementById('z_dob').value, document.getElementById('z_tob').value);
+            const dob = document.getElementById('z_dob').value;
+            const tob = document.getElementById('z_tob').value;
+            const res = getThaiLunarCalendar100Y(dob, tob);
             document.getElementById('t7_day').value = res.astroDay;
             document.getElementById('t7_month').value = res.astroMonth;
             document.getElementById('t7_year').value = res.astroYear;
             document.getElementById('t7_birthBE').value = res.birthYearBE;
+            document.getElementById('tk_day').value = res.astroDay;
+            document.getElementById('tk_age').value = 2569 - res.birthYearBE + 1;
+            document.getElementById('qk_dob').value = dob;
             render7TuaModeUI();
         }
-        const CAT_QUOTES = ['เมี๊ยว~ ร่ายมนต์เปิดดวงดาวให้ส่องสว่างแล้ว! ✨', 'ลูกแก้วพยากรณ์กำลังส่องประกายนำโชคลาภมาให้! 🔮', 'วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะเมี๊ยว~ 🌟', 'ลองกดสลับดูทั้ง 4 ศาสตร์พยากรณ์ด้านบนได้เลย! 🐾'];
+
+        const CAT_QUOTES = [
+            'เมี๊ยว~ ร่ายมนต์เปิดดวงดาวให้ส่องสว่างแล้ว! ✨',
+            'ลูกแก้วพยากรณ์กำลังส่องประกายนำโชคลาภมาให้! 🔮',
+            'วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะเมี๊ยว~ 🌟',
+            'ลองกดสลับดูทั้ง 4 ศาสตร์พยากรณ์ด้านบนได้เลย! 🐾'
+        ];
         function triggerCatMagic() {
             const bubble = document.getElementById('catSpeech'), sparks = document.getElementById('magicSparks');
             if (!bubble || !sparks) return;
             bubble.innerText = CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)];
-            sparks.style.display = 'block'; setTimeout(() => { sparks.style.display = 'none'; }, 1800);
-        }
-        window.onload = function() {
-            buildDynamicForms();
-            renderZodiacModeUI();
-        };
-    </script>
-</body>
-</html>
-                            <option value="anto_lmt">อันโตนาที + ตัดเวลาท้องถิ่น (LMT)</option>
-                            <option value="anto_lat">อันโตนาทีตามพิกัดจริง</option>
-                            <option value="lahiri">สมผุสดาวจริง (นิรายนะ - ลาหิรี)</option>
-                        </select>
-                    </div>
-                </div>
-                <button onclick="renderZodiacModeUI()" class="btn-action">🔭 คำนวณสมผุสดาว 10 ดวงและวางลัคนา</button>
-            </div>
-            <div id="z_result" class="card-light" style="display:none;"></div>
-        </section>
-        <section id="mode-7tua" class="mode-section">
-            <div class="card-light card-cream">
-                <div class="mode-header">
-                    <h2 style="color:#B91C1C;font-size:19px;">🔢 คัมภีร์เลข 7 ตัว 9 ฐาน & ตารางอายุจร 21 ปี</h2>
-                    <button onclick="syncForm7Tua()" style="padding:6px 14px;border-radius:99px;border:1.5px solid #059669;background:#ECFDF5;color:#065F46;font-size:12px;font-weight:700;cursor:pointer;">🔄 ดึงวันเกิดจากโหมด 1 อัตโนมัติ</button>
-                </div>
-                <div class="form-grid" id="form7TuaContainer"></div>
-                <button onclick="render7TuaModeUI()" class="btn-action">📜 ตั้งตารางเลข 7 ตัว 9 ฐาน & มหาภูติ</button>
-            </div>
-            <div id="t7_result" class="card-light" style="display:none;"></div>
-        </section>
-
-        <section id="mode-taksa" class="mode-section">
-            <div class="card-light card-cream">
-                <div class="mode-header"><h2 style="color:#065F46;font-size:19px;">🧭 เข็มทิศทักษา 8 ทิศ & กาลโยคประจำปี</h2></div>
-                <div class="form-grid" id="formTaksaContainer"></div>
-                <button onclick="renderTaksaModeUI()" class="btn-action">🧭 เปิดเข็มทิศทักษา & กาลโยค</button>
-            </div>
-            <div id="tk_result" class="card-light" style="display:none;"></div>
-        </section>
-
-        <section id="mode-quick" class="mode-section">
-            <div class="card-light card-cream">
-                <div class="mode-header"><h2 style="color:#BE123C;font-size:19px;">✨ เช็กดวงด่วน & ราศี/นักษัตรประจำตัว</h2></div>
-                <div class="form-grid"><div class="form-group"><label>🎂 วัน/เดือน/ปี เกิดของคุณ</label><input type="date" id="qk_dob" value="1979-08-10" class="form-control"></div></div>
-                <button onclick="renderQuickModeUI()" class="btn-action">💖 เปิดแผนที่ดวงดาวประจำตัว</button>
-            </div>
-            <div id="qk_result" class="card-light" style="display:none;"></div>
-        </section>
-    </div>
-
-    <div class="meadow-ground">
-        <div style="display:flex;justify-content:space-around;padding-top:4px;font-size:18px;">
-            <span>🌸</span><span>🌷</span><span>🌼</span><span>🌸</span><span>🌷</span><span>🌼</span><span>🌸</span><span>🌷</span>
-        </div>
-    </div>
-
-    <div class="seer-cat-walker" onclick="triggerCatMagic()" title="คลิกเพื่อให้น้องแมวร่ายมนต์!">
-        <div id="catSpeech" class="cat-bubble">เมี๊ยว~ ยินดีต้อนรับสู่ ProjectSeer! ✨</div>
-        <div class="seer-cat-body">
-            <svg width="115" height="115" viewBox="0 0 120 120">
-                <defs><radialGradient id="orbGrad"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="70%" stop-color="#BAE6FD"/><stop offset="100%" stop-color="#F472B6"/></radialGradient></defs>
-                <g id="magicSparks" style="display:none; transform-origin: 60px 85px; animation: sparkSpin 1.2s infinite;"><text x="20" y="75" font-size="16">✨</text><text x="85" y="75" font-size="16">🌟</text><text x="52" y="45" font-size="16">💫</text></g>
-                <polygon points="28,45 22,12 50,30" fill="#FFFFFF" stroke="#38BDF8" stroke-width="2.5"/><polygon points="92,45 98,12 70,30" fill="#FFFFFF" stroke="#38BDF8" stroke-width="2.5"/>
-                <polygon points="31,40 27,20 44,31" fill="#FECDD3"/><polygon points="89,40 93,20 76,31" fill="#FECDD3"/>
-                <ellipse cx="60" cy="33" rx="7" ry="4" fill="#E0F2FE" stroke="#E11D48" stroke-width="1.5"/><circle cx="60" cy="33" r="2.5" fill="#1D4ED8"/>
-                <circle cx="44" cy="52" r="13" fill="rgba(224,242,254,0.55)" stroke="#F472B6" stroke-width="3"/><circle cx="76" cy="52" r="13" fill="rgba(224,242,254,0.55)" stroke="#38BDF8" stroke-width="3"/>
-                <line x1="57" y1="52" x2="63" y2="52" stroke="#F472B6" stroke-width="3"/>
-                <circle cx="44" cy="52" r="5" fill="#1E3A8A"/><circle cx="42" cy="50" r="1.8" fill="#FFF"/><circle cx="76" cy="52" r="5" fill="#1E3A8A"/><circle cx="74" cy="50" r="1.8" fill="#FFF"/>
-                <polygon points="57,60 63,60 60,64" fill="#FB7185"/><path d="M53 66 Q57 70 60 65 Q63 70 67 66" fill="none" stroke="#9F1239" stroke-width="2" stroke-linecap="round"/>
-                <path d="M26 78 Q60 70 94 78 L102 108 L18 108 Z" fill="#FBCFE8" stroke="#38BDF8" stroke-width="2"/><path d="M60 74 L94 78 L102 108 L60 108 Z" fill="#BAE6FD"/>
-                <circle cx="60" cy="94" r="18" fill="url(#orbGrad)" stroke="#FDE047" stroke-width="2.5"/>
-                <text x="60" y="93" text-anchor="middle" font-size="6.5" font-weight="700" fill="#1E3A8A">PROJECT</text><text x="60" y="100" text-anchor="middle" font-size="7.5" font-weight="700" fill="#BE123C">SEER</text>
-                <ellipse cx="38" cy="102" rx="8" ry="6" fill="#FFFFFF" stroke="#38BDF8" stroke-width="2"/><ellipse cx="82" cy="102" rx="8" ry="6" fill="#FFFFFF" stroke="#38BDF8" stroke-width="2"/>
-            </svg>
-        </div>
-    </div>
-
-    <script src="astro-engine.js"></script>
-    <script src="ui-render.js"></script>
-    <script>
-        function buildDynamicForms() {
-            const daysOpt = '<option value="1">1 - วันอาทิตย์</option><option value="2">2 - วันจันทร์</option><option value="3">3 - วันอังคาร</option><option value="4">4 - วันพุธกลางวัน</option><option value="8">8 - วันพุธกลางคืน (ราหู)</option><option value="5" selected>5 - วันพฤหัสบดี</option><option value="6">6 - วันศุกร์</option><option value="7">7 - วันเสาร์</option>';
-            let monthsOpt = '';
-            for (let i = 1; i <= 12; i++) monthsOpt += `<option value="${i}" ${i === 9 ? 'selected' : ''}>เดือน ${i}</option>`;
-            const animals = ['ชวด', 'ฉลู', 'ขาล', 'เถาะ', 'มะโรง', 'มะเส็ง', 'มะเมีย', 'มะแม', 'วอก', 'ระกา', 'จอ', 'กุน'];
-            let yearsOpt = animals.map((a, idx) => `<option value="${idx + 1}" ${idx === 7 ? 'selected' : ''}>${idx + 1} - ปี${a}</option>`).join('');
-
-            document.getElementById('form7TuaContainer').innerHTML = `
-                <div class="form-group"><label>☀️ วันเกิดโหราศาสตร์</label><select id="t7_day" class="form-control">${daysOpt}</select></div>
-                <div class="form-group"><label>🗓️ เดือนเกิด (จันทรคติ)</label><select id="t7_month" class="form-control">${monthsOpt}</select></div>
-                <div class="form-group"><label>🐾 ปีนักษัตรเกิด</label><select id="t7_year" class="form-control">${yearsOpt}</select></div>
-                <div class="form-group"><label>🎂 พ.ศ. เกิด</label><input type="number" id="t7_birthBE" value="2522" class="form-control"></div>
-                <div class="form-group"><label>🎯 พ.ศ. ปัจจุบัน (จร)</label><input type="number" id="t7_targetBE" value="2569" class="form-control"></div>
-                <div class="form-group"><label>🌙 นับจรเพิ่ม (เดือน / วัน)</label><div style="display:flex;gap:6px;"><input type="number" id="t7_addM" value="3" class="form-control"><input type="number" id="t7_addD" value="14" class="form-control"></div></div>`;
-
-            document.getElementById('formTaksaContainer').innerHTML = `
-                <div class="form-group"><label>☀️ วันเกิด</label><select id="tk_day" class="form-control">${daysOpt}</select></div>
-                <div class="form-group"><label>🎂 อายุย่างปัจจุบัน (ปี)</label><input type="number" id="tk_age" value="48" class="form-control"></div>
-                <div class="form-group"><label>🗓️ พ.ศ. พยากรณ์</label><input type="number" id="tk_be" value="2569" class="form-control"></div>`;
+            sparks.style.display = 'block';
+            setTimeout(() => { sparks.style.display = 'none'; }, 1800);
         }
 
-        function switchMode(id, btn) {
-            document.querySelectorAll('.mode-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
-        }
-        function syncForm7Tua() {
-            const res = autoConvertSolarToThai(document.getElementById('z_dob').value, document.getElementById('z_tob').value);
-            document.getElementById('t7_day').value = res.astroDay;
-            document.getElementById('t7_month').value = res.astroMonth;
-            document.getElementById('t7_year').value = res.astroYear;
-            document.getElementById('t7_birthBE').value = res.birthYearBE;
-            render7TuaModeUI();
-        }
-        const CAT_QUOTES = ['เมี๊ยว~ ร่ายมนต์เปิดดวงดาวให้ส่องสว่างแล้ว! ✨', 'ลูกแก้วพยากรณ์กำลังส่องประกายนำโชคลาภมาให้! 🔮', 'วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะเมี๊ยว~ 🌟', 'ลองกดสลับดูทั้ง 4 ศาสตร์พยากรณ์ด้านบนได้เลย! 🐾'];
-        function triggerCatMagic() {
-            const bubble = document.getElementById('catSpeech'), sparks = document.getElementById('magicSparks');
-            if (!bubble || !sparks) return;
-            bubble.innerText = CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)];
-            sparks.style.display = 'block'; setTimeout(() => { sparks.style.display = 'none'; }, 1800);
-        }
         window.onload = function() {
             buildDynamicForms();
             renderZodiacModeUI();
