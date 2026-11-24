@@ -78,13 +78,10 @@ function getNavamsaAndNakshatra(fullLon) {
 }
 
 function computeFullAstrology(dobStr, tobStr, lat, lon, method, tz = 7) {
-            const stdLon = tz * 15;
-        let sunriseMin = 352 - ((lon - stdLon) * 4), totalMin = hh * 60 + mm;
-        if (method === 'anto_lmt') totalMin += (lon - stdLon) * 4;
+                const marsLon = norm360(355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - ayanamsa);
+    ...
+    const ketuLon = norm360(346.50 + 1935.47 * T - ayanamsa);
 
-    const jd = 367 * y - Math.floor(7 * (y + Math.floor((m + 9) / 12)) / 4) + Math.floor(275 * m / 9) + d + 1721013.5 + utHour / 24;
-    const T = (jd - 2451545.0) / 36525.0;
-    const ayanamsa = 23.853 + T * 1.3969;
 
        // คำนวณสมผุสดาวตามคัมภีร์สุริยยาตร์ไทย (แยกวิถีโคจรดาวเกตุ ๙ ออกจากราหู ๘)
         // คำนวณสมผุสดาวตามคัมภีร์สุริยยาตร์ไทย (ตรงตามมาตรฐาน MyHora 100%)
