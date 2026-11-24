@@ -163,7 +163,8 @@
                 </div>
                 <div class="form-group">
                     <label>⏰ เวลาเกิด (น.)</label>
-                    <input type="time" id="tob" value="09:45" class="form-control">
+                   <input type="time" id="tob" value="09:45" onchange="autoDetectAstroDate()" class="form-control">
+
                 </div>
                 <div class="form-group">
                     <label>📍 จังหวัดเกิด (พิกัดลัคนา)</label>
@@ -551,6 +552,8 @@
                 '<div style="background:rgba(245,158,11,0.2); border:1px solid #FBBF24; padding:12px; border-radius:12px;">⚡ <b>อุบาทว์:</b> ' + DAY_NAMES[kalayok.ubat] + '</div>' +
                 '<div style="background:rgba(244,63,94,0.2); border:1px solid #FB7185; padding:12px; border-radius:12px;">🚨 <b>โลกาวินาศ:</b> ' + DAY_NAMES[kalayok.lokawinart] + '</div>';
             castCatMagic();
+            document.getElementById('summaryCards').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
         }
 
         function showMeaning(house, planetNum, rYear, rMonth, rDay, rawVal) {
