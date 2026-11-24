@@ -128,14 +128,22 @@ function render7TuaModeUI() {
         return `<th style="font-size:11px;padding-bottom:6px;color:#1E3A8A;">${tag.join(' ') || 'ฐาน ' + (c + 1)}</th>`;
     }).join('') + '</tr></thead><tbody>';
 
-    data.rows.forEach((row, rIdx) => {
-        tbl += `<tr><td style="font-size:12px;color:#1E3A8A;font-weight:700;text-align:left;padding-left:6px;">${ASTRO_CONST.BASE_NAMES.at(rIdx)}</td>` +
+        data.rows.forEach((row, rIdx) => {
+        const isBase4 = (rIdx === 3);
+        const labelColor = isBase4 ? '#0369A1' : '#1E3A8A';
+        tbl += `<tr><td style="font-size:12px;color:${labelColor};font-weight:700;text-align:left;padding-left:6px;">${ASTRO_CONST.BASE_NAMES.at(rIdx)}</td>` +
             row.map((val, cIdx) => {
                 const p = mod7(val), role = tkY.roleMap[p];
                 let bg = '#FFFFFF', border = '#93C5FD', color = '#1E3A8A';
-                if (role === 'ศรี') { bg = '#ECFDF5'; border = '#10B981'; color = '#065F46'; }
-                else if (role === 'กาลกิณี') { bg = '#FFF1F2'; border = '#F43F5E'; color = '#9F1239'; }
-                else if (role === 'เดช') { bg = '#FFFBEB'; border = '#F59E0B'; color = '#92400E'; }
+
+                if (isBase4) {
+                    // สีพิเศษเฉพาะฐานที่ 4 (โทนฟ้าคราม-น้ำเงินเข้ม แยกเป็นแถบเด่นกลางตาราง)
+                    bg = '#E0F2FE'; border = '#0284C7'; color = '#0C4A6E';
+                } else {
+                    if (role === 'ศรี') { bg = '#ECFDF5'; border = '#10B981'; color = '#065F46'; }
+                    else if (role === 'กาลกิณี') { bg = '#FFF1F2'; border = '#F43F5E'; color = '#9F1239'; }
+                    else if (role === 'เดช') { bg = '#FFFBEB'; border = '#F59E0B'; color = '#92400E'; }
+                }
 
                 let sub = '';
                 if (rIdx < 3) sub = ASTRO_CONST.HOUSES.at(rIdx).at(cIdx);
@@ -143,13 +151,16 @@ function render7TuaModeUI() {
                 else if (rIdx === 7) sub = ASTRO_CONST.BASE8_MEANINGS.at(val - 1);
                 else if (rIdx === 8) sub = ASTRO_CONST.BASE9_MEANINGS.at(val - 1);
 
-                return `<td><button onclick="show7TuaPopup('${sub || ASTRO_CONST.BASE_NAMES.at(rIdx)}', ${p}, '${role}', ${val})" style="width:100%;padding:7px 4px;border-radius:12px;background:${bg};border:1.5px solid ${border};color:${color};cursor:pointer;">
-                    <div style="font-size:16px;font-weight:700;">${val}</div>
+                const roleDot = isBase4 ? (role === 'ศรี' ? ' 🍀' : (role === 'กาลกิณี' ? ' ⚠️' : '')) : '';
+
+                return `<td><button onclick="show7TuaPopup('${sub || ASTRO_CONST.BASE_NAMES.at(rIdx)}', ${p}, '${role}', ${val})" style="width:100%;padding:7px 4px;border-radius:12px;background:${bg};border:${isBase4 ? '2px' : '1.5px'} solid ${border};color:${color};cursor:pointer;">
+                    <div style="font-size:16px;font-weight:700;">${val}${roleDot}</div>
                     <div style="font-size:10px;font-weight:600;">${sub}</div>
                 </button></td>`;
             }).join('') + '</tr>';
     });
     tbl += '</tbody>';
+
 
     let ageHtml = data.ageTable.map(line =>
         '<tr>' + line.map(cell => {
