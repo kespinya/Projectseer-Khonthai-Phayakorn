@@ -394,6 +394,7 @@
             const planetPositions = {};
             const planetDetails = {};
             let sunLon = 0;
+            
 
             bodyMap.forEach(b => {
                 const vec = Astronomy.GeoVector(b.name, utcDate, true);
@@ -494,6 +495,66 @@
                 tanuSetPlanet: tanuSetPlanet
             };
         }
+        function drawGlowingZodiac(ascRasi, sunRasi, planetPositions) {
+            const cx = 185, cy = 185, rOut = 170, rMid = 122, rIn = 65;
+            let svg = '<svg width="370" height="370" viewBox="0 0 370 370" style="max-width:100%;">';
+            svg += '<circle cx="185" cy="185" r="170" fill="rgba(15,23,42,0.95)" stroke="#F59E0B" stroke-width="2.5"/>';
+            svg += '<circle cx="185" cy="185" r="122" fill="rgba(30,41,59,0.9)" stroke="#38BDF8" stroke-width="1.5"/>';
+            svg += '<circle cx="185" cy="185" r="65" fill="rgba(220,38,38,0.2)" stroke="#FB7185" stroke-width="2"/>';
+
+            for (let i = 0; i < 12; i++) {
+                const startAngle = (-90 - i * 30) * Math.PI / 180;
+                const midAngle = (-90 - (i + 0.5) * 30) * Math.PI / 180;
+                const x1 = cx + rIn * Math.cos(startAngle), y1 = cy + rIn * Math.sin(startAngle);
+                const x2 = cx + rOut * Math.cos(startAngle), y2 = cy + rOut * Math.sin(startAngle);
+                svg += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="rgba(253,224,71,0.35)" stroke-width="1"/>';
+
+                const isAsc = (i === ascRasi), isSun = (i === sunRasi), isLit = isAsc || isSun;
+                const zx = cx + 146 * Math.cos(midAngle), zy = cy + 146 * Math.sin(midAngle);
+                const zColor = isAsc ? '#FB7185' : (isSun ? '#FDE047' : '#93C5FD');
+                svg += '<text x="' + zx + '" y="' + zy + '" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="' + zColor + '"' + (isLit ? ' class="glow-active"' : '') + '>' + ZODIAC_NAMES.at(i).split(' ').at(0) + '</text>';
+
+                const planetsHere = Object.keys(planetPositions).filter(p => planetPositions[p] === i).map(p => PLANET_SYMBOLS[p]);
+                if (isAsc) planetsHere.unshift('ลั');
+                const px = cx + 93 * Math.cos(midAngle), py = cy + 93 * Math.sin(midAngle);
+                svg += '<text x="' + px + '" y="' + py + '" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="' + (planetsHere.length ? '#FEF08A' : '#475569') + '"' + (planetsHere.length ? ' class="glow-active"' : '') + '>' + (planetsHere.join(' ') || '·') + '</text>';
+            }
+
+            svg += '<text x="185" y="177" text-anchor="middle" font-size="12" fill="#FDA4AF">ลัคนาราศี</text>';
+            svg += '<text x="185" y="198" text-anchor="middle" font-size="15" font-weight="700" fill="#FDE047" class="glow-active">' + ZODIAC_NAMES.at(ascRasi) + '</text>';
+            return svg + '</svg>';
+        }
+
+        function calculateAll() {
+            const dobVal = document.getElementById('dob').value;
+            const tobVal = document.getElementById('tob').value;
+            const targetDateVal = document.getElementById('targetDate').value;
+            const [latStr, lonStr, provName] = document.getElementById('province').value.split(',');
+            const method = document.getElementById('ascMethod').value;
+
+            const dVal = parseInt(document.getElementById('thaiDay').value);
+            const mVal = parseInt(document.getElementById('thaiMonth').value);
+            const yVal = parseInt(document.getElementById('thaiYear').value);
+
+            const [birthYearAD, birthMonth, birthDayNum] = dobVal.split('-').map(Number);
+            const [tYearAD, tMonth, tDay] = targetDateVal.split('-').map(Number);
+            const targetBE = tYearAD + 543;
+            const age = Math.max(1, targetBE - (birthYearAD + 543) + 1);
+            const monthsElapsed = (tMonth - birthMonth + 12) % 12;
+            const daysElapsed = (tDay - birthDayNum + 30) % 30;
+
+            const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
+            const seq7 = '0,1,2,3,4,5,6'.split(',').map(Number);
+            const r1 = seq7.map(i => mod7(d7 + i));
+            const r2 = seq7.map(i => mod7(m7 + i));
+            const r3 = seq7.map(i => mod7(y7 + i));
+            const r4 = seq7.map(i => r1.at(i) + r2.at(i) + r3.at(i));
+            const r5 = r4.map(n => PLANET_POWER[mod7(n)]);
+            const r6 = seq7.map(i => mod7(r4.at(i) + r5.at(i)));
+            const r7 = seq7.map(i => mod7(r6.at(i) + r5.at(i)));
+            const r8 = seq7.map(i => mod7(r7.at(i) + r5.at(i)));
+            const r9 = seq7.map(i => mod7(r8.at(i) + r5.at(i)));
+            const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
 
     </script>
 
