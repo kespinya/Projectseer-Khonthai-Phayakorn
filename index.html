@@ -99,6 +99,15 @@
                     <div class="form-group"><label>📅 วัน/เดือน/ปี เกิด (ค.ศ.)</label><input type="date" id="z_dob" value="1979-08-10" class="form-control"></div>
                     <div class="form-group"><label>⏰ เวลาเกิดที่แน่นอน (น.)</label><input type="time" id="z_tob" value="03:38" class="form-control"></div>
                     <div class="form-group">
+                        <div class="form-group">
+    <label>⚧️ เพศ (กำหนดทิศเดินทักษา)</label>
+    <select id="z_gender" onchange="syncForm7Tua()" class="form-control">
+        <option value="male">👨 เพศชาย (ทักษาเวียนขวา)</option>
+        <option value="female" selected>👩 เพศหญิง (ทักษาเวียนซ้าย)</option>
+        <option value="lgbtq">🌈 LGBTQ+ (ทักษาเวียนซ้าย)</option>
+        <option value="unspecified">✨ ไม่ระบุเพศ (ทักษาเวียนซ้าย)</option>
+    </select>
+</div>
                         <label>📍 จังหวัดเกิด</label>
                         <select id="z_prov" class="form-control">
                             <option value="13.7563,100.5018,กรุงเทพมหานคร">กรุงเทพมหานคร</option>
@@ -210,11 +219,12 @@
     <script src="ui-render.js"></script>
     <script>
         function buildDynamicForms() {
-            const daysOpt = '<option value="1">1 - วันอาทิตย์</option><option value="2">2 - วันจันทร์</option><option value="3">3 - วันอังคาร</option><option value="4">4 - วันพุธกลางวัน</option><option value="8">8 - วันพุธกลางคืน (ราหู)</option><option value="5" selected>5 - วันพฤหัสบดี</option><option value="6">6 - วันศุกร์</option><option value="7">7 - วันเสาร์</option>';
-            let monthsOpt = '';
-            for (let i = 1; i <= 12; i++) monthsOpt += `<option value="${i}" ${i === 9 ? 'selected' : ''}>เดือน ${i}</option>`;
-            const animals = ['ชวด', 'ฉลู', 'ขาล', 'เถาะ', 'มะโรง', 'มะเส็ง', 'มะเมีย', 'มะแม', 'วอก', 'ระกา', 'จอ', 'กุน'];
-            let yearsOpt = animals.map((a, idx) => `<option value="${idx + 1}" ${idx === 7 ? 'selected' : ''}>${idx + 1} - ปี${a}</option>`).join('');
+                        document.getElementById('formTaksaContainer').innerHTML = `
+                <div class="form-group"><label>☀️ วันเกิด</label><select id="tk_day" class="form-control">${daysOpt}</select></div>
+                <div class="form-group"><label>⚧️ เพศ (ทิศทักษา)</label><select id="tk_gender" onchange="renderTaksaModeUI()" class="form-control"><option value="male">👨 เพศชาย (เวียนขวา)</option><option value="female" selected>👩 เพศหญิง (เวียนซ้าย)</option><option value="lgbtq">🌈 LGBTQ+ (เวียนซ้าย)</option><option value="unspecified">✨ ไม่ระบุเพศ (เวียนซ้าย)</option></select></div>
+                <div class="form-group"><label>🎂 อายุย่างปัจจุบัน (ปี)</label><input type="number" id="tk_age" value="48" class="form-control"></div>
+                <div class="form-group"><label>🗓️ พ.ศ. พยากรณ์</label><input type="number" id="tk_be" value="2569" class="form-control"></div>`;
+
 
             document.getElementById('form7TuaContainer').innerHTML = `
                 <div class="form-group"><label>☀️ วันเกิดโหราศาสตร์</label><select id="t7_day" class="form-control">${daysOpt}</select></div>
@@ -243,10 +253,13 @@
 
         function syncForm7Tua() {
             const dob = document.getElementById('z_dob').value;
-            const tob = document.getElementById('z_tob').value;
+            const tob = document.getElementById('z_tob')ue;
             const calType = document.getElementById('t7_calType') ? document.getElementById('t7_calType').value : 'lunar';
             const res = getThaiLunarCalendar100Y(dob, tob);
             const [y, m] = dob.split('-').map(Number);
+            const genderVal = document.getElementById('z_gender') ? document.getElementById('z_gender').value : 'female';
+            if (document.getElementById('tk_gender')) document.getElementById('tk_gender').value = genderVal;
+
 
             document.getElementById('t7_day').value = res.astroDay;
             document.getElementById('t7_month').value = (calType === 'solar') ? ((m % 12) + 1) : res.astroMonth;
