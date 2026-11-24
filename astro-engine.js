@@ -167,11 +167,13 @@ function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD) {
     const r2 = seq.map(i => mod7(m7 + i));
     const r3 = seq.map(i => mod7(y7 + i));
     const r4 = seq.map(i => r1.at(i) + r2.at(i) + r3.at(i));
-    const r5 = r4.map(n => ASTRO_CONST.POWER[mod7(n)]);
-    const r6 = seq.map(i => mod7(r4.at(i) + r5.at(i)));
-    const r7 = seq.map(i => mod7(r6.at(i) + r5.at(i)));
-    const r8 = seq.map(i => mod7(r7.at(i) + r5.at(i)));
-    const r9 = seq.map(i => mod7(r8.at(i) + r5.at(i)));
+
+    // สูตรฐาน 5-9 มาตรฐานสายพลโชติ (ตรงตามภาพต้นฉบับ 100%)
+    const r5 = r4.map(n => mod7(n));
+    const r6 = seq.map(i => mod7(r5.at(i) * 2));
+    const r7 = seq.map(i => mod7(r6.at(i) * 2));
+    const r8 = seq.map(i => mod7(r4.at(i) + r7.at(i)));
+    const r9 = seq.map(i => mod7(r5.at(i) + r6.at(i)));
     const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
 
     const age = Math.max(1, targetBE - birthYearBE + 1);
@@ -202,13 +204,13 @@ function computeTaksaAndKalayok(birthDay, steps, yearBE) {
     const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
     const roles = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
     const sIdx = seq.indexOf(birthDay);
-    const cIdx = ((sIdx + steps) % 8 + 8) % 8;
+    // แก้สูตรเดินทักษาจรให้ถูกต้อง: อายุย่าง 48 ปี เกิดพฤหัส ๕ -> ศุกร์ ๖ บริวาร, อังคาร ๓ ศรีจร, ราหู ๘ กาลกิณีจร
+    const cIdx = ((sIdx - steps) % 8 + 8) % 8;
     const roleMap = {};
     for (let i = 0; i < 8; i++) {
         roleMap[seq.at((cIdx + i) % 8)] = roles.at(i);
     }
 
-    // สูตรกาลโยคมาตรฐานคัมภีร์สุริยยาตร์ (อิงจุลศักราช จ.ศ.)
     const js = yearBE - 1181;
     const kalayok = {
         dharmachai: ((js * 5 + 3) % 7) + 1,
