@@ -4,7 +4,7 @@ const ASTRO_CONST = {
     FULL_NAMES: { 1: '๑ อาทิตย์', 2: '๒ จันทร์', 3: '๓ อังคาร', 4: '๔ พุธ', 5: '๕ พฤหัส', 6: '๖ ศุกร์', 7: '๗ เสาร์', 8: '๘ ราหู', 9: '๙ เกตุ', 0: '๐ มฤตยู' },
     ZODIACS: ['เมษ ♈', 'พฤษภ ♉', 'เมถุน ♊', 'กรกฎ ♋', 'สิงห์ ♌', 'กันย์ ♍', 'ตุลย์ ♎', 'พิจิก ♏', 'ธนู ♐', 'มังกร ♑', 'กุมภ์ ♒', 'มีน ♓'],
     ANIMALS: ['ชวด 🐭', 'ฉลู 🐮', 'ขาล 🐯', 'เถาะ 🐰', 'มะโรง 🐲', 'มะเส็ง 🐍', 'มะเมีย 🐴', 'มะแม 🐐', 'วอก 🐵', 'ระกา 🐔', 'จอ 🐶', 'กุน 🐷'],
-    TAKSA_SEQ: '1,2,3,4,7,5,8,6'.split(',').map(Number),
+   TAKSA_SEQ: '1,2,3,4,7,5,8,6'.split(',').map(Number),
     TAKSA_ROLES: ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'],
     BASE_NAMES: ['ฐาน 1 (วัน)', 'ฐาน 2 (เดือน)', 'ฐาน 3 (ปี)', 'ฐาน 4 (ผลบวก)', 'ฐาน 5 (กำลังดาว)', 'ฐาน 6 (ฐานบวก)', 'ฐาน 7 (ฐานบวก)', 'ฐาน 8 (ฐานบวก)', 'ฐาน 9 (สรุป)'],
     HOUSES: [
@@ -199,22 +199,25 @@ function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD) {
 }
 
 function computeTaksaAndKalayok(birthDay, steps, yearBE) {
-    const sIdx = ASTRO_CONST.TAKSA_SEQ.indexOf(birthDay);
+    const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
+    const roles = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
+    const sIdx = seq.indexOf(birthDay);
     const cIdx = ((sIdx + steps) % 8 + 8) % 8;
     const roleMap = {};
     for (let i = 0; i < 8; i++) {
-        roleMap[ASTRO_CONST.TAKSA_SEQ.at((cIdx + i) % 8)] = ASTRO_CONST.TAKSA_ROLES.at(i);
+        roleMap[seq.at((cIdx + i) % 8)] = roles.at(i);
     }
 
+    // สูตรกาลโยคมาตรฐานคัมภีร์สุริยยาตร์ (อิงจุลศักราช จ.ศ.)
     const js = yearBE - 1181;
     const kalayok = {
         dharmachai: ((js * 5 + 3) % 7) + 1,
-        athibodi: ((js * 5 + 6) % 7) + 1,
+        athibodi: ((js * 5 + 0) % 7) + 1,
         ubat: ((js * 5 + 2) % 7) + 1,
-        lokawinart: ((js * 5 + 4) % 7) + 1
+        lokawinart: ((js * 5 + 1) % 7) + 1
     };
 
-    return { roleMap, briwan: ASTRO_CONST.TAKSA_SEQ.at(cIdx), kalayok };
+    return { roleMap, briwan: seq.at(cIdx), kalayok };
 }
 
 function autoConvertSolarToThai(dobStr, tobStr) {
