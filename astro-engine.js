@@ -77,10 +77,11 @@ function getNavamsaAndNakshatra(fullLon) {
     return { nakshatra: ASTRO_CONST.NAKSHATRAS.at(nakIdx), navamsaRasi: navIdx };
 }
 
-function computeFullAstrology(dobStr, tobStr, lat, lon, method) {
-    const [y, m, d] = dobStr.split('-').map(Number);
-    const [hh, mm] = tobStr.split(':').map(Number);
-    const utHour = hh + mm / 60 - 7;
+function computeFullAstrology(dobStr, tobStr, lat, lon, method, tz = 7) {
+            const stdLon = tz * 15;
+        let sunriseMin = 352 - ((lon - stdLon) * 4), totalMin = hh * 60 + mm;
+        if (method === 'anto_lmt') totalMin += (lon - stdLon) * 4;
+
     const jd = 367 * y - Math.floor(7 * (y + Math.floor((m + 9) / 12)) / 4) + Math.floor(275 * m / 9) + d + 1721013.5 + utHour / 24;
     const T = (jd - 2451545.0) / 36525.0;
     const ayanamsa = 23.853 + T * 1.3969;
