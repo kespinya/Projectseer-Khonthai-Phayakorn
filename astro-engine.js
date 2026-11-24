@@ -19,9 +19,10 @@ const ASTRO_CONST = {
     ANTO_STD: '96,108,120,132,132,120,120,132,132,120,120,108'.split(',').map(Number),
     LORDS: '3,6,4,2,1,4,6,3,5,7,7,5'.split(',').map(Number),
     NAKSHATRAS: [
-        'อัศวินี (ทลิทโท)', 'ภรณี (มหัทธโน)', 'กฤตติกา (โจโร)', 'โรหิณี (ภูมิปาโล)', 'มฤคศิระ (เทศาตรี)', 'อารทรา (เทวี)', 'ปุนัพสุ (เพชฌฆาต)', 'ปุษยะ (ราชา)', 'อาศเลษา (สมโณ)',
-        'มาฆะ (ทลิทโท)', 'ปุรพผลคุนี (มหัทธโน)', 'อุตรผลคุนี (โจโร)', 'หัสตะ (ภูมิปาโล)', 'จิตรา (เทศาตรี)', 'สวาติ (เทวี)', 'วิสาขะ (เพชฌฆาต)', 'อนุราธะ (ราชา)', 'เชษฐา (สมโณ)',
-        'มูละ (ทลิทโท)', 'ปุรพาษาฒ (มหัทธโน)', 'อุตราษาฒ (โจโร)', 'ศรวณะ (ภูมิปาโล)', 'ธนิษฐา (เทศาตรี)', 'ศตภิษัช (เทวี)', 'ปุรพภัทรบท (เพชฌฆาต)', 'อุตรภัทรบท (ราชา)', 'เรวดี (สมโณ)'
+            NAKSHATRAS: [
+        'อัศวินี (ทลิทโทฤกษ์)', 'ภรณี (มหัทธโนฤกษ์)', 'กฤตติกา (โจโรฤกษ์)', 'โรหิณี (ภูมิปาโลฤกษ์)', 'มฤคศิระ (เทศาตรีฤกษ์)', 'อารทรา (เทวีฤกษ์)', 'ปุนัพสุ (เพชฌฆาตฤกษ์)', 'ปุษยะ (ราชาฤกษ์)', 'อาศเลษา (สมโณฤกษ์)',
+        'มาฆะ (ทลิทโทฤกษ์)', 'บุรพผลคุนี (มหัทธโนฤกษ์)', 'อุตรผลคุนี (โจโรฤกษ์)', 'หัสตะ (ภูมิปาโลฤกษ์)', 'จิตรา (เทศาตรีฤกษ์)', 'สวาติ (เทวีฤกษ์)', 'วิสาขา (เพชฌฆาตฤกษ์)', 'อนุราธะ (ราชาฤกษ์)', 'เชษฐา (สมโณฤกษ์)',
+        'มูละ (ทลิทโทฤกษ์)', 'บุรพาษาฒ (มหัทธโนฤกษ์)', 'อุตราษาฒ (โจโรฤกษ์)', 'ศรวณะ (ภูมิปาโลฤกษ์)', 'ธนิษฐา (เทศาตรีฤกษ์)', 'ศตภิษัช (เทวีฤกษ์)', 'บุรพภัทรบท (เพชฌฆาตฤกษ์)', 'อุตรภัทรบท (ราชาฤกษ์)', 'เรวดี (สมโณฤกษ์)'
     ]
 };
 
@@ -59,7 +60,12 @@ function computeFullAstrology(dobStr, tobStr, lat, lon, method) {
     const ketuLon = (rahuLon + 180) % 360;
     const uranLon = (314.055 + 428.467 * T - ayanamsa + 720) % 360;
 
-    const rawLons = { 1: sunLon, 2: moonLon, 3: marsLon, 4: mercLon, 5: jupLon, 6: venLon, 7: satLon, 8: rahuLon, 9: ketuLon, 0: uranLon };
+       const norm360 = deg => ((deg % 360) + 360) % 360;
+    const rawLons = {
+        1: norm360(sunLon), 2: norm360(moonLon), 3: norm360(marsLon), 4: norm360(mercLon),
+        5: norm360(jupLon), 6: norm360(venLon), 7: norm360(satLon), 8: norm360(rahuLon),
+        9: norm360(ketuLon), 0: norm360(uranLon)
+    };
     const planetPos = {}, planetDet = {}, navamsaPos = {};
 
     Object.keys(rawLons).forEach(k => {
@@ -69,6 +75,10 @@ function computeFullAstrology(dobStr, tobStr, lat, lon, method) {
         navamsaPos[k] = extra.navamsaRasi;
         planetDet[k] = { rasi: rasi, deg: Math.floor(degF), min: Math.floor((degF % 1) * 60), nakshatra: extra.nakshatra, navamsaRasi: extra.navamsaRasi };
     });
+
+    const sunRasi = planetPos.at ? planetPos[1] : planetPos[1];
+    const sunDegInRasi = norm360(sunLon) % 30;
+
 
     const sunRasi = planetPos, sunDegInRasi = sunLon % 30;
     let ascLon = 0;
