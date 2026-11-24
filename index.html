@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProjectSeer - มหาโหราศาสตร์จักรวาล ครบทุกแขนง</title>
+    <script src="https://jsdelivr.net"></script>
+
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; }
@@ -304,7 +306,8 @@
     </div>
     <script>
         const DAY_NAMES = { 1: 'อาทิตย์ (๑)', 2: 'จันทร์ (๒)', 3: 'อังคาร (๓)', 4: 'พุธ (๔)', 5: 'พฤหัสบดี (๕)', 6: 'ศุกร์ (๖)', 7: 'เสาร์ (๗)', 8: 'ราหู (๘)' };
-        const PLANET_SYMBOLS = { 1: '๑', 2: '๒', 3: '๓', 4: '๔', 5: '๕', 6: '๖', 7: '๗', 8: '๘' };
+                const PLANET_SYMBOLS = { 1: '๑', 2: '๒', 3: '๓', 4: '๔', 5: '๕', 6: '๖', 7: '๗', 8: '๘', 9: '๙', 0: '๐' };
+        const PLANET_FULL_NAMES = { 1: '๑ อาทิตย์', 2: '๒ จันทร์', 3: '๓ อังคาร', 4: '๔ พุธ', 5: '๕ พฤหัส', 6: '๖ ศุกร์', 7: '๗ เสาร์', 8: '๘ ราหู', 9: '๙ เกตุ', 0: '๐ มฤตยู' };
         const ZODIAC_NAMES = ['เมษ ♈', 'พฤษภ ♉', 'เมถุน ♊', 'กรกฎ ♋', 'สิงห์ ♌', 'กันย์ ♍', 'ตุลย์ ♎', 'พิจิก ♏', 'ธนู ♐', 'มังกร ♑', 'กุมภ์ ♒', 'มีน ♓'];
         const YEAR_ANIMALS = ['ชวด 🐭', 'ฉลู 🐮', 'ขาล 🐯', 'เถาะ 🐰', 'มะโรง 🐲', 'มะเส็ง 🐍', 'มะเมีย 🐴', 'มะแม 🐐', 'วอก 🐵', 'ระกา 🐔', 'จอ 🐶', 'กุน 🐷'];
         const TAKSA_SEQ = '1,2,3,4,7,5,8,6'.split(',').map(Number);
@@ -317,6 +320,7 @@
         ];
         const PLANET_POWER = { 1: 6, 2: 15, 3: 8, 4: 17, 5: 19, 6: 21, 7: 10 };
         const ANTO_STANDARD = '96,108,120,132,132,120,120,132,132,120,120,108'.split(',').map(Number);
+        const RASI_LORDS = '3,6,4,2,1,4,6,3,5,7,7,5'.split(',').map(Number);
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -372,214 +376,125 @@
             };
         }
 
-        function calcAscendantApprox(dobVal, tobVal, lat, lon, method) {
+        function calcExactAstro(dobVal, tobVal, lat, lon, method) {
             const [y, m, d] = dobVal.split('-').map(Number);
             const [hh, mm] = tobVal.split(':').map(Number);
-            const dayOfYear = Math.floor((new Date(y, m - 1, d) - new Date(y, 0, 0)) / 86400000);
-            const sunDeg = ((dayOfYear - 103) * (360 / 365.25) + 360) % 360;
-            const sunRasi = Math.floor(sunDeg / 30);
+            const utcDate = new Date(Date.UTC(y, m - 1, d, hh - 7, mm));
 
-            const planetPositions = {
-                1: sunRasi,
-                2: (sunRasi + (d % 12)) % 12,
-                3: (sunRasi + Math.floor(dayOfYear / 45)) % 12,
-                4: (sunRasi + (d % 2 === 0 ? 0 : 1)) % 12,
-                5: ((y - 1987) % 12 + 12) % 12,
-                6: (sunRasi + (m % 3 === 0 ? 11 : 1)) % 12,
-                7: (Math.floor((y - 1988) / 2.5) % 12 + 12) % 12
+            // ค่าอายนางศะสุริยยาตร์/ลาหิรีมาตรฐาน
+            const jd = (utcDate.getTime() / 86400000) + 2440587.5;
+            const ayanamsa = 23.853 + (jd - 2451545.0) * (50.29 / 3600 / 365.25);
+
+            const bodyMap = [
+                { id: 1, name: 'Sun' }, { id: 2, name: 'Moon' }, { id: 3, name: 'Mars' },
+                { id: 4, name: 'Mercury' }, { id: 5, name: 'Jupiter' }, { id: 6, name: 'Venus' },
+                { id: 7, name: 'Saturn' }, { id: 0, name: 'Uranus' }
+            ];
+
+            const planetPositions = {};
+            const planetDetails = {};
+            let sunLon = 0;
+
+            bodyMap.forEach(b => {
+                const vec = Astronomy.GeoVector(b.name, utcDate, true);
+                const ecl = Astronomy.Ecliptic(vec);
+                const sidLon = (ecl.elon - ayanamsa + 360) % 360;
+                const rasi = Math.floor(sidLon / 30);
+                const degInRasi = sidLon % 30;
+                const deg = Math.floor(degInRasi);
+                const min = Math.floor((degInRasi - deg) * 60);
+                planetPositions[b.id] = rasi;
+                planetDetails[b.id] = { rasi: rasi, deg: deg, min: min, fullLon: sidLon };
+                if (b.id === 1) sunLon = sidLon;
+            });
+
+            // คำนวณราหู (๘) และ เกตุ (๙) ตามสมการดาราศาสตร์ (Mean Node)
+            const T = (jd - 2451545.0) / 36525.0;
+            const rahuTrop = (125.04452 - 1934.136261 * T) % 360;
+            const rahuSid = (rahuTrop - ayanamsa + 360) % 360;
+            const ketuSid = (rahuSid + 180) % 360;
+
+            [ { id: 8, lon: rahuSid }, { id: 9, lon: ketuSid } ].forEach(node => {
+                const rasi = Math.floor(node.lon / 30);
+                const degInRasi = node.lon % 30;
+                const deg = Math.floor(degInRasi);
+                const min = Math.floor((degInRasi - deg) * 60);
+                planetPositions[node.id] = rasi;
+                planetDetails[node.id] = { rasi: rasi, deg: deg, min: min, fullLon: node.lon };
+            });
+
+            const sunRasi = Math.floor(sunLon / 30);
+            const sunDegInRasi = sunLon % 30;
+            let ascLon = 0;
+            let methodText = '';
+
+            if (method === 'lahiri') {
+                const gst = Astronomy.SiderealTime(utcDate);
+                const lst = (gst + lon / 15 + 24) % 24;
+                const ramc = lst * 15 * Math.PI / 180;
+                const eps = 23.4393 * Math.PI / 180;
+                const latRad = lat * Math.PI / 180;
+                let ascDeg = Math.atan2(Math.cos(ramc), -Math.sin(ramc) * Math.cos(eps) - Math.tan(latRad) * Math.sin(eps)) * 180 / Math.PI;
+                ascLon = (ascDeg + 360 - ayanamsa + 360) % 360;
+                methodText = 'สมผุสลาหิรี (ดาราศาสตร์)';
+            } else {
+                // คำนวณเวลาอาทิตย์อุทัยจริง + เศษองศาดาวอาทิตย์
+                let sunriseMinutes = 364; // เฉลี่ย 06:04 น.
+                let totalMinutes = hh * 60 + mm;
+
+                if (method === 'anto_lmt') {
+                    totalMinutes += (lon - 105) * 4;
+                    methodText = 'อันโตนาที + LMT';
+                } else if (method === 'anto_lat') {
+                    const dayOfYear = Math.floor((new Date(y, m - 1, d) - new Date(y, 0, 0)) / 86400000);
+                    const sunOffset = Math.sin((dayOfYear - 80) * 2 * Math.PI / 365) * (lat * 1.4);
+                    sunriseMinutes = 360 - sunOffset - ((lon - 100.5) * 4);
+                    methodText = 'อันโตนาทีตามพิกัดจริง';
+                } else {
+                    sunriseMinutes = 364 - ((lon - 100.5) * 4);
+                    methodText = 'อันโตนาทีสามัญ (สมผุสอาทิตย์อุทัย)';
+                }
+
+                let elapsed = (totalMinutes - sunriseMinutes + 1440) % 1440;
+                // หักเวลาที่เหลือของดาวอาทิตย์ในราศีเกิดก่อน
+                const remDegRatio = (30 - sunDegInRasi) / 30;
+                const remTimeInSunRasi = ANTO_STANDARD[sunRasi] * remDegRatio;
+
+                if (elapsed < remTimeInSunRasi) {
+                    const addedDeg = (elapsed / ANTO_STANDARD[sunRasi]) * 30;
+                    ascLon = (sunLon + addedDeg) % 360;
+                } else {
+                    elapsed -= remTimeInSunRasi;
+                    let currRasi = (sunRasi + 1) % 12;
+                    while (elapsed >= ANTO_STANDARD[currRasi]) {
+                        elapsed -= ANTO_STANDARD[currRasi];
+                        currRasi = (currRasi + 1) % 12;
+                    }
+                    const degInCurr = (elapsed / ANTO_STANDARD[currRasi]) * 30;
+                    ascLon = currRasi * 30 + degInCurr;
+                }
+            }
+
+            const ascRasi = Math.floor(ascLon / 30);
+            const ascDegInRasi = ascLon % 30;
+            const ascDeg = Math.floor(ascDegInRasi);
+            const ascMin = Math.floor((ascDegInRasi - ascDeg) * 60);
+
+            // คำนวณตนุเศษ
+            const lordOfAsc = RASI_LORDS[ascRasi];
+            const lordRasi = planetPositions[lordOfAsc];
+            const stepsToLord = (lordRasi - ascRasi + 12) % 12;
+            const tanuSetRasi = (lordRasi + stepsToLord) % 12;
+            const tanuSetPlanet = RASI_LORDS[tanuSetRasi];
+
+            return {
+                ascRasi: ascRasi, ascDeg: ascDeg, ascMin: ascMin,
+                sunRasi: sunRasi, planetPositions: planetPositions,
+                planetDetails: planetDetails, methodText: methodText,
+                tanuSetPlanet: tanuSetPlanet
             };
-
-            let totalMinutes = hh * 60 + mm;
-            let sunriseMinutes = 360;
-            let methodText = 'อันโตนาทีสามัญ';
-
-            if (method === 'anto_lmt') {
-                totalMinutes += (lon - 105) * 4;
-                methodText = 'อันโตนาที + LMT';
-            } else if (method === 'anto_lat' || method === 'lahiri') {
-                totalMinutes += (lon - 105) * 4;
-                const sunOffset = Math.sin((dayOfYear - 80) * 2 * Math.PI / 365) * (lat * 1.4);
-                sunriseMinutes = 360 - sunOffset;
-                methodText = method === 'lahiri' ? 'สมผุสสุริยยาตร์/ลาหิรี' : 'อันโตนาทีพิกัดจริง';
-            }
-
-            let elapsed = (totalMinutes - sunriseMinutes + 1440) % 1440;
-            let currRasi = sunRasi;
-            while (elapsed > 0) {
-                const dur = ANTO_STANDARD.at(currRasi);
-                if (elapsed >= dur) { elapsed -= dur; currRasi = (currRasi + 1) % 12; }
-                else { break; }
-            }
-            return { ascRasi: currRasi, sunRasi: sunRasi, planetPositions: planetPositions, methodText: methodText };
         }
 
-                function drawGlowingZodiac(ascRasi, sunRasi, planetPositions) {
-            const cx = 185, cy = 185, rOut = 170, rMid = 122, rIn = 65;
-            let svg = '<svg width="370" height="370" viewBox="0 0 370 370" style="max-width:100%;">';
-            svg += '<circle cx="185" cy="185" r="170" fill="rgba(15,23,42,0.95)" stroke="#F59E0B" stroke-width="2.5"/>';
-            svg += '<circle cx="185" cy="185" r="122" fill="rgba(30,41,59,0.9)" stroke="#38BDF8" stroke-width="1.5"/>';
-            svg += '<circle cx="185" cy="185" r="65" fill="rgba(220,38,38,0.2)" stroke="#FB7185" stroke-width="2"/>';
-
-            for (let i = 0; i < 12; i++) {
-                const startAngle = (-90 - i * 30) * Math.PI / 180;
-                const midAngle = (-90 - (i + 0.5) * 30) * Math.PI / 180;
-                const x1 = cx + rIn * Math.cos(startAngle), y1 = cy + rIn * Math.sin(startAngle);
-                const x2 = cx + rOut * Math.cos(startAngle), y2 = cy + rOut * Math.sin(startAngle);
-                svg += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="rgba(253,224,71,0.35)" stroke-width="1"/>';
-
-                const isAsc = (i === ascRasi), isSun = (i === sunRasi), isLit = isAsc || isSun;
-                const zx = cx + 146 * Math.cos(midAngle), zy = cy + 146 * Math.sin(midAngle);
-                const zColor = isAsc ? '#FB7185' : (isSun ? '#FDE047' : '#93C5FD');
-                svg += '<text x="' + zx + '" y="' + zy + '" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="' + zColor + '"' + (isLit ? ' class="glow-active"' : '') + '>' + ZODIAC_NAMES[i].split(' ')[0] + '</text>';
-
-                const planetsHere = Object.keys(planetPositions).filter(p => planetPositions[p] === i).map(p => PLANET_SYMBOLS[p]);
-                if (isAsc) planetsHere.unshift('ลั');
-                const px = cx + 93 * Math.cos(midAngle), py = cy + 93 * Math.sin(midAngle);
-                svg += '<text x="' + px + '" y="' + py + '" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="' + (planetsHere.length ? '#FEF08A' : '#475569') + '"' + (planetsHere.length ? ' class="glow-active"' : '') + '>' + (planetsHere.join(' ') || '·') + '</text>';
-            }
-
-            svg += '<text x="185" y="177" text-anchor="middle" font-size="12" fill="#FDA4AF">ลัคนาราศี</text>';
-            svg += '<text x="185" y="198" text-anchor="middle" font-size="15" font-weight="700" fill="#FDE047" class="glow-active">' + ZODIAC_NAMES[ascRasi] + '</text>';
-            return svg + '</svg>';
-        }
-
-        function calculateAll() {
-            const dobVal = document.getElementById('dob').value;
-            const tobVal = document.getElementById('tob').value;
-            const targetDateVal = document.getElementById('targetDate').value;
-            const [latStr, lonStr, provName] = document.getElementById('province').value.split(',');
-            const method = document.getElementById('ascMethod').value;
-
-            const dVal = parseInt(document.getElementById('thaiDay').value);
-            const mVal = parseInt(document.getElementById('thaiMonth').value);
-            const yVal = parseInt(document.getElementById('thaiYear').value);
-
-            const [birthYearAD, birthMonth, birthDayNum] = dobVal.split('-').map(Number);
-            const [tYearAD, tMonth, tDay] = targetDateVal.split('-').map(Number);
-            const targetBE = tYearAD + 543;
-            const age = Math.max(1, targetBE - (birthYearAD + 543) + 1);
-            const monthsElapsed = (tMonth - birthMonth + 12) % 12;
-            const daysElapsed = (tDay - birthDayNum + 30) % 30;
-
-            const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
-            const seq7 = '0,1,2,3,4,5,6'.split(',').map(Number);
-            const r1 = seq7.map(i => mod7(d7 + i));
-            const r2 = seq7.map(i => mod7(m7 + i));
-            const r3 = seq7.map(i => mod7(y7 + i));
-            const r4 = seq7.map(i => r1[i] + r2[i] + r3[i]);
-            const r5 = r4.map(n => PLANET_POWER[mod7(n)]);
-            const r6 = seq7.map(i => mod7(r4[i] + r5[i]));
-            const r7 = seq7.map(i => mod7(r6[i] + r5[i]));
-            const r8 = seq7.map(i => mod7(r7[i] + r5[i]));
-            const r9 = seq7.map(i => mod7(r8[i] + r5[i]));
-            const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
-            const yearColIdx = (age - 1) % 7, monthColIdx = (yearColIdx + monthsElapsed) % 7, dayColIdx = (monthColIdx + daysElapsed) % 7;
-            const taksaBirth = calcTaksaBySteps(dVal, 0), taksaYear = calcTaksaBySteps(dVal, age - 1);
-            const taksaMonth = calcTaksaBySteps(taksaYear.briwanPlanet, monthsElapsed), taksaDay = calcTaksaBySteps(taksaMonth.briwanPlanet, daysElapsed);
-            const kalayok = calcKalayok(targetBE), astro = calcAscendantApprox(dobVal, tobVal, parseFloat(latStr), parseFloat(lonStr), method);
-
-            const sriDay = Object.keys(taksaDay.roleMap).find(k => taksaDay.roleMap[k] === 'ศรี');
-            const kaliDay = Object.keys(taksaDay.roleMap).find(k => taksaDay.roleMap[k] === 'กาลกิณี');
-
-            document.getElementById('overviewDateBadge').innerText = 'วันที่พยากรณ์: ' + tDay + '/' + tMonth + '/' + targetBE;
-            document.getElementById('summaryCards').innerHTML =
-                '<div class="stat-box"><div class="stat-label">🐾 ปีนักษัตรเกิด</div><div class="stat-value">ปี' + YEAR_ANIMALS[yVal - 1] + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">☀️ ราศีเกิด (อาทิตย์)</div><div class="stat-value" style="color:#7DD3FC;">ราศี' + ZODIAC_NAMES[astro.sunRasi] + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">🎡 ลัคนา (' + provName + ')</div><div class="stat-value" style="color:#FDA4AF;">ลัคนา' + ZODIAC_NAMES[astro.ascRasi] + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">🎂 อายุย่างปัจจุบัน</div><div class="stat-value">' + age + ' ปี</div></div>';
-
-            document.getElementById('transitCards').innerHTML =
-                '<div class="stat-box"><div class="stat-label">🟡 จุดตกปีจร</div><div class="stat-value">ภพ' + HOUSE_NAMES[0][yearColIdx] + '/' + HOUSE_NAMES[1][yearColIdx] + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">🔵 จุดตกเดือนจร</div><div class="stat-value" style="color:#38BDF8;">ภพ' + HOUSE_NAMES[0][monthColIdx] + '/' + HOUSE_NAMES[1][monthColIdx] + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">🔴 จุดตกวันจร</div><div class="stat-value" style="color:#FB7185;">ภพ' + HOUSE_NAMES[0][dayColIdx] + '/' + HOUSE_NAMES[1][dayColIdx] + '</div></div>' +
-                '<div class="stat-box"><div class="stat-label">🍀 ศรีวันจร / ⚠️ กาลกิณีวันจร</div><div class="stat-value" style="font-size:15px;">ดาว' + sriDay + ' / ดาว' + kaliDay + '</div></div>';
-
-            const svgChart = drawGlowingZodiac(astro.ascRasi, astro.sunRasi, astro.planetPositions);
-            document.getElementById('overviewStarMap').innerHTML = svgChart;
-            document.getElementById('zodiacCircleSvg').innerHTML = svgChart;
-            document.getElementById('ascMethodBadge').innerText = astro.methodText;
-
-            document.getElementById('planetListBox').innerHTML = Object.keys(astro.planetPositions).map(pId =>
-                '<div style="background:rgba(30,41,59,0.8); border:1px solid rgba(56,189,248,0.4); border-radius:12px; padding:8px; font-size:13px; text-align:center;">ดาว<b style="color:#FDE047;">' + DAY_NAMES[pId] + '</b> สถิต <b style="color:#7DD3FC;">ราศี' + ZODIAC_NAMES[astro.planetPositions[pId]] + '</b></div>'
-            ).join('');
-
-            let tblHtml = '<thead><tr><th></th>';
-            seq7.forEach(cIdx => {
-                let b = [];
-                if (cIdx === yearColIdx) b.push('<span style="background:#D97706;color:#FFF;padding:1px 5px;border-radius:5px;">ปีจร</span>');
-                if (cIdx === monthColIdx) b.push('<span style="background:#0284C7;color:#FFF;padding:1px 5px;border-radius:5px;">เดือนจร</span>');
-                if (cIdx === dayColIdx) b.push('<span style="background:#E11D48;color:#FFF;padding:1px 5px;border-radius:5px;">วันจร</span>');
-                tblHtml += '<th style="font-size:10px; padding-bottom:6px;">' + (b.join(' ') || 'ฐาน ' + (cIdx + 1)) + '</th>';
-            });
-            tblHtml += '</tr></thead><tbody>';
-
-            rows.forEach((row, rIdx) => {
-                tblHtml += '<tr><td class="base-label">' + BASE_NAMES[rIdx] + '</td>';
-                row.forEach((val, cIdx) => {
-                    const pNum = mod7(val), roleYear = taksaYear.roleMap[pNum];
-                    const hlClass = roleYear === 'ศรี' ? 'hl-sri' : (roleYear === 'กาลกิณี' ? 'hl-kali' : (roleYear === 'เดช' ? 'hl-det' : ''));
-                    const hName = rIdx < 3 ? HOUSE_NAMES[rIdx][cIdx] : BASE_NAMES[rIdx];
-                    const subText = rIdx < 3 ? '<div class="num-sub">' + HOUSE_NAMES[rIdx][cIdx] + '</div>' : '';
-                    tblHtml += '<td><button onclick="showMeaning(\'' + hName + '\',' + pNum + ',\'' + roleYear + '\',\'' + taksaMonth.roleMap[pNum] + '\',\'' + taksaDay.roleMap[pNum] + '\',' + val + ')" class="num-btn ' + hlClass + '"><div class="num-main">' + val + '</div>' + subText + '</button></td>';
-                });
-                tblHtml += '</tr>';
-            });
-            document.getElementById('table7Tua').innerHTML = tblHtml + '</tbody>';
-
-            const mpGrid = [{ label: 'มรณะ', idx: 2 }, { label: 'อริ', idx: 5 }, { label: 'ทาสี', idx: 6 }, { label: 'ปิตา', idx: 3 }, { label: 'อัตตะ (ตนุ)', idx: 0 }, { label: 'ทาสา', idx: 4 }, { label: 'หินะ', idx: 1 }, { label: 'ธานัง', idx: 2 }, { label: 'โภคา', idx: 5 }];
-            document.getElementById('mahaphutBox').innerHTML = mpGrid.map(item =>
-                '<div style="background:rgba(30,41,59,0.8); border:1px solid rgba(251,191,36,0.4); border-radius:12px; padding:10px;"><div style="font-size:11px; color:#7DD3FC;">' + item.label + '</div><div style="font-size:18px; font-weight:700; color:#FDE047;">' + r1[item.idx] + '</div></div>'
-            ).join('');
-
-            let taksaHtml = '<thead><tr><th class="base-label">ระดับทักษา</th>';
-            TAKSA_ROLES.forEach(r => { taksaHtml += '<th style="font-size:12px; color:#FDE047; padding:6px;">' + r + '</th>'; });
-            taksaHtml += '</tr></thead><tbody>';
-            [{ name: '🌟 ทักษาเดิม', obj: taksaBirth.roleMap }, { name: '🟡 ทักษาปีจร', obj: taksaYear.roleMap }, { name: '🔵 ทักษาเดือนจร', obj: taksaMonth.roleMap }, { name: '🔴 ทักษาวันจร', obj: taksaDay.roleMap }].forEach(lv => {
-                taksaHtml += '<tr><td class="base-label">' + lv.name + '</td>';
-                TAKSA_ROLES.forEach(role => {
-                    const pFound = Object.keys(lv.obj).find(k => lv.obj[k] === role);
-                    const cellStyle = role === 'ศรี' ? 'background:rgba(16,185,129,0.3); color:#6EE7B7; font-weight:700;' : (role === 'กาลกิณี' ? 'background:rgba(244,63,94,0.3); color:#FDA4AF; font-weight:700;' : 'background:rgba(30,41,59,0.8); color:#E2E8F0;');
-                    taksaHtml += '<td style="' + cellStyle + ' padding:8px; border-radius:8px; font-size:12px;">' + DAY_NAMES[pFound].split(' ')[0] + '</td>';
-                });
-                taksaHtml += '</tr>';
-            });
-            document.getElementById('taksaTransitTable').innerHTML = taksaHtml + '</tbody>';
-
-            document.getElementById('kalayokYearLabel').innerText = targetBE;
-            document.getElementById('kalayokBox').innerHTML =
-                '<div style="background:rgba(16,185,129,0.2); border:1px solid #34D399; padding:12px; border-radius:12px;">🏆 <b>ธงชัย:</b> ' + DAY_NAMES[kalayok.dharmachai] + '</div>' +
-                '<div style="background:rgba(56,189,248,0.2); border:1px solid #38BDF8; padding:12px; border-radius:12px;">👑 <b>อธิบดี:</b> ' + DAY_NAMES[kalayok.athibodi] + '</div>' +
-                '<div style="background:rgba(245,158,11,0.2); border:1px solid #FBBF24; padding:12px; border-radius:12px;">⚡ <b>อุบาทว์:</b> ' + DAY_NAMES[kalayok.ubat] + '</div>' +
-                '<div style="background:rgba(244,63,94,0.2); border:1px solid #FB7185; padding:12px; border-radius:12px;">🚨 <b>โลกาวินาศ:</b> ' + DAY_NAMES[kalayok.lokawinart] + '</div>';
-            castCatMagic();
-            document.getElementById('summaryCards').scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        }
-
-        function showMeaning(house, planetNum, rYear, rMonth, rDay, rawVal) {
-            document.getElementById('meaningBox').innerHTML =
-                '<div style="background:rgba(30,41,59,0.9); border:1.5px solid #F59E0B; padding:14px; border-radius:14px;">' +
-                '<div style="font-size:16px; font-weight:700; color:#FDE047; margin-bottom:6px;">✨ ตำแหน่ง: ' + house + ' | เลข ' + rawVal + ' (ดาว' + DAY_NAMES[planetNum] + ')</div>' +
-                '<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; font-size:12px;">' +
-                    '<span style="background:rgba(245,158,11,0.3); color:#FDE047; padding:3px 10px; border-radius:99px;">🟡 ปีจร: <b>' + rYear + '</b></span>' +
-                    '<span style="background:rgba(56,189,248,0.3); color:#7DD3FC; padding:3px 10px; border-radius:99px;">🔵 เดือนจร: <b>' + rMonth + '</b></span>' +
-                    '<span style="background:rgba(244,63,94,0.3); color:#FDA4AF; padding:3px 10px; border-radius:99px;">🔴 วันจร: <b>' + rDay + '</b></span>' +
-                '</div><p>• <b>ความหมาย:</b> ภพ <b>' + house + '</b> มีดาว <b>' + DAY_NAMES[planetNum] + '</b> สถิตอยู่ ส่งผลต่อเรื่อง' + house + 'โดยตรง</p></div>';
-            castCatMagic();
-        }
-
-        const CAT_QUOTES = ['เมี๊ยว~ ร่ายมนต์เปิดดวงดาวให้ส่องสว่างแล้ว! ✨', 'ลูกแก้วพยากรณ์กำลังส่องประกายนำโชคลาภมาให้! 🔮', 'วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะเมี๊ยว~ 🌟', 'คลิกที่ตัวเลขในตารางเพื่อดูคำทำนายลับได้เลย! 🐾'];
-        function castCatMagic() {
-            const bubble = document.getElementById('catSpeech');
-            const sparks = document.getElementById('magicSparks');
-            if (!bubble || !sparks) return;
-            bubble.innerText = CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)];
-            bubble.style.opacity = '1';
-            sparks.style.display = 'block';
-            setTimeout(() => { sparks.style.display = 'none'; }, 1800);
-        }
-
-        window.onload = autoDetectAstroDate;
     </script>
 
     <style>
