@@ -461,7 +461,7 @@
             const daysElapsed = (tDay - birthDayNum + 30) % 30;
 
             const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
-            const seq7 =;
+            const seq7 = '0,1,2,3,4,5,6'.split(',').map(Number);
             const r1 = seq7.map(i => mod7(d7 + i));
             const r2 = seq7.map(i => mod7(m7 + i));
             const r3 = seq7.map(i => mod7(y7 + i));
