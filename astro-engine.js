@@ -231,9 +231,6 @@ function computeTaksaAndKalayok(birthDay, steps, yearBE) {
     return { roleMap, briwan: seq.at(cIdx), kalayok };
 }
 
-    return { roleMap, briwan: seq.at(cIdx), kalayok };
-}
-
 function autoConvertSolarToThai(dobStr, tobStr) {
     return getThaiLunarCalendar100Y(dobStr, tobStr);
 }
