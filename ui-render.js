@@ -1,8 +1,10 @@
+const BHAVA_NAMES = ['ตนุ', 'กฎุมพะ', 'สหัชชะ', 'พันธุ', 'ปุตตะ', 'อริ', 'ปัตนิ', 'มรณะ', 'ศุภะ', 'กัมมะ', 'ลาภะ', 'วินาศ'];
+
 function buildCosmicWheelSVG(title, ascRasi, sunRasi, planetPos) {
-    const cx = 180, cy = 180, rOut = 166, rMid = 118, rIn = 62;
+    const cx = 195, cy = 195, rOut = 182, rMid = 142, rBhava = 104, rIn = 58;
     let svg = `<div style="text-align:center;">
-        <div style="font-size:13px;font-weight:700;color:#FDE047;margin-bottom:6px;">${title}</div>
-        <svg width="340" height="340" viewBox="0 0 360 360" style="max-width:100%;">
+        <div style="font-size:14px;font-weight:700;color:#FDE047;margin-bottom:8px;">${title}</div>
+        <svg width="375" height="375" viewBox="0 0 390 390" style="max-width:100%;">
             <defs>
                 <radialGradient id="wheelBg">
                     <stop offset="0%" stop-color="#1E3A8A"/>
@@ -10,9 +12,10 @@ function buildCosmicWheelSVG(title, ascRasi, sunRasi, planetPos) {
                     <stop offset="100%" stop-color="#09152B"/>
                 </radialGradient>
             </defs>
-            <circle cx="180" cy="180" r="166" fill="url(#wheelBg)" stroke="#F59E0B" stroke-width="3"/>
-            <circle cx="180" cy="180" r="118" fill="rgba(255,255,255,0.05)" stroke="#38BDF8" stroke-width="1.5"/>
-            <circle cx="180" cy="180" r="62" fill="rgba(220,38,38,0.22)" stroke="#FB7185" stroke-width="2"/>`;
+            <circle cx="195" cy="195" r="182" fill="url(#wheelBg)" stroke="#F59E0B" stroke-width="3"/>
+            <circle cx="195" cy="195" r="142" fill="rgba(255,255,255,0.04)" stroke="#38BDF8" stroke-width="1.5"/>
+            <circle cx="195" cy="195" r="104" fill="rgba(16,185,129,0.08)" stroke="#6EE7B7" stroke-width="1.2" stroke-dasharray="3 2"/>
+            <circle cx="195" cy="195" r="58" fill="rgba(220,38,38,0.25)" stroke="#FB7185" stroke-width="2"/>`;
 
     for (let i = 0; i < 12; i++) {
         const startA = (-90 - i * 30) * Math.PI / 180;
@@ -20,29 +23,35 @@ function buildCosmicWheelSVG(title, ascRasi, sunRasi, planetPos) {
         svg += `<line x1="${cx + rIn * Math.cos(startA)}" y1="${cy + rIn * Math.sin(startA)}" x2="${cx + rOut * Math.cos(startA)}" y2="${cy + rOut * Math.sin(startA)}" stroke="rgba(253,224,71,0.35)" stroke-width="1"/>`;
 
         const isAsc = (i === ascRasi), isSun = (i === sunRasi), isLit = isAsc || isSun;
-        const zx = cx + 142 * Math.cos(midA), zy = cy + 142 * Math.sin(midA);
+        // 1. วงนอกสุด: ชื่อ 12 ราศี
+        const zx = cx + 162 * Math.cos(midA), zy = cy + 162 * Math.sin(midA);
         const zColor = isAsc ? '#FB7185' : (isSun ? '#FDE047' : '#7DD3FC');
-
         svg += `<text x="${zx}" y="${zy}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="${zColor}" ${isLit ? 'class="star-pulse"' : ''}>${ASTRO_CONST.ZODIACS.at(i).split(' ').at(0)}</text>`;
 
-        // แสงดาวเคลื่อนที่พุ่งชี้จุดลัคนาและราศีเกิด
-        if (isAsc) {
-            const beamX = cx + 115 * Math.cos(midA), beamY = cy + 115 * Math.sin(midA);
-            svg += `<line x1="180" y1="180" x2="${beamX}" y2="${beamY}" stroke="#F43F5E" stroke-width="2.5" stroke-dasharray="4 3" class="star-beam"/>`;
-            svg += `<circle cx="${beamX}" cy="${beamY}" r="5" fill="#FDE047" class="star-pulse"/>`;
-        }
-
+        // 2. วงกลาง: ดวงดาวที่สถิต + ลัคนา
         const pHere = Object.keys(planetPos).filter(p => planetPos[p] === i).map(p => ASTRO_CONST.SYMBOLS[p]);
         if (isAsc) pHere.unshift('ลั');
-        const px = cx + 90 * Math.cos(midA), py = cy + 90 * Math.sin(midA);
+        const px = cx + 123 * Math.cos(midA), py = cy + 123 * Math.sin(midA);
         svg += `<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="${pHere.length ? '#FEF08A' : '#38BDF8'}" ${pHere.length ? 'class="star-pulse"' : ''}>${pHere.join(' ') || '·'}</text>`;
+
+        // 3. วงใน: ชื่อ 12 เรือนชะตา (ตนุ -> วินาศ) หมุนตามลัคนาอัตโนมัติ
+        const bhavaIdx = (i - ascRasi + 12) % 12;
+        const bx = cx + 81 * Math.cos(midA), by = cy + 81 * Math.sin(midA);
+        const bColor = bhavaIdx === 0 ? '#FDA4AF' : ([3, 6, 9].includes(bhavaIdx) ? '#FDE047' : '#6EE7B7');
+        svg += `<text x="${bx}" y="${by}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="${bColor}">${BHAVA_NAMES.at(bhavaIdx)}</text>`;
+
+        if (isAsc) {
+            const beamX = cx + 104 * Math.cos(midA), beamY = cy + 104 * Math.sin(midA);
+            svg += `<line x1="195" y1="195" x2="${beamX}" y2="${beamY}" stroke="#F43F5E" stroke-width="2" stroke-dasharray="4 3" class="star-beam"/>`;
+        }
     }
 
-    svg += `<text x="180" y="172" text-anchor="middle" font-size="11" fill="#FECDD3">ลัคนาราศี</text>
-            <text x="180" y="193" text-anchor="middle" font-size="14" font-weight="700" fill="#FDE047" class="star-pulse">${ASTRO_CONST.ZODIACS.at(ascRasi)}</text>
+    svg += `<text x="195" y="187" text-anchor="middle" font-size="10" fill="#FECDD3">ลัคนา (ตนุ)</text>
+            <text x="195" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#FDE047" class="star-pulse">${ASTRO_CONST.ZODIACS.at(ascRasi)}</text>
         </svg></div>`;
     return svg;
 }
+
 
 function renderZodiacModeUI() {
     const dob = document.getElementById('z_dob').value;
