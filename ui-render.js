@@ -169,39 +169,29 @@ function render7TuaModeUI() {
         }).join('') + '</tr>'
     ).join('');
 
-    const mpHtml = data.mahaphut.map(x =>
-        `<div style="background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:12px;padding:10px;text-align:center;">
-            <div style="font-size:11px;color:#B45309;font-weight:600;">${x.label}</div>
-            <div style="font-size:18px;font-weight:700;color:#B91C1C;">${x.val}</div>
-        </div>`
-    ).join('');
-
-    const box = document.getElementById('t7_result');
-    box.style.display = 'block';
-    box.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-bottom:2px dashed #FCD34D;padding-bottom:10px;margin-bottom:14px;">
-            <h3 style="color:#B91C1C;font-size:18px;">📜 ตารางเลข 7 ตัว 9 ฐาน (อายุย่าง ${data.age} ปี)</h3>
-            <div style="font-size:11px;font-weight:700;">
-                <span style="background:#ECFDF5;color:#065F46;border:1px solid #10B981;padding:2px 8px;border-radius:99px;">🍀 ศรีจร</span>
-                <span style="background:#FFFBEB;color:#92400E;border:1px solid #F59E0B;padding:2px 8px;border-radius:99px;">👑 เดชจร</span>
-                <span style="background:#FFF1F2;color:#9F1239;border:1px solid #F43F5E;padding:2px 8px;border-radius:99px;">⚠️ กาลกิณีจร</span>
-            </div>
+        const mpHtml = `
+        <div style="background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:12px;padding:10px;text-align:center;">
+            <div style="font-size:11px;color:#B45309;font-weight:700;">ราชา</div>
+            <div style="font-size:20px;font-weight:700;color:#B91C1C;">${data.mpBirth.raja}</div>
+            <div style="font-size:11px;color:#047857;font-weight:600;">${data.mpJor.raja} จร</div>
         </div>
-        <div style="overflow-x:auto;margin-bottom:16px;"><table style="width:100%;border-collapse:separate;border-spacing:5px;min-width:540px;">${tbl}</table></div>
-        <div id="t7_meaning" style="background:#EFF6FF;border:1.5px solid #3B82F6;border-radius:14px;padding:12px;margin-bottom:16px;font-size:13px;color:#1E3A8A;">
-            💡 <b>คลิกที่ตัวเลขในตารางด้านบน</b> เพื่อดูคำพยากรณ์เจาะลึกของภพ ฐาน และทักษาที่กระทบกัน
+        <div style="background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:12px;padding:10px;text-align:center;">
+            <div style="font-size:11px;color:#B45309;font-weight:700;">อธิบดี</div>
+            <div style="font-size:20px;font-weight:700;color:#B91C1C;">${data.mpBirth.athibodi}</div>
+            <div style="font-size:11px;color:#047857;font-weight:600;">${data.mpJor.athibodi} จร</div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
-            <div>
-                <h4 style="color:#B45309;margin-bottom:8px;font-size:14px;">💠 ผังมหาภูติ (ธาตุกำเนิด)</h4>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">${mpHtml}</div>
-            </div>
-            <div>
-                <h4 style="color:#1E3A8A;margin-bottom:8px;font-size:14px;">🗓️ ตารางนับอายุจร (ไฮไลต์สีแดง = อายุปัจจุบัน)</h4>
-                <div style="overflow-x:auto;"><table style="width:100%;border-collapse:separate;border-spacing:4px;text-align:center;">${ageHtml}</table></div>
-            </div>
-        </div>`;
-    triggerCatMagic();
+        <div style="background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:12px;padding:10px;text-align:center;">
+            <div style="font-size:11px;color:#B45309;font-weight:700;">ธงชัย</div>
+            <div style="font-size:20px;font-weight:700;color:#B91C1C;">${data.mpBirth.dharmachai}</div>
+            <div style="font-size:11px;color:#047857;font-weight:600;">${data.mpJor.dharmachai} จร</div>
+        </div>
+        <div></div>
+        <div style="background:#EFF6FF;border:1.5px solid #3B82F6;border-radius:12px;padding:10px;text-align:center;">
+            <div style="font-size:11px;color:#1E3A8A;font-weight:700;">ขุมทรัพย์</div>
+            <div style="font-size:20px;font-weight:700;color:#1D4ED8;">${data.mpBirth.khumsap}</div>
+            <div style="font-size:11px;color:#047857;font-weight:600;">${data.mpJor.khumsap} จร</div>
+        </div>
+        <div></div>`;
 }
 
 function show7TuaPopup(posName, pNum, role, rawVal) {
