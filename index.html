@@ -555,6 +555,115 @@
             const r8 = seq7.map(i => mod7(r7.at(i) + r5.at(i)));
             const r9 = seq7.map(i => mod7(r8.at(i) + r5.at(i)));
             const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
+            const yearColIdx = (age - 1) % 7, monthColIdx = (yearColIdx + monthsElapsed) % 7, dayColIdx = (monthColIdx + daysElapsed) % 7;
+            const taksaBirth = calcTaksaBySteps(dVal, 0), taksaYear = calcTaksaBySteps(dVal, age - 1);
+            const taksaMonth = calcTaksaBySteps(taksaYear.briwanPlanet, monthsElapsed), taksaDay = calcTaksaBySteps(taksaMonth.briwanPlanet, daysElapsed);
+            const kalayok = calcKalayok(targetBE), astro = calcExactAstro(dobVal, tobVal, parseFloat(latStr), parseFloat(lonStr), method);
+
+            const sriDay = Object.keys(taksaDay.roleMap).find(k => taksaDay.roleMap[k] === 'ศรี');
+            const kaliDay = Object.keys(taksaDay.roleMap).find(k => taksaDay.roleMap[k] === 'กาลกิณี');
+
+            document.getElementById('overviewDateBadge').innerText = 'วันที่พยากรณ์: ' + tDay + '/' + tMonth + '/' + targetBE;
+            document.getElementById('summaryCards').innerHTML =
+                '<div class="stat-box"><div class="stat-label">🐾 ปีนักษัตรเกิด</div><div class="stat-value">ปี' + YEAR_ANIMALS.at(yVal - 1) + '</div></div>' +
+                '<div class="stat-box"><div class="stat-label">☀️ ราศีเกิด (อาทิตย์)</div><div class="stat-value" style="color:#7DD3FC;">ราศี' + ZODIAC_NAMES.at(astro.sunRasi) + '</div></div>' +
+                '<div class="stat-box"><div class="stat-label">🎡 ลัคนา (' + astro.ascDeg + '°' + astro.ascMin + '\')</div><div class="stat-value" style="color:#FDA4AF;">ลัคนา' + ZODIAC_NAMES.at(astro.ascRasi) + '</div></div>' +
+                '<div class="stat-box"><div class="stat-label">🔮 ตนุเศษ / อายุย่าง</div><div class="stat-value">' + PLANET_FULL_NAMES[astro.tanuSetPlanet] + ' • ' + age + ' ปี</div></div>';
+
+            document.getElementById('transitCards').innerHTML =
+                '<div class="stat-box"><div class="stat-label">🟡 จุดตกปีจร</div><div class="stat-value">ภพ' + HOUSE_NAMES.at(0).at(yearColIdx) + '/' + HOUSE_NAMES.at(1).at(yearColIdx) + '</div></div>' +
+                '<div class="stat-box"><div class="stat-label">🔵 จุดตกเดือนจร</div><div class="stat-value" style="color:#38BDF8;">ภพ' + HOUSE_NAMES.at(0).at(monthColIdx) + '/' + HOUSE_NAMES.at(1).at(monthColIdx) + '</div></div>' +
+                '<div class="stat-box"><div class="stat-label">🔴 จุดตกวันจร</div><div class="stat-value" style="color:#FB7185;">ภพ' + HOUSE_NAMES.at(0).at(dayColIdx) + '/' + HOUSE_NAMES.at(1).at(dayColIdx) + '</div></div>' +
+                '<div class="stat-box"><div class="stat-label">🍀 ศรีวันจร / ⚠️ กาลกิณีวันจร</div><div class="stat-value" style="font-size:15px;">ดาว' + sriDay + ' / ดาว' + kaliDay + '</div></div>';
+
+            const svgChart = drawGlowingZodiac(astro.ascRasi, astro.sunRasi, astro.planetPositions);
+            document.getElementById('overviewStarMap').innerHTML = svgChart;
+            document.getElementById('zodiacCircleSvg').innerHTML = svgChart;
+            document.getElementById('ascMethodBadge').innerText = astro.methodText + ' (ตนุเศษ: ' + PLANET_FULL_NAMES[astro.tanuSetPlanet] + ')';
+
+            const displayOrder = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
+            document.getElementById('planetListBox').innerHTML = displayOrder.map(pId => {
+                const det = astro.planetDetails[pId];
+                return '<div style="background:rgba(30,41,59,0.85); border:1px solid rgba(56,189,248,0.4); border-radius:12px; padding:8px; font-size:12px; text-align:center;">' +
+                    '<div style="color:#FDE047; font-weight:700;">' + PLANET_FULL_NAMES[pId] + '</div>' +
+                    '<div style="color:#7DD3FC;">' + ZODIAC_NAMES.at(det.rasi) + ' (' + det.deg + '°' + det.min + '\')</div></div>';
+            }).join('');
+
+            let tblHtml = '<thead><tr><th></th>';
+            seq7.forEach(cIdx => {
+                let b = [];
+                if (cIdx === yearColIdx) b.push('<span style="background:#D97706;color:#FFF;padding:1px 5px;border-radius:5px;">ปีจร</span>');
+                if (cIdx === monthColIdx) b.push('<span style="background:#0284C7;color:#FFF;padding:1px 5px;border-radius:5px;">เดือนจร</span>');
+                if (cIdx === dayColIdx) b.push('<span style="background:#E11D48;color:#FFF;padding:1px 5px;border-radius:5px;">วันจร</span>');
+                tblHtml += '<th style="font-size:10px; padding-bottom:6px;">' + (b.join(' ') || 'ฐาน ' + (cIdx + 1)) + '</th>';
+            });
+            tblHtml += '</tr></thead><tbody>';
+            rows.forEach((row, rIdx) => {
+                tblHtml += '<tr><td class="base-label">' + BASE_NAMES.at(rIdx) + '</td>';
+                row.forEach((val, cIdx) => {
+                    const pNum = mod7(val), roleYear = taksaYear.roleMap[pNum];
+                    const hlClass = roleYear === 'ศรี' ? 'hl-sri' : (roleYear === 'กาลกิณี' ? 'hl-kali' : (roleYear === 'เดช' ? 'hl-det' : ''));
+                    const hName = rIdx < 3 ? HOUSE_NAMES.at(rIdx).at(cIdx) : BASE_NAMES.at(rIdx);
+                    const subText = rIdx < 3 ? '<div class="num-sub">' + HOUSE_NAMES.at(rIdx).at(cIdx) + '</div>' : '';
+                    tblHtml += '<td><button onclick="showMeaning(\'' + hName + '\',' + pNum + ',\'' + roleYear + '\',\'' + taksaMonth.roleMap[pNum] + '\',\'' + taksaDay.roleMap[pNum] + '\',' + val + ')" class="num-btn ' + hlClass + '"><div class="num-main">' + val + '</div>' + subText + '</button></td>';
+                });
+                tblHtml += '</tr>';
+            });
+            document.getElementById('table7Tua').innerHTML = tblHtml + '</tbody>';
+
+            const mpGrid = [{ label: 'มรณะ', idx: 2 }, { label: 'อริ', idx: 5 }, { label: 'ทาสี', idx: 6 }, { label: 'ปิตา', idx: 3 }, { label: 'อัตตะ (ตนุ)', idx: 0 }, { label: 'ทาสา', idx: 4 }, { label: 'หินะ', idx: 1 }, { label: 'ธานัง', idx: 2 }, { label: 'โภคา', idx: 5 }];
+            document.getElementById('mahaphutBox').innerHTML = mpGrid.map(item =>
+                '<div style="background:rgba(30,41,59,0.8); border:1px solid rgba(251,191,36,0.4); border-radius:12px; padding:10px;"><div style="font-size:11px; color:#7DD3FC;">' + item.label + '</div><div style="font-size:18px; font-weight:700; color:#FDE047;">' + r1.at(item.idx) + '</div></div>'
+            ).join('');
+
+            let taksaHtml = '<thead><tr><th class="base-label">ระดับทักษา</th>';
+            TAKSA_ROLES.forEach(r => { taksaHtml += '<th style="font-size:12px; color:#FDE047; padding:6px;">' + r + '</th>'; });
+            taksaHtml += '</tr></thead><tbody>';
+            [{ name: '🌟 ทักษาเดิม', obj: taksaBirth.roleMap }, { name: '🟡 ทักษาปีจร', obj: taksaYear.roleMap }, { name: '🔵 ทักษาเดือนจร', obj: taksaMonth.roleMap }, { name: '🔴 ทักษาวันจร', obj: taksaDay.roleMap }].forEach(lv => {
+                taksaHtml += '<tr><td class="base-label">' + lv.name + '</td>';
+                TAKSA_ROLES.forEach(role => {
+                    const pFound = Object.keys(lv.obj).find(k => lv.obj[k] === role);
+                    const cellStyle = role === 'ศรี' ? 'background:rgba(16,185,129,0.3); color:#6EE7B7; font-weight:700;' : (role === 'กาลกิณี' ? 'background:rgba(244,63,94,0.3); color:#FDA4AF; font-weight:700;' : 'background:rgba(30,41,59,0.8); color:#E2E8F0;');
+                    taksaHtml += '<td style="' + cellStyle + ' padding:8px; border-radius:8px; font-size:12px;">' + DAY_NAMES[pFound].split(' ').at(0) + '</td>';
+                });
+                taksaHtml += '</tr>';
+            });
+            document.getElementById('taksaTransitTable').innerHTML = taksaHtml + '</tbody>';
+
+            document.getElementById('kalayokYearLabel').innerText = targetBE;
+            document.getElementById('kalayokBox').innerHTML =
+                '<div style="background:rgba(16,185,129,0.2); border:1px solid #34D399; padding:12px; border-radius:12px;">🏆 <b>ธงชัย:</b> ' + DAY_NAMES[kalayok.dharmachai] + '</div>' +
+                '<div style="background:rgba(56,189,248,0.2); border:1px solid #38BDF8; padding:12px; border-radius:12px;">👑 <b>อธิบดี:</b> ' + DAY_NAMES[kalayok.athibodi] + '</div>' +
+                '<div style="background:rgba(245,158,11,0.2); border:1px solid #FBBF24; padding:12px; border-radius:12px;">⚡ <b>อุบาทว์:</b> ' + DAY_NAMES[kalayok.ubat] + '</div>' +
+                '<div style="background:rgba(244,63,94,0.2); border:1px solid #FB7185; padding:12px; border-radius:12px;">🚨 <b>โลกาวินาศ:</b> ' + DAY_NAMES[kalayok.lokawinart] + '</div>';
+
+            castCatMagic();
+            document.getElementById('summaryCards').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function showMeaning(house, planetNum, rYear, rMonth, rDay, rawVal) {
+            document.getElementById('meaningBox').innerHTML =
+                '<div style="background:rgba(30,41,59,0.9); border:1.5px solid #F59E0B; padding:14px; border-radius:14px;">' +
+                '<div style="font-size:16px; font-weight:700; color:#FDE047; margin-bottom:6px;">✨ ตำแหน่ง: ' + house + ' | เลข ' + rawVal + ' (ดาว' + DAY_NAMES[planetNum] + ')</div>' +
+                '<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; font-size:12px;">' +
+                    '<span style="background:rgba(245,158,11,0.3); color:#FDE047; padding:3px 10px; border-radius:99px;">🟡 ปีจร: <b>' + rYear + '</b></span>' +
+                    '<span style="background:rgba(56,189,248,0.3); color:#7DD3FC; padding:3px 10px; border-radius:99px;">🔵 เดือนจร: <b>' + rMonth + '</b></span>' +
+                    '<span style="background:rgba(244,63,94,0.3); color:#FDA4AF; padding:3px 10px; border-radius:99px;">🔴 วันจร: <b>' + rDay + '</b></span>' +
+                '</div><p>• <b>ความหมาย:</b> ภพ <b>' + house + '</b> มีดาว <b>' + DAY_NAMES[planetNum] + '</b> สถิตอยู่ ส่งผลต่อเรื่อง' + house + 'โดยตรง</p></div>';
+            castCatMagic();
+        }
+
+        const CAT_QUOTES = ['เมี๊ยว~ ร่ายมนต์เปิดดวงดาวให้ส่องสว่างแล้ว! ✨', 'ลูกแก้วพยากรณ์กำลังส่องประกายนำโชคลาภมาให้! 🔮', 'วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะเมี๊ยว~ 🌟', 'คลิกที่ตัวเลขในตารางเพื่อดูคำทำนายลับได้เลย! 🐾'];
+        function castCatMagic() {
+            const bubble = document.getElementById('catSpeech');
+            const sparks = document.getElementById('magicSparks');
+            if (!bubble || !sparks) return;
+            bubble.innerText = CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)];
+            sparks.style.display = 'block';
+            setTimeout(() => { sparks.style.display = 'none'; }, 1800);
+        }
+
+        window.onload = autoDetectAstroDate;
 
     </script>
 
