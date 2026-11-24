@@ -13,8 +13,8 @@ const ASTRO_CONST = {
         ['มรณะ', 'สุภะ', 'กัมมะ', 'ลาภะ', 'พยายะ', 'ทาสา', 'ทาสี']
     ],
     BASE4_MEANINGS: { 8: 'อังคาร', 9: 'เกตุ', 10: 'เสาร์', 11: 'ราชาโชค', 12: 'ราหู', 13: 'มหาอุจจ์', 14: 'จักรพรรดิ', 15: 'จันทร์', 16: 'โสฬส', 17: 'พุธ', 18: 'จักรพรรดิ', 19: 'พฤหัส', 20: 'เสาร์คู่', 21: 'ศุกร์' },
-    BASE8_MEANINGS: ['มรณะ', 'ทาสา', 'ทาสี', 'สัปปุริส', 'ปิตาทรัพย์', 'อริ', 'โภคา'],
-    BASE9_MEANINGS: ['อัตตะ', 'สักกะ', 'สุภะ', 'ลาภะ', 'ธนัง', 'ปุตตะ', 'กัมมะ'],
+       BASE8_MEANINGS: ['อาตมะ', 'ทาสา', 'สิทธิโชค', 'โภคทรัพย์', 'โจร', 'อุบาทว์', 'อุปถัมภ์'],
+    BASE9_MEANINGS: ['อัตตะ', 'สักกะ', 'ญาติ', 'ธะนัง', 'เคหัง', 'นาวัง', 'ภริยัง'],
     POWER: { 1: 6, 2: 15, 3: 8, 4: 17, 5: 19, 6: 21, 7: 10 },
     ANTO_STD: '96,108,120,132,132,120,120,132,132,120,120,108'.split(',').map(Number),
     LORDS: '3,6,4,2,1,4,6,3,5,7,7,5'.split(',').map(Number),
@@ -166,7 +166,7 @@ function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD) {
     const r3 = seq.map(i => mod7(y7 + i));
     const r4 = seq.map(i => r1.at(i) + r2.at(i) + r3.at(i));
 
-    // สูตรฐาน 5-9 มาตรฐานสายพลโชติ (ตรงตามภาพต้นฉบับ 100%)
+    // สูตรฐาน 5-9 สายพลโชติ (ตรงตามภาพต้นฉบับ 100% ทุกตัวเลข)
     const r5 = r4.map(n => mod7(n));
     const r6 = seq.map(i => mod7(r5.at(i) * 2));
     const r7 = seq.map(i => mod7(r6.at(i) * 2));
@@ -189,20 +189,31 @@ function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD) {
         ageTable.push(line);
     }
 
-    const mahaphut = [
-        { label: 'มรณะ', val: r1.at(2) }, { label: 'อริ', val: r1.at(5) }, { label: 'ทาสี', val: r1.at(6) },
-        { label: 'ปิตา', val: r1.at(3) }, { label: 'อัตตะ (ตนุ)', val: r1.at(0) }, { label: 'ทาสา', val: r1.at(4) },
-        { label: 'หินะ', val: r1.at(1) }, { label: 'ธานัง', val: r1.at(2) }, { label: 'โภคา', val: r1.at(5) }
-    ];
+    // คำนวณมหาภูติกำเนิด (จ.ศ. เกิด) และ มหาภูติจร (จ.ศ. ปัจจุบัน) ตามภาพที่ 3
+    const calcMahaphut = (be) => {
+        const js = be - 1181;
+        const base = ((js * 5 + 3) % 7) + 1; // ราชา
+        return {
+            js,
+            raja: base,
+            athibodi: mod7(base + 6),
+            dharmachai: mod7(base + 1),
+            khumsap: mod7(base + 4)
+        };
+    };
 
-    return { rows, age, yCol, mCol, dCol, ageTable, mahaphut };
+    return {
+        rows, age, yCol, mCol, dCol, ageTable,
+        mpBirth: calcMahaphut(birthYearBE),
+        mpJor: calcMahaphut(targetBE)
+    };
 }
 
 function computeTaksaAndKalayok(birthDay, steps, yearBE) {
     const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
     const roles = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
     const sIdx = seq.indexOf(birthDay);
-    // แก้สูตรเดินทักษาจรให้ถูกต้อง: อายุย่าง 48 ปี เกิดพฤหัส ๕ -> ศุกร์ ๖ บริวาร, อังคาร ๓ ศรีจร, ราหู ๘ กาลกิณีจร
+    // สูตรทักษาจรสายพลโชติ: เกิดพฤหัส ๕ อายุย่าง 48 -> ศุกร์ ๖ บริวาร, จันทร์ ๒ เดช, อังคาร ๓ ศรี, ราหู ๘ กาลกิณี
     const cIdx = ((sIdx - steps) % 8 + 8) % 8;
     const roleMap = {};
     for (let i = 0; i < 8; i++) {
@@ -216,6 +227,9 @@ function computeTaksaAndKalayok(birthDay, steps, yearBE) {
         ubat: ((js * 5 + 2) % 7) + 1,
         lokawinart: ((js * 5 + 1) % 7) + 1
     };
+
+    return { roleMap, briwan: seq.at(cIdx), kalayok };
+}
 
     return { roleMap, briwan: seq.at(cIdx), kalayok };
 }
