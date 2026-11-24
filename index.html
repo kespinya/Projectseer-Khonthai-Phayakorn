@@ -110,12 +110,12 @@
                     <div class="form-group">
                         <label>📍 จังหวัดเกิด</label>
                         <select id="z_prov" class="form-control">
-                            <option value="13.7563,100.5018,กรุงเทพมหานคร">กรุงเทพมหานคร</option>
-                            <option value="18.7883,98.9853,เชียงใหม่">เชียงใหม่</option>
-                            <option value="16.4322,102.8236,ขอนแก่น">ขอนแก่น</option>
-                            <option value="14.9799,102.0978,นครราชสีมา">นครราชสีมา</option>
-                            <option value="7.0086,100.4747,สงขลา">สงขลา</option>
+                                               <div class="form-group">
+                        <label>🌍 สถานที่เกิด (ครบ 77 จังหวัด & ต่างประเทศ)</label>
+                        <select id="z_prov" class="form-control">
+                            <option value="13.7563,100.5018,7,กรุงเทพมหานคร">กรุงเทพมหานคร</option>
                         </select>
+         
                     </div>
                     <div class="form-group">
                         <label>🧭 สูตรคำนวณลัคนา</label>
@@ -124,14 +124,6 @@
                             <option value="anto_lmt">อันโตนาที + ตัดเวลาท้องถิ่น (LMT)</option>
                             <option value="anto_lat">อันโตนาทีตามพิกัดจริง</option>
                             <option value="lahiri">สมผุสดาวจริง (นิรายนะ - ลาหิรี)</option>
-                        </select>
-                    </div>
-                </div>
-                <button onclick="renderZodiacModeUI()" class="btn-action">🔭 คำนวณสมผุสดาว 10 ดวงและวางลัคนา</button>
-            </div>
-            <div id="z_result" class="card-light" style="display:none;"></div>
-        </section>
-
                         </select>
                     </div>
                 </div>
@@ -298,7 +290,16 @@
             sparks.style.display = 'block'; setTimeout(() => { sparks.style.display = 'none'; }, 1800);
         }
 
-        window.onload = function() {
+                window.onload = function() {
+            const provEl = document.getElementById('z_prov');
+            if (provEl && typeof WORLD_LOCATIONS !== 'undefined') {
+                const thOpts = WORLD_LOCATIONS.thailand.map(p => `<option value="${p.at(1)},${p.at(2)},${p.at(3)},${p.at(0)}">${p.at(0)}</option>`).join('');
+                const intOpts = WORLD_LOCATIONS.international.map(p => `<option value="${p.at(1)},${p.at(2)},${p.at(3)},${p.at(0)}">${p.at(0)}</option>`).join('');
+                provEl.innerHTML = `<optgroup label="🇹🇭 ประเทศไทย (ครบ 77 จังหวัด)">${thOpts}</optgroup><optgroup label="🌏 ต่างประเทศ (ตาม Time Zone)">${intOpts}</optgroup>`;
+            }
+            if (document.getElementById('z_jorDate')) {
+                document.getElementById('z_jorDate').valueAsDate = new Date();
+            }
             buildDynamicForms();
             if (typeof renderZodiacModeUI === 'function') renderZodiacModeUI();
         };
