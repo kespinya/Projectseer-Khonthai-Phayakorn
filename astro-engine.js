@@ -50,7 +50,10 @@ function getThaiLunarCalendar100Y(dobStr, tobStr) {
 
     const sunApprox = norm360((jd - 2451545.0) * 0.9856474 + 280.46 - 23.85);
     const newMoonSunLon = norm360(sunApprox - (lunarAge * 0.9856));
-    let thaiMonth = Math.floor(newMoonSunLon / 30) + 5;
+        const ADHIVASA_YEARS = '1977,1979,1982,1985,1988,1990,1993,1996,1999,2001,2004,2007,2010,2012,2015,2018,2020,2023,2026,2029'.split(',').map(Number);
+    let thaiMonth = Math.floor((newMoonSunLon + 12) / 30) + 5;
+    if (ADHIVASA_YEARS.includes(ay) && am >= 8 && thaiMonth === 8) thaiMonth = 9;
+
     if (thaiMonth > 12) thaiMonth -= 12;
 
     let yIdx = ((ay - 1900) % 12 + 12) % 12;
