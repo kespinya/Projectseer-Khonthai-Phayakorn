@@ -119,7 +119,7 @@ function computeFullAstrology(dobStr, tobStr, lat, lon, method, tz = 7) {
         const eps = 23.4393 * Math.PI / 180, latR = lat * Math.PI / 180;
         ascLon = norm360(Math.atan2(Math.cos(ramc), -Math.sin(ramc) * Math.cos(eps) - Math.tan(latR) * Math.sin(eps)) * 180 / Math.PI - ayanamsa);
     } else {
-        let sunriseMin = 364 - ((lon - 100.5) * 4), totalMin = hh * 60 + mm;
+            let sunriseMin = 364 - ((lon - stdLon) * 4), totalMin = hh * 60 + mm;
         if (method === 'anto_lmt') totalMin += (lon - 105) * 4;
         if (method === 'anto_lat') {
             const doy = Math.floor((new Date(y, m - 1, d) - new Date(y, 0, 0)) / 86400000);
