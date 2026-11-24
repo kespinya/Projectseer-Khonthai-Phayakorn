@@ -1,7 +1,7 @@
 const BHAVA_NAMES = ['ตนุ', 'กฎุมพะ', 'สหัชชะ', 'พันธุ', 'ปุตตะ', 'อริ', 'ปัตนิ', 'มรณะ', 'ศุภะ', 'กัมมะ', 'ลาภะ', 'วินาศ'];
 
-function buildCosmicWheelSVG(title, ascRasi, sunRasi, planetPos, showBhava = true) {
-    const cx = 195, cy = 195, rOut = 182, rMid = 142, rBhava = 104, rIn = 58;
+function buildCosmicWheelSVG(title, ascRasi, sunRasi, planetPos, showBhava) {
+    const cx = 195, cy = 195, rOut = 182, rMid = 142, rIn = 58;
     let svg = `<div style="text-align:center;">
         <div style="font-size:14px;font-weight:700;color:#FDE047;margin-bottom:8px;">${title}</div>
         <svg width="375" height="375" viewBox="0 0 390 390" style="max-width:100%;">
@@ -36,7 +36,8 @@ function buildCosmicWheelSVG(title, ascRasi, sunRasi, planetPos, showBhava = tru
         if (showBhava) {
             const bhavaIdx = (i - ascRasi + 12) % 12;
             const bx = cx + 81 * Math.cos(midA), by = cy + 81 * Math.sin(midA);
-            const bColor = bhavaIdx === 0 ? '#FDA4AF' : (.includes(bhavaIdx) ? '#FDE047' : '#6EE7B7');
+            const isKendra = (bhavaIdx === 0 || bhavaIdx === 3 || bhavaIdx === 6 || bhavaIdx === 9);
+            const bColor = bhavaIdx === 0 ? '#FDA4AF' : (isKendra ? '#FDE047' : '#6EE7B7');
             svg += `<text x="${bx}" y="${by}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="${bColor}">${BHAVA_NAMES.at(bhavaIdx)}</text>`;
         }
 
@@ -51,60 +52,6 @@ function buildCosmicWheelSVG(title, ascRasi, sunRasi, planetPos, showBhava = tru
         </svg></div>`;
     return svg;
 }
-const BHAVA_NAMES = ['ตนุ', 'กฎุมพะ', 'สหัชชะ', 'พันธุ', 'ปุตตะ', 'อริ', 'ปัตนิ', 'มรณะ', 'ศุภะ', 'กัมมะ', 'ลาภะ', 'วินาศ'];
-
-function ${buildCosmicWheelSVG('🎡 ดวงจักรราศี (ราศีจักร)', res.ascRasi, res.sunRasi, res.planetPos, true)}
-${buildCosmicWheelSVG('💠 ดวงนวางค์จักร', res.ascNavamsa, res.navamsaPos, res.navamsaPos, false)}
-
-        <div style="font-size:14px;font-weight:700;color:#FDE047;margin-bottom:8px;">${title}</div>
-        <svg width="375" height="375" viewBox="0 0 390 390" style="max-width:100%;">
-            <defs>
-                <radialGradient id="wheelBg">
-                    <stop offset="0%" stop-color="#1E3A8A"/>
-                    <stop offset="70%" stop-color="#0F294A"/>
-                    <stop offset="100%" stop-color="#09152B"/>
-                </radialGradient>
-            </defs>
-            <circle cx="195" cy="195" r="182" fill="url(#wheelBg)" stroke="#F59E0B" stroke-width="3"/>
-            <circle cx="195" cy="195" r="142" fill="rgba(255,255,255,0.04)" stroke="#38BDF8" stroke-width="1.5"/>
-            <circle cx="195" cy="195" r="104" fill="rgba(16,185,129,0.08)" stroke="#6EE7B7" stroke-width="1.2" stroke-dasharray="3 2"/>
-            <circle cx="195" cy="195" r="58" fill="rgba(220,38,38,0.25)" stroke="#FB7185" stroke-width="2"/>`;
-
-    for (let i = 0; i < 12; i++) {
-        const startA = (-90 - i * 30) * Math.PI / 180;
-        const midA = (-90 - (i + 0.5) * 30) * Math.PI / 180;
-        svg += `<line x1="${cx + rIn * Math.cos(startA)}" y1="${cy + rIn * Math.sin(startA)}" x2="${cx + rOut * Math.cos(startA)}" y2="${cy + rOut * Math.sin(startA)}" stroke="rgba(253,224,71,0.35)" stroke-width="1"/>`;
-
-        const isAsc = (i === ascRasi), isSun = (i === sunRasi), isLit = isAsc || isSun;
-        // 1. วงนอกสุด: ชื่อ 12 ราศี
-        const zx = cx + 162 * Math.cos(midA), zy = cy + 162 * Math.sin(midA);
-        const zColor = isAsc ? '#FB7185' : (isSun ? '#FDE047' : '#7DD3FC');
-        svg += `<text x="${zx}" y="${zy}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="${zColor}" ${isLit ? 'class="star-pulse"' : ''}>${ASTRO_CONST.ZODIACS.at(i).split(' ').at(0)}</text>`;
-
-        // 2. วงกลาง: ดวงดาวที่สถิต + ลัคนา
-        const pHere = Object.keys(planetPos).filter(p => planetPos[p] === i).map(p => ASTRO_CONST.SYMBOLS[p]);
-        if (isAsc) pHere.unshift('ลั');
-        const px = cx + 123 * Math.cos(midA), py = cy + 123 * Math.sin(midA);
-        svg += `<text x="${px}" y="${py}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="${pHere.length ? '#FEF08A' : '#38BDF8'}" ${pHere.length ? 'class="star-pulse"' : ''}>${pHere.join(' ') || '·'}</text>`;
-
-        // 3. วงใน: ชื่อ 12 เรือนชะตา (ตนุ -> วินาศ) หมุนตามลัคนาอัตโนมัติ
-        const bhavaIdx = (i - ascRasi + 12) % 12;
-        const bx = cx + 81 * Math.cos(midA), by = cy + 81 * Math.sin(midA);
-        const bColor = bhavaIdx === 0 ? '#FDA4AF' : ([3, 6, 9].includes(bhavaIdx) ? '#FDE047' : '#6EE7B7');
-        svg += `<text x="${bx}" y="${by}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="${bColor}">${BHAVA_NAMES.at(bhavaIdx)}</text>`;
-
-        if (isAsc) {
-            const beamX = cx + 104 * Math.cos(midA), beamY = cy + 104 * Math.sin(midA);
-            svg += `<line x1="195" y1="195" x2="${beamX}" y2="${beamY}" stroke="#F43F5E" stroke-width="2" stroke-dasharray="4 3" class="star-beam"/>`;
-        }
-    }
-
-    svg += `<text x="195" y="187" text-anchor="middle" font-size="10" fill="#FECDD3">ลัคนา (ตนุ)</text>
-            <text x="195" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#FDE047" class="star-pulse">${ASTRO_CONST.ZODIACS.at(ascRasi)}</text>
-        </svg></div>`;
-    return svg;
-}
-
 
 function renderZodiacModeUI() {
     const dob = document.getElementById('z_dob').value;
@@ -137,12 +84,15 @@ function renderZodiacModeUI() {
     box.style.display = 'block';
     box.innerHTML = `
         <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;border-bottom:2px dashed #FCD34D;padding-bottom:12px;margin-bottom:16px;">
-            <h3 style="color:#B91C1C;font-size:18px;">🌟 ผลผูกดวงจักรราศี & นวางค์จักร (${prov})</h3>
+            <div>
+                <h3 style="color:#B91C1C;font-size:18px;">🌟 ผลผูกดวงจักรราศี & นวางค์จักร (${prov})</h3>
+                <div style="font-size:12px;color:#047857;font-weight:600;margin-top:2px;">📅 ปฏิทินโหร: ${res.lunarText}</div>
+            </div>
             <span style="background:#ECFDF5;border:1.5px solid #10B981;color:#065F46;padding:4px 14px;border-radius:99px;font-size:13px;font-weight:700;">🔮 ตนุเศษ: ${ASTRO_CONST.FULL_NAMES[res.tanuPlanet]}</span>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;background:linear-gradient(135deg,#0A192F,#1E3A8A);padding:18px;border-radius:20px;border:2px solid #F59E0B;margin-bottom:18px;">
-            ${buildCosmicWheelSVG('🎡 ดวงจักรราศี (ราศีจักร)', res.ascRasi, res.sunRasi, res.planetPos)}
-            ${buildCosmicWheelSVG('💠 ดวงนวางค์จักร', res.ascNavamsa, res.navamsaPos, res.navamsaPos)}
+            ${buildCosmicWheelSVG('🎡 ดวงจักรราศี (ราศีจักร)', res.ascRasi, res.sunRasi, res.planetPos, true)}
+            ${buildCosmicWheelSVG('💠 ดวงนวางค์จักร', res.ascNavamsa, res.navamsaPos, res.navamsaPos, false)}
         </div>
         <div style="overflow-x:auto;">
             <table style="width:100%;border-collapse:collapse;text-align:center;font-size:13px;background:#FFFFFF;border-radius:14px;overflow:hidden;border:1.5px solid #FCD34D;">
@@ -155,6 +105,7 @@ function renderZodiacModeUI() {
             </table>
         </div>`;
     triggerCatMagic();
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 function render7TuaModeUI() {
     const dVal = +document.getElementById('t7_day').value;
@@ -200,7 +151,6 @@ function render7TuaModeUI() {
     });
     tbl += '</tbody>';
 
-    // ตารางอายุจร 21 ปี (3 รอบ) แบบโฮ๋ราสาด
     let ageHtml = data.ageTable.map(line =>
         '<tr>' + line.map(cell => {
             const activeStyle = cell.isCurrent ? 'background:#DC2626;color:#FFFFFF;font-weight:700;border:2px solid #FDE047;' : 'background:#FFFBEB;color:#1E3A8A;border:1px solid #FDE68A;';
@@ -286,15 +236,16 @@ function renderTaksaModeUI() {
 function renderQuickModeUI() {
     const dob = document.getElementById('qk_dob').value;
     const res = computeFullAstrology(dob, '12:00', 13.75, 100.5, 'anto_sun');
-    const thai = autoConvertSolarToThai(dob, '12:00');
+    const thai = getThaiLunarCalendar100Y(dob, '12:00');
     const box = document.getElementById('qk_result');
     box.style.display = 'block';
     box.innerHTML = `
         <div style="text-align:center;">
             <h3 style="color:#B91C1C;font-size:21px;margin-bottom:6px;">✨ คุณเกิดปี${ASTRO_CONST.ANIMALS.at(thai.astroYear - 1)} • ราศี${ASTRO_CONST.ZODIACS.at(res.sunRasi)} ✨</h3>
+            <p style="color:#047857;font-size:13px;font-weight:600;margin-bottom:6px;">📅 ${thai.lunarText}</p>
             <p style="color:#1E3A8A;font-size:14px;margin-bottom:16px;">ดาวประจำราศีเกิดของคุณคือ <b>${ASTRO_CONST.FULL_NAMES[ASTRO_CONST.LORDS.at(res.sunRasi)]}</b></p>
             <div style="background:linear-gradient(135deg,#0A192F,#1E3A8A);padding:18px;border-radius:20px;border:2px solid #F59E0B;display:inline-block;">
-                ${buildCosmicWheelSVG('🌟 แผนที่ดาวประจำตัวของคุณ', res.sunRasi, res.sunRasi, res.planetPos)}
+                ${buildCosmicWheelSVG('🌟 แผนที่ดาวประจำตัวของคุณ', res.sunRasi, res.sunRasi, res.planetPos, false)}
             </div>
         </div>`;
     triggerCatMagic();
