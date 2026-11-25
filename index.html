@@ -449,7 +449,10 @@
             const dayYams = [], nightYams = [];
             for (let i = 0; i < 8; i++) {
                 dayYams.push(mod7(d7 + i * 3));
-                nightYams.push(mod7(d7 + i * 4));
+                        const nightStart = mod7(d7 + 4);
+            for (let i = 0; i < 8; i++) {
+                dayYams.push(mod7(d7 + i * 3));
+                nightYams.push(mod7(nightStart + i * 4));
             }
             const activePlanet = isDay ? dayYams[yamIndex - 1] : nightYams[yamIndex - 1];
             return { isDay, periodText: isDay ? '☀️ ยามกลางวัน' : '🌙 ยามกลางคืน', yamIndex, activePlanet, dayYams, nightYams };
