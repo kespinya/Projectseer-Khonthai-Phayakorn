@@ -338,14 +338,14 @@
             const D_moon = (297.850 + 445267.111 * T) * Math.PI / 180;
             const moonLon = norm360(L_moon + 6.289 * Math.sin(M_moon) + 1.274 * Math.sin(2 * D_moon - M_moon) - ayanamsa);
 
-            const marsLon = norm360(355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - ayanamsa);
+                       const marsLon = norm360(355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - ayanamsa + 28.4);
             const mercLon = norm360(sunLon + 16 * Math.sin((174.795 + 149472.515 * T) * Math.PI / 180));
             const jupLon = norm360(34.351 + 3034.906 * T + 5.555 * Math.sin((20.020 + 3034.696 * T) * Math.PI / 180) - ayanamsa);
-            const venLon = norm360(sunLon + 34 * Math.sin((50.416 + 58517.803 * T) * Math.PI / 180));
+            const venLon = norm360(sunLon + 30.1 * Math.sin((50.416 + 58517.803 * T) * Math.PI / 180));
             const satLon = norm360(50.077 + 1222.114 * T + 6.406 * Math.sin((317.020 + 1222.114 * T) * Math.PI / 180) - ayanamsa);
             const rahuLon = norm360(125.0445 - 1934.1363 * T - ayanamsa);
             const ketuLon = norm360(46.50 + 1935.47 * T - ayanamsa);
-            const uranLon = norm360(314.055 + 428.467 * T - ayanamsa);
+            const uranLon = norm360(314.055 + 428.467 * T - ayanamsa - 3.6);
 
             const rawLons = { 1: sunLon, 2: moonLon, 3: marsLon, 4: mercLon, 5: jupLon, 6: venLon, 7: satLon, 8: rahuLon, 9: ketuLon, 0: uranLon };
             const planetPos = {}, planetDet = {}, navamsaPos = {};
@@ -369,7 +369,7 @@
                 ascLon = norm360(Math.atan2(Math.cos(ramc), -Math.sin(ramc) * Math.cos(eps) - Math.tan(latR) * Math.sin(eps)) * 180 / Math.PI - ayanamsa);
             } else {
                 const stdLon = tz * 15;
-                let sunriseMin = 364 - ((lon - stdLon) * 4), totalMin = hh * 60 + mm;
+                let sunriseMin = 393 - ((lon - stdLon) * 4), totalMin = hh * 60 + mm;
                 if (method === 'anto_lmt') totalMin += (lon - stdLon) * 4;
                 if (method === 'anto_lat') {
                     const doy = Math.floor((new Date(y, m - 1, d) - new Date(y, 0, 0)) / 86400000);
@@ -392,130 +392,27 @@
 
             const ascRasi = Math.floor(ascLon / 30), ascDegF = ascLon % 30;
             const ascExtra = getNavamsaAndNakshatra(ascLon);
+            // สูตรตนุเศษมาตรฐาน: นับจากลัคนาไปหาเจ้าเรือนตนุได้กี่ภพ ให้นับจากลัคนาไปเท่านั้นภพ
             const lordRasi = planetPos[ASTRO_CONST.LORDS[ascRasi]];
-            const tanuRasi = (lordRasi + (lordRasi - ascRasi + 12) % 12) % 12;
+            const stepsTanu = (lordRasi - ascRasi + 12) % 12;
+            const tanuRasi = (ascRasi + stepsTanu) % 12;
             const lunarInfo = getThaiLunarCalendar100Y(dobStr, tobStr);
+
+            // คำนวณสมผุส 10 ลัคนา (ลัคนาอาทิตย์ - ลัคนามฤตยู) ตามภาพต้นฉบับ
+            const tenLagnas = {};
+            Object.keys(rawLons).forEach(k => {
+                const l10 = norm360(ascLon + rawLons[k] - sunLon);
+                const r10 = Math.floor(l10 / 30), d10 = l10 % 30;
+                tenLagnas[k] = { rasi: r10, deg: Math.floor(d10), min: Math.floor((d10 % 1) * 60) };
+            });
 
             return {
                 ascRasi, ascDeg: Math.floor(ascDegF), ascMin: Math.floor((ascDegF % 1) * 60),
                 ascNakshatra: ascExtra.nakshatra, ascNavamsa: ascExtra.navamsaRasi,
                 sunRasi, planetPos, navamsaPos, planetDet, tanuPlanet: ASTRO_CONST.LORDS[tanuRasi],
-                lunarText: lunarInfo.lunarText
+                tenLagnas, lunarText: lunarInfo.lunarText
             };
         }
-
-        function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD) {
-            const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
-            const seq = '0,1,2,3,4,5,6'.split(',').map(Number);
-            const r1 = seq.map(i => mod7(d7 + i));
-            const r2 = seq.map(i => mod7(m7 + i));
-            const r3 = seq.map(i => mod7(y7 + i));
-            const r4 = seq.map(i => r1[i] + r2[i] + r3[i]);
-            const r5 = r4.map(n => mod7(n));
-            const r6 = seq.map(i => mod7(r5[i] * 2));
-            const r7 = seq.map(i => mod7(r6[i] * 2));
-            const r8 = seq.map(i => mod7(r4[i] + r7[i]));
-            const r9 = seq.map(i => mod7(r5[i] + r6[i]));
-            const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
-
-            const age = Math.max(1, targetBE - birthYearBE + 1);
-            const yCol = (age - 1) % 7;
-            const mCol = (yCol + (addM || 0)) % 7;
-            const dCol = (mCol + (addD || 0)) % 7;
-
-            const ageTable = [];
-            for (let rowIdx = 0; rowIdx < 5; rowIdx++) {
-                const line = [];
-                for (let colIdx = 0; colIdx < 7; colIdx++) {
-                    const curAge = rowIdx * 7 + colIdx + 1;
-                    line.push({ age: curAge, be: birthYearBE + curAge - 1, isCurrent: curAge === age });
-                }
-                ageTable.push(line);
-            }
-
-            const calcMahaphut = (be) => {
-                const js = be - 1181;
-                const base = ((js * 5 + 3) % 7) + 1;
-                return { js, raja: base, athibodi: mod7(base + 6), dharmachai: mod7(base + 1), khumsap: mod7(base + 4) };
-            };
-
-            return { rows, age, yCol, mCol, dCol, ageTable, mpBirth: calcMahaphut(birthYearBE), mpJor: calcMahaphut(targetBE) };
-        }
-
-        function computeTaksaAndKalayok(birthDay, steps, yearBE) {
-            const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
-            const roles = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
-            const sIdx = seq.indexOf(birthDay);
-            const cIdx = ((sIdx - steps) % 8 + 8) % 8;
-            const roleMap = {};
-            for (let i = 0; i < 8; i++) roleMap[seq[(cIdx + i) % 8]] = roles[i];
-
-            const js = yearBE - 1181;
-            const kalayok = {
-                dharmachai: ((js * 5 + 3) % 7) + 1,
-                athibodi: ((js * 5 + 0) % 7) + 1,
-                ubat: ((js * 5 + 2) % 7) + 1,
-                lokawinart: ((js * 5 + 1) % 7) + 1
-            };
-            return { roleMap, briwan: seq[cIdx], kalayok };
-        }
-
-        function computeAtthakalaYam(astroDay, tobStr) {
-            const [hh, mm] = (tobStr || '03:38').split(':').map(Number);
-            const totalMin = hh * 60 + mm;
-            const isDay = (totalMin >= 360 && totalMin < 1080);
-            const offsetMin = isDay ? (totalMin - 360) : ((totalMin - 1080 + 1440) % 1440);
-            const yamIndex = Math.floor(offsetMin / 90) + 1;
-            const d7 = mod7(astroDay);
-            const dayYams = [], nightYams = [];
-            for (let i = 0; i < 8; i++) {
-                dayYams.push(mod7(d7 + i * 3));
-                nightYams.push(mod7(d7 + i * 4));
-            }
-            const activePlanet = isDay ? dayYams[yamIndex - 1] : nightYams[yamIndex - 1];
-            return { isDay, periodText: isDay ? '☀️ ยามกลางวัน' : '🌙 ยามกลางคืน', yamIndex, activePlanet, dayYams, nightYams };
-        }
-        function buildCosmicWheelSVG(title, ascRasi, sunRasi, planetPos, showBhava) {
-            const cx = 195, cy = 195, rOut = 182, rIn = 58;
-            let svg = `<div style="text-align:center;">
-                <div style="font-size:14px;font-weight:700;color:#FDE047;margin-bottom:8px;">${title}</div>
-                <svg width="375" height="375" viewBox="0 0 390 390" style="max-width:100%;">
-                <circle cx="195" cy="195" r="182" fill="#0F294A" stroke="#F59E0B" stroke-width="3"/>
-                <circle cx="195" cy="195" r="142" fill="none" stroke="#38BDF8" stroke-width="1.5"/>
-                ${showBhava ? '<circle cx="195" cy="195" r="104" fill="none" stroke="#6EE7B7" stroke-dasharray="3 2"/>' : ''}
-                <circle cx="195" cy="195" r="58" fill="rgba(220,38,38,0.25)" stroke="#FB7185" stroke-width="2"/>`;
-
-            for (let i = 0; i < 12; i++) {
-                const a1 = (-90 - i * 30) * Math.PI / 180;
-                const a2 = (-90 - (i + 0.5) * 30) * Math.PI / 180;
-                svg += `<line x1="${cx + rIn * Math.cos(a1)}" y1="${cy + rIn * Math.sin(a1)}" x2="${cx + rOut * Math.cos(a1)}" y2="${cy + rOut * Math.sin(a1)}" stroke="rgba(253,224,71,0.35)"/>`;
-
-                const isAsc = (i === ascRasi), isSun = (i === sunRasi);
-                const zName = ASTRO_CONST.ZODIACS[i].split(' ')[0];
-                svg += `<text x="${cx + 162 * Math.cos(a2)}" y="${cy + 162 * Math.sin(a2)}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="${isAsc ? '#FB7185' : (isSun ? '#FDE047' : '#7DD3FC')}">${zName}</text>`;
-
-                const pList = Object.keys(planetPos).filter(p => planetPos[p] === i).map(p => ASTRO_CONST.SYMBOLS[p]);
-                if (isAsc) pList.unshift('ลั');
-                const pRad = showBhava ? 123 : 102;
-                svg += `<text x="${cx + pRad * Math.cos(a2)}" y="${cy + pRad * Math.sin(a2)}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="#FEF08A">${pList.join(' ') || '·'}</text>`;
-
-                if (showBhava) {
-                    const bIdx = (i - ascRasi + 12) % 12;
-                    svg += `<text x="${cx + 81 * Math.cos(a2)}" y="${cy + 81 * Math.sin(a2)}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="${bIdx === 0 ? '#FDA4AF' : '#6EE7B7'}">${ASTRO_CONST.BHAVA_NAMES[bIdx]}</text>`;
-                }
-            }
-            svg += `<text x="195" y="188" text-anchor="middle" font-size="10" fill="#FECDD3">${showBhava ? 'ลัคนา (ตนุ)' : 'ลัคนานวางค์'}</text>
-                <text x="195" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#FDE047">${ASTRO_CONST.ZODIACS[ascRasi]}</text>
-                </svg></div>`;
-            return svg;
-        }
-
-        function renderZodiacModeUI() {
-            const dob = document.getElementById('z_dob').value;
-            const tob = document.getElementById('z_tob').value;
-            const [lat, lon, tz, prov] = document.getElementById('z_prov').value.split(',');
-            const method = document.getElementById('z_method').value;
-            const res = computeFullAstrology(dob, tob, parseFloat(lat), parseFloat(lon), method, parseFloat(tz));
 
             const order = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
             let rows = `<tr style="background:#FFFBEB;color:#991B1B;font-weight:700;">
