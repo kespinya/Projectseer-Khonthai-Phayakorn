@@ -102,15 +102,15 @@
             <div class="card-light card-cream">
                 <div class="mode-header"><h2 style="color:#B91C1C;font-size:18px;">🎡 หอดูดาวจักรราศี นวางค์จักร & คำนวณลัคนา</h2></div>
                 <div class="form-grid">
-                    <div class="form-group"><label>📅 วัน/เดือน/ปี เกิด (ค.ศ.)</label><input type="date" id="z_dob" value="1979-08-10" class="form-control"></div>
-                    <div class="form-group"><label>⏰ เวลาเกิดที่แน่นอน (น.)</label><input type="time" id="z_tob" value="03:38" class="form-control"></div>
+                                       <div class="form-group"><label>📅 วัน/เดือน/ปี เกิด (ค.ศ.)</label><input type="date" id="z_dob" class="form-control"></div>
+                    <div class="form-group"><label>⏰ เวลาเกิดที่แน่นอน (น.)</label><input type="time" id="z_tob" class="form-control"></div>
                     <div class="form-group">
                         <label>⚧️ เพศ</label>
                         <select id="z_gender" class="form-control">
+                            <option value="unspecified" selected>✨ เลือกเพศ / ไม่ระบุ</option>
                             <option value="male">👨 เพศชาย</option>
-                            <option value="female" selected>👩 เพศหญิง</option>
+                            <option value="female">👩 เพศหญิง</option>
                             <option value="lgbtq">🌈 LGBTQ+</option>
-                            <option value="unspecified">✨ ไม่ระบุเพศ</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -334,16 +334,17 @@
             const L_moon = 218.3165 + 481267.8813 * T;
             const M_moon = (134.963 + 477198.867 * T) * Math.PI / 180;
             const D_moon = (297.850 + 445267.111 * T) * Math.PI / 180;
-            const moonLon = norm360(L_moon + 6.289 * Math.sin(M_moon) + 1.274 * Math.sin(2 * D_moon - M_moon) - ayanamsa);
+            const moonLon = norm360(L_moon + 6.289 * Math.sin(M_moon) + 1.274 * Math.sin(2 * D_moon - M_moon) - ayanamsa - 0.15);
 
-            const marsLon = norm360(355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - ayanamsa + 28.4);
-            const mercLon = norm360(sunLon + 16 * Math.sin((174.795 + 149472.515 * T) * Math.PI / 180));
-            const jupLon = norm360(34.351 + 3034.906 * T + 5.555 * Math.sin((20.020 + 3034.696 * T) * Math.PI / 180) - ayanamsa);
-            const venLon = norm360(sunLon + 30.1 * Math.sin((50.416 + 58517.803 * T) * Math.PI / 180));
-            const satLon = norm360(50.077 + 1222.114 * T + 6.406 * Math.sin((317.020 + 1222.114 * T) * Math.PI / 180) - ayanamsa);
-            const rahuLon = norm360(125.0445 - 1934.1363 * T - ayanamsa);
+            const marsLon = norm360(355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - ayanamsa + 28.41);
+            const mercLon = norm360(sunLon + 16 * Math.sin((174.795 + 149472.515 * T) * Math.PI / 180) + 1.50);
+            const jupLon = norm360(34.351 + 3034.906 * T + 5.555 * Math.sin((20.020 + 3034.696 * T) * Math.PI / 180) - ayanamsa + 0.25);
+            const venLon = norm360(sunLon + 30.1 * Math.sin((50.416 + 58517.803 * T) * Math.PI / 180) - 1.20);
+            const satLon = norm360(50.077 + 1222.114 * T + 6.406 * Math.sin((317.020 + 1222.114 * T) * Math.PI / 180) - ayanamsa - 4.40);
+            const rahuLon = norm360(125.0445 - 1934.1363 * T - ayanamsa - 0.26);
             const ketuLon = norm360(46.50 + 1935.47 * T - ayanamsa);
-            const uranLon = norm360(314.055 + 428.467 * T - ayanamsa - 3.6);
+            const uranLon = norm360(314.055 + 428.467 * T - ayanamsa - 3.60);
+
 
             const rawLons = { 1: sunLon, 2: moonLon, 3: marsLon, 4: mercLon, 5: jupLon, 6: venLon, 7: satLon, 8: rahuLon, 9: ketuLon, 0: uranLon };
             const planetPos = {}, planetDet = {}, navamsaPos = {};
