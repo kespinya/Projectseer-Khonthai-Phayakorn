@@ -344,7 +344,7 @@
             const venLon = norm360(sunLon + 34 * Math.sin((50.416 + 58517.803 * T) * Math.PI / 180));
             const satLon = norm360(50.077 + 1222.114 * T + 6.406 * Math.sin((317.020 + 1222.114 * T) * Math.PI / 180) - ayanamsa);
             const rahuLon = norm360(125.0445 - 1934.1363 * T - ayanamsa);
-            const ketuLon = norm360(346.50 + 1935.47 * T - ayanamsa);
+            const ketuLon = norm360(46.50 + 1935.47 * T - ayanamsa);
             const uranLon = norm360(314.055 + 428.467 * T - ayanamsa);
 
             const rawLons = { 1: sunLon, 2: moonLon, 3: marsLon, 4: mercLon, 5: jupLon, 6: venLon, 7: satLon, 8: rahuLon, 9: ketuLon, 0: uranLon };
@@ -747,14 +747,15 @@
             triggerCatMagic();
         }
 
-        function buildAllForms() {
+                function buildAllForms() {
             const daysOpt = '<option value="1">1 - วันอาทิตย์</option><option value="2">2 - วันจันทร์</option><option value="3">3 - วันอังคาร</option><option value="4">4 - วันพุธกลางวัน</option><option value="8">8 - วันพุธกลางคืน (ราหู)</option><option value="5" selected>5 - วันพฤหัสบดี</option><option value="6">6 - วันศุกร์</option><option value="7">7 - วันเสาร์</option>';
             let monthsOpt = '';
             for (let i = 1; i <= 12; i++) monthsOpt += `<option value="${i}" ${i === 9 ? 'selected' : ''}>เดือน ${i}</option>`;
             const animals = ['ชวด', 'ฉลู', 'ขาล', 'เถาะ', 'มะโรง', 'มะเส็ง', 'มะเมีย', 'มะแม', 'วอก', 'ระกา', 'จอ', 'กุน'];
             let yearsOpt = animals.map((a, idx) => `<option value="${idx + 1}" ${idx === 7 ? 'selected' : ''}>${idx + 1} - ปี${a}</option>`).join('');
 
-            document.getElementById('form7TuaContainer').innerHTML = `
+            const f7 = document.getElementById('form7TuaContainer');
+            if (f7) f7.innerHTML = `
                 <div class="form-group"><label>☀️ วันเกิดโหร</label><select id="t7_day" class="form-control">${daysOpt}</select></div>
                 <div class="form-group"><label>🗓️ เดือนเกิด</label><select id="t7_month" class="form-control">${monthsOpt}</select></div>
                 <div class="form-group"><label>🐾 ปีนักษัตร</label><select id="t7_year" class="form-control">${yearsOpt}</select></div>
@@ -762,13 +763,15 @@
                 <div class="form-group"><label>🎯 พ.ศ. จร</label><input type="number" id="t7_targetBE" value="2569" class="form-control"></div>
                 <div class="form-group"><label>🌙 จรเพิ่ม (เดือน/วัน)</label><div style="display:flex;gap:6px;"><input type="number" id="t7_addM" value="3" class="form-control"><input type="number" id="t7_addD" value="14" class="form-control"></div></div>`;
 
-            document.getElementById('formGraphContainer').innerHTML = `
+            const fgr = document.getElementById('formGraphContainer');
+            if (fgr) fgr.innerHTML = `
                 <div class="form-group"><label>☀️ วันเกิด</label><select id="gr_day" class="form-control">${daysOpt}</select></div>
                 <div class="form-group"><label>🗓️ เดือนเกิด</label><select id="gr_month" class="form-control">${monthsOpt}</select></div>
                 <div class="form-group"><label>🐾 ปีนักษัตร</label><select id="gr_year" class="form-control">${yearsOpt}</select></div>
                 <div class="form-group"><label>🎂 อายุย่าง (ปี)</label><input type="number" id="gr_age" value="48" class="form-control"></div>`;
 
-            document.getElementById('formTaksaContainer').innerHTML = `
+            const ftk = document.getElementById('formTaksaContainer');
+            if (ftk) ftk.innerHTML = `
                 <div class="form-group"><label>☀️ วันเกิด</label><select id="tk_day" class="form-control">${daysOpt}</select></div>
                 <div class="form-group"><label>🎂 อายุย่าง (ปี)</label><input type="number" id="tk_age" value="48" class="form-control"></div>
                 <div class="form-group"><label>🗓️ พ.ศ. พยากรณ์</label><input type="number" id="tk_be" value="2569" class="form-control"></div>`;
@@ -780,8 +783,9 @@
             const target = document.getElementById(id);
             if (target) { target.style.display = 'block'; target.classList.add('active'); }
             if (btn) btn.classList.add('active');
+            buildAllForms();
             try {
-                if (id === 'mode-7tua') syncAllForms();
+                if (id === 'mode-7tua') { syncAllForms(); render7TuaModeUI(); }
                 if (id === 'mode-graph') { syncAllForms(); renderGraphModeUI(); }
                 if (id === 'mode-taksa') { syncAllForms(); renderTaksaModeUI(); }
                 if (id === 'mode-quick') { syncAllForms(); renderQuickModeUI(); }
@@ -789,29 +793,27 @@
         }
 
         function syncAllForms() {
-            const dob = document.getElementById('z_dob').value;
-            const tob = document.getElementById('z_tob').value;
+            const dob = document.getElementById('z_dob')?.value || '1979-08-10';
+            const tob = document.getElementById('z_tob')?.value || '03:38';
             const calType = document.getElementById('t7_calType')?.value || 'lunar';
             const res = getThaiLunarCalendar100Y(dob, tob);
             const [y, m] = dob.split('-').map(Number);
             const finalM = (calType === 'solar') ? ((m % 12) + 1) : res.astroMonth;
             const curAge = 2569 - res.birthYearBE + 1;
 
-            document.getElementById('t7_day').value = res.astroDay;
-            document.getElementById('t7_month').value = finalM;
-            document.getElementById('t7_year').value = res.astroYear;
-            document.getElementById('t7_birthBE').value = res.birthYearBE;
-            document.getElementById('gr_day').value = res.astroDay;
-            document.getElementById('gr_month').value = finalM;
-            document.getElementById('gr_year').value = res.astroYear;
-            document.getElementById('gr_age').value = curAge;
-            document.getElementById('tk_day').value = res.astroDay;
-            document.getElementById('tk_age').value = curAge;
-            document.getElementById('qk_dob').value = dob;
-            render7TuaModeUI();
+            if (document.getElementById('t7_day')) document.getElementById('t7_day').value = res.astroDay;
+            if (document.getElementById('t7_month')) document.getElementById('t7_month').value = finalM;
+            if (document.getElementById('t7_year')) document.getElementById('t7_year').value = res.astroYear;
+            if (document.getElementById('t7_birthBE')) document.getElementById('t7_birthBE').value = res.birthYearBE;
+            if (document.getElementById('gr_day')) document.getElementById('gr_day').value = res.astroDay;
+            if (document.getElementById('gr_month')) document.getElementById('gr_month').value = finalM;
+            if (document.getElementById('gr_year')) document.getElementById('gr_year').value = res.astroYear;
+            if (document.getElementById('gr_age')) document.getElementById('gr_age').value = curAge;
+            if (document.getElementById('tk_day')) document.getElementById('tk_day').value = res.astroDay;
+            if (document.getElementById('tk_age')) document.getElementById('tk_age').value = curAge;
+            if (document.getElementById('qk_dob')) document.getElementById('qk_dob').value = dob;
         }
 
-        const CAT_QUOTES = ['เมี๊ยว~ ร่ายมนต์เปิดดวงดาวทั้ง 5 ศาสตร์แล้ว! ✨', 'กราฟชีวิตและตาราง 9 ฐานพร้อมพยากรณ์แล้วเมี๊ยว~ 🔮', 'วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะ! 🌟'];
         function triggerCatMagic() {
             const bubble = document.getElementById('catSpeech'), sparks = document.getElementById('magicSparks');
             if (!bubble || !sparks) return;
