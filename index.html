@@ -407,22 +407,14 @@
             });
 
             return {
-                ascRasi, ascDeg: Math.floor(ascDegF), ascMin: Math.floor((ascDegF % 1) * 60),
-                ascNakshatra: ascExtra.nakshatra, ascNavamsa: ascExtra.navamsaRasi,
-                sunRasi, planetPos, navamsaPos, planetDet, tanuPlanet: ASTRO_CONST.LORDS[tanuRasi],
-                tenLagnas, lunarText: lunarInfo.lunarText
-            };
-        }
-
+                   function renderZodiacModeUI() {
+            const dob = document.getElementById('z_dob').value;
+            const tob = document.getElementById('z_tob').value;
+            const [lat, lon, tz, prov] = document.getElementById('z_prov').value.split(',');
+            const method = document.getElementById('z_method').value;
+            const res = computeFullAstrology(dob, tob, parseFloat(lat), parseFloat(lon), method, parseFloat(tz));
             const order = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
-            let rows = `<tr style="background:#FFFBEB;color:#991B1B;font-weight:700;">
-                <td style="padding:8px;">ลั. ลัคนา</td><td>${ASTRO_CONST.ZODIACS[res.ascRasi]}</td>
-                <td>${res.ascDeg}° ${res.ascMin}'</td><td>${ASTRO_CONST.ZODIACS[res.ascNavamsa]}</td>
-                <td>${res.ascNakshatra}</td></tr>`;
 
-            order.forEach(id => {
-                const d = res.planetDet[id];
-                rows += `<tr style="border-bottom:1px solid #FDE68A;">
                     <td style="padding:7px;font-weight:700;">${ASTRO_CONST.FULL_NAMES[id]}</td>
                     <td style="color:#B91C1C;font-weight:600;">${ASTRO_CONST.ZODIACS[d.rasi]}</td>
                     <td style="color:#047857;">${d.deg}° ${d.min}'</td>
@@ -459,7 +451,7 @@
                     <p>• <b>ดาวเกตุ (๙):</b> สถิตภพ <b>"${ASTRO_CONST.BHAVA_NAMES[ketuBhava]}"</b> เสริมลางสังหรณ์และสิ่งศักดิ์สิทธิ์คุ้มครองด้าน${ASTRO_CONST.BHAVA_NAMES[ketuBhava]}</p>
                 </div>`;
             triggerCatMagic();
-        
+        }
         function render7TuaModeUI() {
             const dVal = +document.getElementById('t7_day').value;
             const mVal = +document.getElementById('t7_month').value;
