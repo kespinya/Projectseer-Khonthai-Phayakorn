@@ -446,8 +446,9 @@
             const offsetMin = isDay ? (totalMin - 360) : ((totalMin - 1080 + 1440) % 1440);
             const yamIndex = Math.min(7, Math.floor(offsetMin / (720 / 7)) + 1);
 
-            const daySeq =;
-            const nightSeq =;
+                        const daySeq = '1,6,4,2,7,5,3'.split(',').map(Number);
+            const nightSeq = '1,5,2,6,3,7,4'.split(',').map(Number);
+
             const d7 = mod7(astroDay);
 
             const dStart = daySeq.indexOf(d7);
