@@ -694,6 +694,31 @@
             triggerCatMagic();
         }
 
+        function renderTaksaModeUI() {
+            const dVal = +document.getElementById('tk_day').value;
+            const age = +document.getElementById('tk_age').value || 48;
+            const be = +document.getElementById('tk_be').value || 2569;
+            const tkB = computeTaksaAndKalayok(dVal, 0, be);
+            const tkY = computeTaksaAndKalayok(dVal, age - 1, be);
+            const dirs = ['ตะวันออกเฉียงเหนือ (๑)', 'ตะวันออก (๒)', 'ตะวันออกเฉียงใต้ (๓)', 'ใต้ (๔)', 'ตะวันตกเฉียงใต้ (๗)', 'ตะวันตก (๕)', 'ตะวันตกเฉียงเหนือ (๘)', 'เหนือ (๖)'];
+            const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
+
+            const box = document.getElementById('tk_result');
+            box.style.display = 'block';
+            box.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px;">
+                    ${seq.map((p, idx) => `<div style="background:${tkY.roleMap[p] === 'ศรี' ? '#DCFCE7' : (tkY.roleMap[p] === 'กาลกิณี' ? '#FEE2E2' : '#FFFBEB')};border:2px solid #F59E0B;border-radius:14px;padding:10px;text-align:center;">
+                        <div style="font-size:11px;color:#047857;">${dirs[idx]}</div>
+                        <div style="font-size:15px;font-weight:700;color:#1E3A8A;">ดาว${ASTRO_CONST.DAYS[p]}</div>
+                        <div style="font-size:12px;color:#B45309;">เดิม: ${tkB.roleMap[p]}</div>
+                        <div style="font-size:13px;font-weight:700;color:#DC2626;">จรปีนี้: ${tkY.roleMap[p]}</div>
+                    </div>`).join('')}
+                </div>
+                <div style="background:#EFF6FF;border:1.5px solid #3B82F6;border-radius:14px;padding:12px;text-align:center;font-size:13px;font-weight:700;color:#1E3A8A;">
+                    🎊 กาลโยค พ.ศ. ${be}: ธงชัย = ${ASTRO_CONST.DAYS[tkY.kalayok.dharmachai]} • อธิบดี = ${ASTRO_CONST.DAYS[tkY.kalayok.athibodi]} • อุบาทว์ = ${ASTRO_CONST.DAYS[tkY.kalayok.ubat]} • โลกาวินาศ = ${ASTRO_CONST.DAYS[tkY.kalayok.lokawinart]}
+                </div>`;
+            triggerCatMagic();
+        }
 
         function renderQuickModeUI() {
             const dob1 = document.getElementById('qk_dob').value;
@@ -794,13 +819,16 @@
             sparks.style.display = 'block'; setTimeout(() => { sparks.style.display = 'none'; }, 1800);
         }
 
-        window.onload = function() {
+                window.onload = function() {
             const provEl = document.getElementById('z_prov');
             if (provEl && typeof WORLD_LOCATIONS !== 'undefined') {
-const thOpts = WORLD_LOCATIONS.thailand.map(p => <option value="${p.at(1)},${p.at(2)},${p.at(3)},${p.at(0)}">${p.at(0)}</option>).join('');
-const intOpts = WORLD_LOCATIONS.international.map(p => <option value="${p.at(1)},${p.at(2)},${p.at(3)},${p.at(0)}">${p.at(0)}</option>).join('');
-provEl.innerHTML = <optgroup label="🇹🇭 ประเทศไทย (ครบ 77 จังหวัด)">${thOpts}</optgroup><optgroup label="🌏 ต่างประเทศ (ตาม Time Zone)">${intOpts}</optgroup>;
-}
-buildAllForms();
-renderZodiacModeUI();
-};
+                const thOpts = WORLD_LOCATIONS.thailand.map(p => `<option value="${p.at(1)},${p.at(2)},${p.at(3)},${p.at(0)}">${p.at(0)}</option>`).join('');
+                const intOpts = WORLD_LOCATIONS.international.map(p => `<option value="${p.at(1)},${p.at(2)},${p.at(3)},${p.at(0)}">${p.at(0)}</option>`).join('');
+                provEl.innerHTML = `<optgroup label="🇹🇭 ประเทศไทย (ครบ 77 จังหวัด)">${thOpts}</optgroup><optgroup label="🌏 ต่างประเทศ (ตาม Time Zone)">${intOpts}</optgroup>`;
+            }
+            buildAllForms();
+            renderZodiacModeUI();
+        };
+    </script>
+</body>
+</html>
