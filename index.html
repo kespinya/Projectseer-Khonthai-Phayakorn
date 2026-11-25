@@ -443,15 +443,14 @@
         }
 
         function computeTaksaAndKalayok(birthDay, steps, yearBE) {
-            const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
-            const roles = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
-            const sIdx = seq.indexOf(birthDay);
-            const cIdx = steps === 0 ? sIdx : (sIdx + steps + 2) % 8;
+            const js = yearBE - 1181;
+            const dharmachai = ((js * 5 + 2) % 7) + 1;
+            const athibodi = mod7(dharmachai + 1);
+            const ubat = ((js * 3 + 5) % 7) + 1;
+            const lokawinart = ((js * 4 + 3) % 7) + 1;
+            const kalayok = { dharmachai, athibodi, ubat, lokawinart };
+            return { roleMap, briwan: seq[cIdx], kalayok };
 
-
-
-
-         
             const roleMap = {};
             for (let i = 0; i < 8; i++) roleMap[seq[(cIdx + i) % 8]] = roles[i];
 
