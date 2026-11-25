@@ -89,6 +89,15 @@
             <p style="font-size:13px;color:#FECDD3;">ผสานสุดยอดคัมภีร์พยากรณ์ครบทุกแขนง • จักรราศี • 7 ตัว 9 ฐานชั้นสูง • กราฟชีวิต • มหาทักษา</p>
         </div>
 
+                <div class="card-light" style="padding:14px 18px;margin-bottom:16px;background:linear-gradient(90deg,#FFFBEB,#EFF6FF);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
+            <div style="font-size:13.5px;font-weight:700;color:#1E3A8A;">🗓️ วัน-เวลาจร (ช่วงวันที่ต้องการให้ระบบทำนายเหตุการณ์):</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                <input type="date" id="jor_date" onchange="updateJorDateTime()" class="form-control" style="width:auto;padding:7px 12px;">
+                <input type="time" id="jor_time" onchange="updateJorDateTime()" class="form-control" style="width:auto;padding:7px 12px;">
+                <button onclick="setJorNow()" style="padding:7px 14px;border-radius:99px;border:1.5px solid #059669;background:#ECFDF5;color:#065F46;font-size:12px;font-weight:700;cursor:pointer;">⏱️ เวลาปัจจุบัน</button>
+            </div>
+        </div>
+
         <section id="mode-zodiac" class="mode-section active">
             <div class="card-light card-cream">
                 <div class="mode-header"><h2 style="color:#B91C1C;font-size:18px;">🎡 หอดูดาวจักรราศี นวางค์จักร & คำนวณลัคนา</h2></div>
@@ -830,7 +839,12 @@
             const res = getThaiLunarCalendar100Y(dob, tob);
             const [y, m] = dob.split('-').map(Number);
             const finalM = (calType === 'solar') ? ((m % 12) + 1) : res.astroMonth;
-            const curAge = 2569 - res.birthYearBE + 1;
+            const jorDateStr = document.getElementById('jor_date')?.value || '2026-11-25';
+            const targetYearBE = parseInt(jorDateStr.split('-')[0], 10) + 543;
+            const curAge = Math.max(1, targetYearBE - res.birthYearBE + 1);
+            if (document.getElementById('t7_targetBE')) document.getElementById('t7_targetBE').value = targetYearBE;
+            if (document.getElementById('tk_be')) document.getElementById('tk_be').value = targetYearBE;
+
 
             if (document.getElementById('t7_day')) document.getElementById('t7_day').value = res.astroDay;
             if (document.getElementById('t7_month')) document.getElementById('t7_month').value = finalM;
@@ -851,6 +865,25 @@
             if (!bubble || !sparks) return;
             bubble.innerText = CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)];
             sparks.style.display = 'block'; setTimeout(() => { sparks.style.display = 'none'; }, 1800);
+        }
+
+                function setJorNow() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            if (document.getElementById('jor_date')) document.getElementById('jor_date').value = `${yyyy}-${mm}-${dd}`;
+            if (document.getElementById('jor_time')) document.getElementById('jor_time').value = `${hh}:${min}`;
+            updateJorDateTime();
+        }
+
+        function updateJorDateTime() {
+            syncAllForms();
+            render7TuaModeUI();
+            renderGraphModeUI();
+            renderTaksaModeUI();
         }
 
         window.onload = function() {
