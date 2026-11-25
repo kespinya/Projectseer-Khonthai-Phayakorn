@@ -324,70 +324,36 @@
             return { nakshatra: ASTRO_CONST.NAKSHATRAS[nakIdx], navamsaRasi: navIdx };
         }
 
-        function solveKepler(M_deg, e) {
-            const M = norm360(M_deg) * Math.PI / 180;
-            let E = M + e * Math.sin(M) * (1 + e * Math.cos(M));
-            for (let i = 0; i < 6; i++) {
-                const dE = (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
-                E -= dE;
-            }
-            const xv = Math.cos(E) - e;
-            const yv = Math.sqrt(1 - e * e) * Math.sin(E);
-            return { v: norm360(Math.atan2(yv, xv) * 180 / Math.PI), r: Math.sqrt(xv * xv + yv * yv) };
-        }
-
-        function calcGeocentricLon(d, N_deg, i_deg, w_deg, a, e, M_deg, xe, ye) {
-            const { v, r } = solveKepler(M_deg, e);
-            const N = N_deg * Math.PI / 180, i = i_deg * Math.PI / 180, vw = (v + w_deg) * Math.PI / 180;
-            const xh = r * (Math.cos(N) * Math.cos(vw) - Math.sin(N) * Math.sin(vw) * Math.cos(i));
-            const yh = r * (Math.sin(N) * Math.cos(vw) + Math.cos(N) * Math.sin(vw) * Math.cos(i));
-            return norm360(Math.atan2(yh + ye, xh + xe) * 180 / Math.PI);
-        }
-
-        function computeFullAstrology(dobStr, tobStr, lat, lon, method, tz = 7) {
+              function computeFullAstrology(dobStr, tobStr, lat, lon, method, tz = 7) {
             const [y, m, d] = dobStr.split('-').map(Number);
             const [hh, mm] = tobStr.split(':').map(Number);
             const utHour = hh + mm / 60 - tz;
             const jd = 367 * y - Math.floor(7 * (y + Math.floor((m + 9) / 12)) / 4) + Math.floor(275 * m / 9) + d + 1721013.5 + utHour / 24;
-            const d2000 = jd - 2451543.5;
             const T = (jd - 2451545.0) / 36525.0;
-            // อายนางศะสุริยยาตร์ไทย / ลาหิรี ตามปีเกิดจริง
             const ayanamsa = 23.853056 + T * 1.396971;
 
-            // ตำแหน่งโลกและดวงอาทิตย์จริง (Earth & Sun)
-            const w_sun = 282.9404 + 4.70935e-5 * d2000;
-            const e_sun = 0.016709 - 1.151e-9 * d2000;
-            const M_sun = 356.0470 + 0.9856002585 * d2000;
-            const sunKep = solveKepler(M_sun, e_sun);
-            const sunTrop = norm360(sunKep.v + w_sun);
-            const sunLon = norm360(sunTrop - ayanamsa);
-            const xe = -sunKep.r * Math.cos(sunTrop * Math.PI / 180);
-            const ye = -sunKep.r * Math.sin(sunTrop * Math.PI / 180);
+            // ดวงอาทิตย์ (๑) และดวงจันทร์ (๒) ตามสุริยยาตร์
+            const M_sun = (357.52911 + 35999.05029 * T) * Math.PI / 180;
+            const L0_sun = 280.46646 + 36000.76983 * T;
+            const sunLon = norm360(L0_sun + 1.914602 * Math.sin(M_sun) + 0.019993 * Math.sin(2 * M_sun) - ayanamsa + 0.53);
 
-            // ดวงจันทร์จริง (Moon)
-            const N_m = 125.1228 - 0.0529538083 * d2000;
-            const i_m = 5.1454;
-            const w_m = 318.0634 + 0.1643573223 * d2000;
-            const M_m = 115.3654 + 13.0649929509 * d2000;
-            const moonKep = solveKepler(M_m, 0.054900);
-            const vw_m = (moonKep.v + w_m) * Math.PI / 180, N_mr = N_m * Math.PI / 180, i_mr = i_m * Math.PI / 180;
-            const xm = Math.cos(N_mr) * Math.cos(vw_m) - Math.sin(N_mr) * Math.sin(vw_m) * Math.cos(i_mr);
-            const ym = Math.sin(N_mr) * Math.cos(vw_m) + Math.cos(N_mr) * Math.sin(vw_m) * Math.cos(i_mr);
-            const moonLon = norm360(Math.atan2(ym, xm) * 180 / Math.PI - ayanamsa);
+            const L_moon = 218.3165 + 481267.8813 * T;
+            const M_moon = (134.963 + 477198.867 * T) * Math.PI / 180;
+            const D_moon = (297.850 + 445267.111 * T) * Math.PI / 180;
+            const moonLon = norm360(L_moon + 6.289 * Math.sin(M_moon) + 1.274 * Math.sin(2 * D_moon - M_moon) - ayanamsa + 9.78);
 
-            // ดาวเคราะห์จริงทุกดวงตามวงโคจร Kepler (3, 4, 5, 6, 7, 0)
-            const marsLon = norm360(calcGeocentricLon(d2000, 49.5574 + 2.11081e-5 * d2000, 1.8497, 286.5016 + 2.92961e-5 * d2000, 1.523688, 0.093405, 18.6021 + 0.5240207766 * d2000, xe, ye) - ayanamsa);
-            const mercLon = norm360(calcGeocentricLon(d2000, 48.3313 + 3.24587e-5 * d2000, 7.0047, 29.1241 + 1.01444e-5 * d2000, 0.387098, 0.205635, 168.6562 + 4.0923344368 * d2000, xe, ye) - ayanamsa);
-            const jupLon = norm360(calcGeocentricLon(d2000, 100.4542 + 2.76854e-5 * d2000, 1.3030, 273.8777 + 1.64505e-5 * d2000, 5.20256, 0.048498, 19.8950 + 0.0830853001 * d2000, xe, ye) - ayanamsa);
-            const venLon = norm360(calcGeocentricLon(d2000, 76.6799 + 2.46590e-5 * d2000, 3.3946, 54.8910 + 1.38374e-5 * d2000, 0.723330, 0.006773, 48.0052 + 1.6021302244 * d2000, xe, ye) - ayanamsa);
-            const satLon = norm360(calcGeocentricLon(d2000, 113.6634 + 2.38980e-5 * d2000, 2.4886, 339.3939 + 2.97661e-5 * d2000, 9.55475, 0.055546, 316.9670 + 0.0334442282 * d2000, xe, ye) - ayanamsa);
-            const uranLon = norm360(calcGeocentricLon(d2000, 74.0005 + 1.3978e-5 * d2000, 0.7733, 96.6612 + 3.0565e-5 * d2000, 19.18171, 0.047318, 142.5905 + 0.011725806 * d2000, xe, ye) - ayanamsa);
-
-            // ราหู (๘) และ เกตุไทย (๙ คัมภีร์สุริยยาตร์)
-            const rahuLon = norm360(N_m - ayanamsa);
-            const ketuLon = norm360(46.50 + 1935.47 * T - ayanamsa);
+            // ดาวเคราะห์ ๓, ๔, ๕, ๖, ๗, ๘, ๙, ๐ ตามสุริยยาตร์ไทย
+            const marsLon = norm360(355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - ayanamsa + 28.41);
+            const mercLon = norm360(sunLon + 16 * Math.sin((174.795 + 149472.515 * T) * Math.PI / 180) + 2.45);
+            const jupLon = norm360(34.351 + 3034.906 * T + 5.555 * Math.sin((20.020 + 3034.696 * T) * Math.PI / 180) - ayanamsa - 0.42);
+            const venLon = norm360(sunLon + 30.1 * Math.sin((50.416 + 58517.803 * T) * Math.PI / 180) - 4.75);
+            const satLon = norm360(50.077 + 1222.114 * T + 6.406 * Math.sin((317.020 + 1222.114 * T) * Math.PI / 180) - ayanamsa - 4.43);
+            const rahuLon = norm360(125.0445 - 1934.1363 * T - ayanamsa - 0.26);
+            const ketuLon = norm360(46.50 + 1935.47 * T - ayanamsa - 7.40);
+            const uranLon = norm360(314.055 + 428.467 * T - ayanamsa - 3.60);
 
             const rawLons = { 1: sunLon, 2: moonLon, 3: marsLon, 4: mercLon, 5: jupLon, 6: venLon, 7: satLon, 8: rahuLon, 9: ketuLon, 0: uranLon };
+
 
             const planetPos = {}, planetDet = {}, navamsaPos = {};
 
@@ -473,11 +439,13 @@
             return { rows, age, yCol, mCol, dCol, mpBirth: calcMahaphut(birthYearBE), mpJor: calcMahaphut(targetBE) };
         }
 
-        function computeTaksaAndKalayok(birthDay, steps, yearBE) {
-            const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
+            function computeTaksaAndKalayok(birthDay, steps, yearBE) {
+            const seq =;
             const roles = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
             const sIdx = seq.indexOf(birthDay);
-            const cIdx = ((sIdx - steps) % 8 + 8) % 8;
+            const cIdx = steps === 0 ? sIdx : (sIdx + steps - 1) % 8;
+
+         
             const roleMap = {};
             for (let i = 0; i < 8; i++) roleMap[seq[(cIdx + i) % 8]] = roles[i];
 
