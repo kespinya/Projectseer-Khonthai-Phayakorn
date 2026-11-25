@@ -405,8 +405,11 @@
                 const r10 = Math.floor(l10 / 30), d10 = l10 % 30;
                 tenLagnas[k] = { rasi: r10, deg: Math.floor(d10), min: Math.floor((d10 % 1) * 60) };
             });
+            return svg;
+        }
 
-            return {
+        function renderZodiacModeUI() {
+
                    function renderZodiacModeUI() {
             const dob = document.getElementById('z_dob').value;
             const tob = document.getElementById('z_tob').value;
