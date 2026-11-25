@@ -517,7 +517,7 @@
             const method = document.getElementById('z_method').value;
             const res = computeFullAstrology(dob, tob, parseFloat(lat), parseFloat(lon), method, parseFloat(tz));
 
-            const order =;
+            const order = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
             let rows = `<tr style="background:#FFFBEB;color:#991B1B;font-weight:700;">
                 <td style="padding:8px;">ลั. ลัคนา</td><td>${ASTRO_CONST.ZODIACS[res.ascRasi]}</td>
                 <td>${res.ascDeg}° ${res.ascMin}'</td><td>${ASTRO_CONST.ZODIACS[res.ascNavamsa]}</td>
