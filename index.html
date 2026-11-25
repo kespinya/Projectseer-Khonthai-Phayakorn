@@ -439,24 +439,29 @@
             return { roleMap, briwan: seq[cIdx], kalayok };
         }
 
-        function computeAtthakalaYam(astroDay, tobStr) {
-            const [hh, mm] = (tobStr || '03:38').split(':').map(Number);
+               function computeAtthakalaYam(astroDay, tobStr) {
+            const [hh, mm] = (tobStr || '14:03').split(':').map(Number);
             const totalMin = hh * 60 + mm;
             const isDay = (totalMin >= 360 && totalMin < 1080);
             const offsetMin = isDay ? (totalMin - 360) : ((totalMin - 1080 + 1440) % 1440);
-            const yamIndex = Math.floor(offsetMin / 90) + 1;
+            const yamIndex = Math.min(7, Math.floor(offsetMin / (720 / 7)) + 1);
+
+            const daySeq =;
+            const nightSeq =;
             const d7 = mod7(astroDay);
+
+            const dStart = daySeq.indexOf(d7);
+            const nStart = nightSeq.indexOf(d7);
             const dayYams = [], nightYams = [];
-            for (let i = 0; i < 8; i++) {
-                dayYams.push(mod7(d7 + i * 3));
-                        const nightStart = mod7(d7 + 4);
-            for (let i = 0; i < 8; i++) {
-                dayYams.push(mod7(d7 + i * 3));
-                nightYams.push(mod7(nightStart + i * 4));
+            for (let i = 0; i < 7; i++) {
+                dayYams.push(daySeq[(dStart + i) % 7]);
+                nightYams.push(nightSeq[(nStart + i) % 7]);
             }
+
             const activePlanet = isDay ? dayYams[yamIndex - 1] : nightYams[yamIndex - 1];
             return { isDay, periodText: isDay ? '☀️ ยามกลางวัน' : '🌙 ยามกลางคืน', yamIndex, activePlanet, dayYams, nightYams };
         }
+
         function buildCosmicWheelSVG(title, ascRasi, sunRasi, planetPos, showBhava) {
             const cx = 195, cy = 195, rOut = 182, rIn = 58;
             let svg = `<div style="text-align:center;">
@@ -545,17 +550,18 @@
                 </div>`;
             triggerCatMagic();
         }
-        function render7TuaModeUI() {
+            function render7TuaModeUI() {        
+            const dSlots = ['06:00-07:42', '07:43-09:25', '09:26-11:08', '11:09-12:51', '12:52-14:34', '14:35-16:17', '16:18-18:00'];
+            const nSlots = ['18:00-19:42', '19:43-21:25', '21:26-23:08', '23:09-00:51', '00:52-02:34', '02:35-04:17', '04:18-06:00'];
             const dVal = +document.getElementById('t7_day').value;
             const mVal = +document.getElementById('t7_month').value;
             const yVal = +document.getElementById('t7_year').value;
             const birthBE = +document.getElementById('t7_birthBE').value || 2522;
             const targetBE = +document.getElementById('t7_targetBE').value || 2569;
-            const addM = +document.getElementById('t7_addM').value || 0;
-            const addD = +document.getElementById('t7_addD').value || 0;
-
+            const addM = +document.getElementById('t7_addM').value || 0, addD = +document.getElementById('t7_addD').value || 0;
             const data = compute7Tua9Than(dVal, mVal, yVal, birthBE, targetBE, addM, addD);
-            const tkY = computeTaksaAndKalayok(dVal, data.age - 1, targetBE);
+            const tkY = computeTaksaAndKalayok(dVal, data.age, targetBE);
+
             const now = new Date(), curDow = now.getDay();
             const curDay = (now.getHours() < 6) ? (curDow === 0 ? 7 : curDow) : (curDow === 0 ? 1 : curDow + 1);
             const curTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
