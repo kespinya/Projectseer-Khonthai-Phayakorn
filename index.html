@@ -440,7 +440,7 @@
         }
 
             function computeTaksaAndKalayok(birthDay, steps, yearBE) {
-            const seq =;
+            const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
             const roles = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
             const sIdx = seq.indexOf(birthDay);
             const cIdx = steps === 0 ? sIdx : (sIdx + steps - 1) % 8;
