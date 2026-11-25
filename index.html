@@ -443,7 +443,9 @@
             const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
             const roles = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
             const sIdx = seq.indexOf(birthDay);
-            const cIdx = steps === 0 ? sIdx : (sIdx + steps - 1) % 8;
+            const cIdx = steps === 0 ? sIdx : (sIdx + steps + 2) % 8;
+
+
 
          
             const roleMap = {};
@@ -853,10 +855,12 @@
             const finalM = (calType === 'solar') ? ((m % 12) + 1) : res.astroMonth;
             const jorDateStr = document.getElementById('jor_date')?.value || '2026-11-25';
             const targetYearBE = parseInt(jorDateStr.split('-')[0], 10) + 543;
-            const curAge = Math.max(1, targetYearBE - res.birthYearBE + 1);
+                       const [bY, bM, bD] = dob.split('-').map(Number);
+            const [jY, jM, jD] = jorDateStr.split('-').map(Number);
+            const passedBirthday = (jM > bM) || (jM === bM && jD >= bD);
+            const curAge = Math.max(1, (jY - bY) + (passedBirthday ? 1 : 0));
             if (document.getElementById('t7_targetBE')) document.getElementById('t7_targetBE').value = targetYearBE;
             if (document.getElementById('tk_be')) document.getElementById('tk_be').value = targetYearBE;
-
 
             if (document.getElementById('t7_day')) document.getElementById('t7_day').value = res.astroDay;
             if (document.getElementById('t7_month')) document.getElementById('t7_month').value = finalM;
