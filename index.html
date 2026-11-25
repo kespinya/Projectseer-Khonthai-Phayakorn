@@ -454,15 +454,14 @@
             const roleMap = {};
             for (let i = 0; i < 8; i++) roleMap[seq[(cIdx + i) % 8]] = roles[i];
 
-            const kalayok = {
-                dharmachai: ((js * 5 + 3) % 7) + 1,
-                athibodi: ((js * 5 + 0) % 7) + 1,
-                ubat: ((js * 5 + 2) % 7) + 1,
-                lokawinart: ((js * 5 + 1) % 7) + 1
-            };
+                       const js = yearBE - 1181;
+            const dharmachai = ((js * 5 + 2) % 7) + 1;
+            const athibodi = mod7(dharmachai + 1);
+            const ubat = ((js * 3 + 5) % 7) + 1;
+            const lokawinart = ((js * 4 + 3) % 7) + 1;
+            const kalayok = { dharmachai, athibodi, ubat, lokawinart };
             return { roleMap, briwan: seq[cIdx], kalayok };
         }
-
                function computeAtthakalaYam(astroDay, tobStr) {
             const [hh, mm] = (tobStr || '14:03').split(':').map(Number);
             const totalMin = hh * 60 + mm;
