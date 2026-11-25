@@ -431,19 +431,23 @@
             const mCol = (yCol + (addM || 0)) % 7;
             const dCol = (mCol + (addD || 0)) % 7;
 
-            const calcMahaphut = (be) => {
+                       const calcMahaphut = (be) => {
                 const js = be - 1181;
-                const base = ((js * 5 + 3) % 7) + 1;
-                return { js, raja: base, athibodi: mod7(base + 6), dharmachai: mod7(base + 1), khumsap: mod7(base + 4) };
+                const dharmachai = ((js * 5 + 3) % 7) + 1;
+                const raja = mod7(dharmachai + 6);
+                const athibodi = mod7(dharmachai + 5);
+                const khumsap = mod7(dharmachai + 3);
+                return { js, raja, athibodi, dharmachai, khumsap };
             };
             return { rows, age, yCol, mCol, dCol, mpBirth: calcMahaphut(birthYearBE), mpJor: calcMahaphut(targetBE) };
         }
 
-            function computeTaksaAndKalayok(birthDay, steps, yearBE) {
+        function computeTaksaAndKalayok(birthDay, steps, yearBE) {
             const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
             const roles = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
             const sIdx = seq.indexOf(birthDay);
             const cIdx = steps === 0 ? sIdx : (sIdx + steps + 2) % 8;
+
 
 
 
