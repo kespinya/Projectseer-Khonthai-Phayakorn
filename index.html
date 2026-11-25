@@ -639,49 +639,113 @@
             triggerCatMagic();
         }
 
-        function renderGraphModeUI() {
+                function renderGraphModeUI() {
             const dVal = +document.getElementById('gr_day').value;
             const mVal = +document.getElementById('gr_month').value;
             const yVal = +document.getElementById('gr_year').value;
             const age = +document.getElementById('gr_age').value || 48;
-            const h12 = ['1.อัตตะ', '2.หินะ', '3.ธานัง', '4.ปิตา', '5.มาตา', '6.โภคา', '7.มัชฌิมา', '8.กัมมะ', '9.ลาภะ', '10.พยายะ', '11.ทาสา', '12.วินาศ'];
+            const birthBE = +document.getElementById('t7_birthBE')?.value || 2522;
+            const h12 = ['วาสนา', 'ทรัพย์', 'เพื่อน', 'ญาติ', 'บริวาร', 'ศัตรู', 'คู่ครอง', 'โรคภัย', 'ความสุข', 'การงาน', 'ลาภยศ', 'วินาศ'];
+            const animals12 = ['ชวด', 'ฉลู', 'ขาล', 'เถาะ', 'มะโรง', 'มะเส็ง', 'มะเมีย', 'มะแม', 'วอก', 'ระกา', 'จอ', 'กุน'];
+
             const pts = [];
             for (let i = 0; i < 12; i++) {
-                const sc = mod12(mod12(dVal + i) + mod12(mVal + i) + mod12(yVal + i));
-                pts.push({ label: h12[i], score: sc, cur: ((age - 1) % 12) === i });
+                const bDay = mod7(dVal + i);
+                const bMonth = mod12(mVal + i);
+                const bYear = mod12(yVal + i);
+                const sum = bDay + bMonth + bYear;
+                const sc = mod12(sum);
+                const pct = Math.round((sc / 12) * 100);
+                const cur = ((age - 1) % 12) === i;
+                const cycleStartAge = Math.floor((age - 1) / 12) * 12 + i + 1;
+                pts.push({ label: h12[i], bDay, bMonth, bYear, sum, score: sc, pct, cur, cycleAge: cycleStartAge, cycleBE: birthBE + cycleStartAge });
             }
-            const coords = pts.map((pt, i) => ({ x: 45 + i * 52, y: 205 - (pt.score * 14), ...pt }));
-            const poly = coords.map(c => `${c.x},${c.y}`).join(' ');
+
+            const coords = pts.map((pt, i) => ({ x: 95 + i * 54, y: 245 - (pt.score * 17), ...pt }));
+            let smoothPath = `M ${coords[0].x} ${coords[0].y}`;
+            for (let i = 0; i < coords.length - 1; i++) {
+                const xc = (coords[i].x + coords[i + 1].x) / 2;
+                const yc = (coords[i].y + coords[i + 1].y) / 2;
+                smoothPath += ` Q ${coords[i].x} ${coords[i].y}, ${xc} ${yc}`;
+            }
+            smoothPath += ` T ${coords[coords.length - 1].x} ${coords[coords.length - 1].y}`;
             const curPt = coords.find(c => c.cur) || coords[0];
 
+            const topTable = `
+                <table style="width:100%;border-collapse:collapse;text-align:center;font-size:12px;margin-bottom:10px;background:#FFF;border:1.5px solid #CBD5E1;">
+                    <tr style="background:#F8FAFC;"><td style="padding:5px;font-weight:700;text-align:left;border:1px solid #CBD5E1;">ฐานวัน</td>${pts.map(p => `<td style="border:1px solid #CBD5E1;">${p.bDay}</td>`).join('')}</tr>
+                    <tr><td style="padding:5px;font-weight:700;text-align:left;border:1px solid #CBD5E1;">ฐานเดือน</td>${pts.map(p => `<td style="border:1px solid #CBD5E1;">${p.bMonth}</td>`).join('')}</tr>
+                    <tr style="background:#F8FAFC;"><td style="padding:5px;font-weight:700;text-align:left;border:1px solid #CBD5E1;">ฐานปี</td>${pts.map(p => `<td style="border:1px solid #CBD5E1;">${p.bYear}</td>`).join('')}</tr>
+                    <tr><td style="padding:5px;font-weight:700;text-align:left;border:1px solid #CBD5E1;">ผลรวม</td>${pts.map(p => `<td style="border:1px solid #CBD5E1;color:#0369A1;">${p.sum}</td>`).join('')}</tr>
+                    <tr style="background:#FFFBEB;font-weight:700;"><td style="padding:5px;text-align:left;border:1px solid #CBD5E1;color:#B91C1C;">เลขดวง</td>${pts.map(p => `<td style="border:1px solid #CBD5E1;color:${p.cur ? '#DC2626' : '#1E3A8A'};background:${p.cur ? '#FEE2E2' : ''};">${p.score}</td>`).join('')}</tr>
+                    <tr style="background:#1E3A8A;color:#FDE047;font-size:11px;"><td style="padding:5px;text-align:left;border:1px solid #CBD5E1;">วิถีชีวิต</td>${pts.map(p => `<td style="border:1px solid #CBD5E1;padding:4px 2px;background:${p.cur ? '#DC2626' : ''};">${p.label}</td>`).join('')}</tr>
+                </table>`;
+
+            let gridLines = '';
+            for (let s = 1; s <= 12; s++) {
+                const gy = 245 - (s * 17);
+                gridLines += `<line x1="68" y1="${gy}" x2="720" y2="${gy}" stroke="#E2E8F0" stroke-width="1"/>` +
+                             `<text x="56" y="${gy + 4}" text-anchor="middle" font-size="10" font-weight="700" fill="#1E3A8A">${s}</text>`;
+            }
+
             const dotsSvg = coords.map(c =>
-                `<circle cx="${c.x}" cy="${c.y}" r="${c.cur ? 8 : 5}" fill="${c.cur ? '#DC2626' : (c.score >= 8 ? '#16A34A' : '#1E3A8A')}"/>` +
-                `<text x="${c.x}" y="${c.y - 10}" text-anchor="middle" font-size="11" font-weight="700" fill="#B91C1C">${c.score}</text>` +
-                `<text x="${c.x}" y="226" text-anchor="middle" font-size="9.5" font-weight="700" fill="${c.cur ? '#DC2626' : '#1E3A8A'}">${c.label}</text>`
+                `<line x1="${c.x}" y1="35" x2="${c.x}" y2="245" stroke="${c.cur ? '#FCA5A5' : '#E2E8F0'}" stroke-dasharray="${c.cur ? '' : '3 2'}"/>` +
+                `<circle cx="${c.x}" cy="${c.y}" r="${c.cur ? 7 : 4.5}" fill="${c.cur ? '#DC2626' : (c.score >= 9 ? '#059669' : '#D97706')}" stroke="#FFF" stroke-width="1.5"/>` +
+                `<text x="${c.x}" y="${c.y - 10}" text-anchor="middle" font-size="10" font-weight="700" fill="${c.cur ? '#DC2626' : '#065F46'}">${c.pct}%</text>` +
+                `<text x="${c.x}" y="${c.y + 14}" text-anchor="middle" font-size="8.5" font-weight="700" fill="${c.cur ? '#DC2626' : '#64748B'}">${c.cycleBE}</text>` +
+                `<text x="${c.x}" y="${c.y + 23}" text-anchor="middle" font-size="8" fill="${c.cur ? '#DC2626' : '#64748B'}">อายุ ${c.cycleAge} ปี</text>`
             ).join('');
 
-            const advice = curPt.score >= 8 ? 'ช่วงขาขึ้น โชคลาภและความสำเร็จโดดเด่นมาก' : (curPt.score >= 5 ? 'ช่วงทรงตัว มั่นคง ค่อยเป็นค่อยไป' : 'ช่วงควรรอบคอบ เน้นวางแผนและระวังค่าใช้จ่าย');
+            let ageRowsHtml = '';
+            for (let r = 0; r < 8; r++) {
+                let cells = '';
+                for (let c = 0; c < 12; c++) {
+                    const aNum = r * 12 + c + 1;
+                    const beNum = birthBE + aNum;
+                    const isNow = (aNum === age);
+                    cells += `<td style="border:1px solid #CBD5E1;padding:3px 2px;background:${isNow ? '#DC2626' : '#FFF'};color:${isNow ? '#FFF' : '#1E3A8A'};font-weight:${isNow ? '700' : '400'};">${beNum}<br><b>${aNum}</b></td>`;
+                }
+                ageRowsHtml += `<tr>${cells}</tr>`;
+            }
+
+            const advice = curPt.score >= 9 ? 'สวรรค์ภูมิ (ขาขึ้นสูงสุด โชคลาภและความสำเร็จโดดเด่น)' : (curPt.score >= 5 ? 'มนุษย์ภูมิ (ทรงตัว มั่นคง ค่อยเป็นค่อยไป)' : 'นรกภูมิ (ช่วงควรรอบคอบ ระวังค่าใช้จ่ายและสุขภาพ)');
             const box = document.getElementById('gr_result');
             box.style.display = 'block';
             box.innerHTML = `
-                <h3 style="color:#0369A1;font-size:17px;margin-bottom:10px;">📈 กราฟชีวิต 12 ภพ (อายุ ${age} ปี ตก "${curPt.label}" คะแนน ${curPt.score}/12)</h3>
-                <div style="overflow-x:auto;background:#FFFBEB;border:2px solid #F59E0B;border-radius:14px;padding:10px;margin-bottom:12px;">
-                    <svg width="680" height="240" viewBox="0 0 680 240" style="max-width:100%;">
-                        <polyline fill="none" stroke="#0284C7" stroke-width="3.5" points="${poly}"/>
+                <h3 style="color:#0369A1;font-size:17px;margin-bottom:10px;">📈 ตารางกราฟชีวิต 12 ภพ (อายุย่าง ${age} ปี ตกภพ "${curPt.label}" คะแนน ${curPt.score}/12 [${curPt.pct}%])</h3>
+                <div style="overflow-x:auto;">${topTable}</div>
+                <div style="overflow-x:auto;background:#FFFFFF;border:2px solid #F59E0B;border-radius:14px;padding:10px;margin-bottom:12px;">
+                    <svg width="750" height="265" viewBox="0 0 750 265" style="max-width:100%;">
+                        <rect x="68" y="34" width="652" height="68" fill="#ECFDF5" opacity="0.65"/>
+                        <rect x="68" y="102" width="652" height="68" fill="#FFFBEB" opacity="0.65"/>
+                        <rect x="68" y="170" width="652" height="75" fill="#FEF2F2" opacity="0.65"/>
+                        <text x="18" y="72" font-size="10" font-weight="700" fill="#059669" transform="rotate(-90 18,72)">สวรรค์ภูมิ</text>
+                        <text x="18" y="140" font-size="10" font-weight="700" fill="#D97706" transform="rotate(-90 18,140)">มนุษย์ภูมิ</text>
+                        <text x="18" y="210" font-size="10" font-weight="700" fill="#DC2626" transform="rotate(-90 18,210)">นรกภูมิ</text>
+                        ${gridLines}
+                        <path d="${smoothPath}" fill="none" stroke="#10B981" stroke-width="3.5"/>
                         ${dotsSvg}
                     </svg>
                 </div>
+                <div style="overflow-x:auto;margin-bottom:12px;">
+                    <table style="width:100%;border-collapse:collapse;text-align:center;font-size:10.5px;background:#FFF;">
+                        <tr style="background:#EFF6FF;font-weight:700;">${Array.from({length: 12}, (_, i) => `<td style="border:1px solid #CBD5E1;padding:3px;">ปี${animals12[(yVal - 1 + i) % 12]}</td>`).join('')}</tr>
+                        ${ageRowsHtml}
+                    </table>
+                </div>
                 <div style="background:#ECFDF5;border:1.5px solid #10B981;border-radius:12px;padding:12px;font-size:13.5px;color:#065F46;">
-                    🌟 <b>ผลพยากรณ์ช่วงอายุ ${age} ปี:</b> กราฟอยู่ที่ระดับ <b>${curPt.score} คะแนน</b> ในภพ <b>${curPt.label}</b> (${advice})
+                    🌟 <b>ผลพยากรณ์ช่วงอายุย่าง ${age} ปี:</b> กราฟอยู่ที่ระดับ <b>${curPt.score} คะแนน (${curPt.pct}%)</b> ในภพ <b>"${curPt.label}"</b> — อยู่ในเกณฑ์ <b>${advice}</b>
                 </div>`;
             triggerCatMagic();
+        }
+
         }
         function renderTaksaModeUI() {
             const dVal = +document.getElementById('tk_day').value;
             const age = +document.getElementById('tk_age').value || 48;
             const be = +document.getElementById('tk_be').value || 2569;
             const tkB = computeTaksaAndKalayok(dVal, 0, be);
-            const tkY = computeTaksaAndKalayok(dVal, age - 1, be);
+            const tkY = computeTaksaAndKalayok(dVal, age, be);
             const dirs = ['ตะวันออกเฉียงเหนือ (๑)', 'ตะวันออก (๒)', 'ตะวันออกเฉียงใต้ (๓)', 'ใต้ (๔)', 'ตะวันตกเฉียงใต้ (๗)', 'ตะวันตก (๕)', 'ตะวันตกเฉียงเหนือ (๘)', 'เหนือ (๖)'];
             const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
 
