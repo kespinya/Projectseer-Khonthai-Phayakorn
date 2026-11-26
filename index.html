@@ -53,8 +53,8 @@
             <div class="card">
                 <h2 style="font-size:17px;color:#B91C1C;margin-bottom:12px;">☀️ ผูกดวงดาวจักรราศี นวางค์จักร & คำนวณลัคนา</h2>
                 <div class="grid-form">
-                    <div><label>วันเดือนปี เกิด (ค.ศ.)</label><input type="date" id="z_dob" value="1979-08-10" onchange="syncAllForms()"></div>
-                    <div><label>เวลาเกิดที่แน่นอน (น.)</label><input type="time" id="z_tob" value="03:38" onchange="syncAllForms()"></div>
+                   <div><label>วันเดือนปี เกิด (ค.ศ.)</label><input type="date" id="z_dob" onchange="syncAllForms()"></div>
+                   <div><label>เวลาเกิดที่แน่นอน (น.)</label><input type="time" id="z_tob" onchange="syncAllForms()"></div>
                     <div><label>เพศ</label><select id="z_gender"><option value="LGBTQ+">LGBTQ+</option><option value="หญิง">หญิง</option><option value="ชาย">ชาย</option></select></div>
                     <div><label>สถานที่เกิด (ไทย 77 จังหวัด & ต่างประเทศ)</label><select id="z_prov" onchange="renderZodiacModeUI()"></select></div>
                 </div>
@@ -70,7 +70,7 @@
                     <div><label>ฐานวันเกิด (1-7 / 8 ราหู)</label><select id="t7_day"></select></div>
                     <div><label>ฐานเดือนจันทรคติ (1-12)</label><select id="t7_month"></select></div>
                     <div><label>ฐานปีนักษัตร (1-12)</label><select id="t7_year"></select></div>
-                    <div><label>พ.ศ. เกิด</label><input type="number" id="t7_birthBE" value="2522"></div>
+                    <div><label>พ.ศ. เกิด</label><input type="number" id="t7_birthBE" placeholder="เช่น 2530"></div>
                     <div><label>พ.ศ. จรที่พยากรณ์</label><input type="number" id="t7_targetBE" value="2569"></div>
                     <div><label>บวกเดือนจร / วันจร</label><div style="display:flex;gap:6px;"><input type="number" id="t7_addM" value="0" min="0" max="11"><input type="number" id="t7_addD" value="0" min="0" max="6"></div></div>
                 </div>
@@ -110,8 +110,9 @@
             <div class="card">
                 <h2 style="font-size:17px;color:#B91C1C;margin-bottom:12px;">💑 วิเคราะห์ดวงคู่สมพงษ์ & เกณฑ์ชะตาเร่งด่วน</h2>
                 <div class="grid-form">
-                    <div><label>วันเกิดเจ้าชะตา</label><input type="date" id="qk_dob" value="1979-08-10"></div>
-                    <div><label>วันเกิดคู่ครอง / หุ้นส่วน</label><input type="date" id="qk_partner" value="1982-05-15"></div>
+                    <div><label>วันเกิดเจ้าชะตา</label><input type="date" id="qk_dob"></div>
+                    <div><label>วันเกิดคู่ครอง / หุ้นส่วน</label><input type="date" id="qk_partner"></div>
+
                 </div>
                 <button class="btn-main" onclick="renderQuickModeUI()">💖 ตรวจสมพงษ์ธาตุ & สมพงษ์ทักษา</button>
             </div>
@@ -386,7 +387,7 @@
             const mCol = (yCol + (addM || 0)) % 7;
             const dCol = (mCol + (addD || 0)) % 7;
 
-            const [hh, mm] = (tobStr || '03:38').split(':').map(Number);
+           const [hh, mm] = (tobStr || '06:00').split(':').map(Number);
             const minFrom6 = ((hh * 60 + mm) - 360 + 1440) % 1440;
             const yamNum = Math.floor(minFrom6 / 90) + 1;
             const lakBase1 = (yamNum - 1) % 7;
@@ -585,8 +586,9 @@
             const addM = +document.getElementById('t7_addM').value || 0;
             const addD = +document.getElementById('t7_addD').value || 0;
 
-            const dobStr = document.getElementById('z_dob')?.value || '1979-08-10';
-            const tobStr = document.getElementById('z_tob')?.value || '03:38';
+            const dobStr = document.getElementById('z_dob')?.value || new Date().toISOString().slice(0, 10);
+            const tobStr = document.getElementById('z_tob')?.value || '06:00';
+
             const jorDateVal = document.getElementById('jor_date')?.value || new Date().toISOString().slice(0, 10);
             const curTime = document.getElementById('jor_time')?.value || '10:40';
 
@@ -845,7 +847,7 @@
         }
 
         function buildAllForms() {
-            document.getElementById('z_prov').innerHTML = ASTRO_CONST.PROVINCES.map((p, i) => `<option value="${i}">${p}</option>`).join('');
+           document.getElementById('z_prov').innerHTML = ASTRO_CONST.PROVINCES.map((p, i) => `<option value="${i}">${p}</option>`).join('');
             const dList = '1,2,3,4,5,6,7,8'.split(',').map(Number);
             const mList = '1,2,3,4,5,6,7,8,9,10,11,12'.split(',').map(Number);
             document.getElementById('t7_day').innerHTML = dList.map(d => `<option value="${d}">${ASTRO_CONST.DAYS[d]}</option>`).join('');
@@ -859,10 +861,8 @@
 
         window.onload = function() {
             buildAllForms();
-            syncAllForms();
             setJorNow();
-            renderZodiacModeUI();
-        };
+                  };
     </script>
 </body>
 </html>
