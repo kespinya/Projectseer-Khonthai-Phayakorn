@@ -595,6 +595,60 @@
                 </div>`;
             triggerCatMagic();
         }
+                function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD, dobStr, tobStr) {
+            const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
+            const seq = '0,1,2,3,4,5,6'.split(',').map(Number);
+            const r1 = seq.map(i => mod7(d7 + i));
+            const r2 = seq.map(i => mod7(m7 + i));
+            const r3 = seq.map(i => mod7(y7 + i));
+            const r4 = seq.map(i => r1[i] + r2[i] + r3[i]);
+            const r5 = r4.map(n => mod7(n));
+            const r6 = seq.map(i => mod7(r5[i] * 2));
+            const r7 = seq.map(i => mod7(r6[i] * 2));
+            const r8 = seq.map(i => mod7(r4[i] + r7[i]));
+            const r9 = seq.map(i => mod7(r5[i] + r6[i]));
+            const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
+
+            const age = Math.max(1, targetBE - birthYearBE + 1);
+            const yCol = (age - 1) % 7;
+            const mCol = (yCol + (addM || 0)) % 7;
+            const dCol = (mCol + (addD || 0)) % 7;
+
+            const [hh, mm] = (tobStr || '03:38').split(':').map(Number);
+            const minFrom6 = ((hh * 60 + mm) - 360 + 1440) % 1440;
+            const yamNum = Math.floor(minFrom6 / 90) + 1;
+            const lakBase1 = (yamNum - 1) % 7;
+            const lakBase2 = (lakBase1 + (m7 - 1)) % 7;
+            const lakBase3 = (lakBase2 + (y7 - 1)) % 7;
+            const lakJor = (lakBase1 + (age - 1)) % 7;
+
+            const calcMahaphut = (be) => {
+                const js = be - 1181;
+                const dharmachai = ((js * 5 + 3) % 7) + 1;
+                return { js, raja: mod7(dharmachai + 6), athibodi: mod7(dharmachai + 5), dharmachai, khumsap: mod7(dharmachai + 3) };
+            };
+
+            return { rows, age, yCol, mCol, dCol, lak3: [lakBase1, lakBase2, lakBase3], lakJor, mpBirth: calcMahaphut(birthYearBE), mpJor: calcMahaphut(targetBE) };
+        }
+
+        function computeAtthakalaYam(dayNum, timeStr) {
+            const dSeq = '1,6,4,2,7,5,3'.split(',').map(Number);
+            const nSeq = '1,5,2,6,3,7,4'.split(',').map(Number);
+            const baseDay = dayNum === 8 ? 4 : dayNum;
+            const dIdx = dSeq.indexOf(baseDay);
+            const nIdx = nSeq.indexOf(baseDay);
+            const dayYams = [0,1,2,3,4,5,6].map(i => dSeq[(dIdx + i) % 7]);
+            const nightYams = [0,1,2,3,4,5,6].map(i => nSeq[(nIdx + i) % 7]);
+
+            const [hh, mm] = (timeStr || '10:40').split(':').map(Number);
+            const totalMin = hh * 60 + mm;
+            const isDay = (totalMin >= 360 && totalMin < 1080);
+            const elapsed = isDay ? (totalMin - 360) : ((totalMin - 1080 + 1440) % 1440);
+            const yamIndex = Math.min(7, Math.floor(elapsed / 102.857) + 1);
+            const activePlanet = isDay ? dayYams[yamIndex - 1] : nightYams[yamIndex - 1];
+            return { isDay, yamIndex, dayYams, nightYams, activePlanet };
+        }
+
             function shiftJorDate(daysDelta) {
             const el = document.getElementById('jor_date');
             if (!el || !el.value) return;
