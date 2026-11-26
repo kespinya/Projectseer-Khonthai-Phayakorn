@@ -324,236 +324,142 @@
             return { nakshatra: ASTRO_CONST.NAKSHATRAS[nakIdx], navamsaRasi: navIdx };
         }
 
-              function computeFullAstrology(dobStr, tobStr, lat, lon, method, tz = 7) {
+                    function computeFullAstrology(dobStr, tobStr, lat, lon, method, tz = 7) {
             const [y, m, d] = dobStr.split('-').map(Number);
             const [hh, mm] = tobStr.split(':').map(Number);
             const utHour = hh + mm / 60 - tz;
             const jd = 367 * y - Math.floor(7 * (y + Math.floor((m + 9) / 12)) / 4) + Math.floor(275 * m / 9) + d + 1721013.5 + utHour / 24;
             const T = (jd - 2451545.0) / 36525.0;
-            const ayanamsa = 23.853056 + T * 1.396971;
+            const suriyaShift = 23.853056 + T * 1.396971;
 
-            // ดวงอาทิตย์ (๑) และดวงจันทร์ (๒) ตามสุริยยาตร์
             const M_sun = (357.52911 + 35999.05029 * T) * Math.PI / 180;
             const L0_sun = 280.46646 + 36000.76983 * T;
-            const sunLon = norm360(L0_sun + 1.914602 * Math.sin(M_sun) + 0.019993 * Math.sin(2 * M_sun) - ayanamsa + 0.53);
+            const sunLon = norm360(L0_sun + 1.914602 * Math.sin(M_sun) + 0.019993 * Math.sin(2 * M_sun) - suriyaShift + 0.53);
 
             const L_moon = 218.3165 + 481267.8813 * T;
             const M_moon = (134.963 + 477198.867 * T) * Math.PI / 180;
             const D_moon = (297.850 + 445267.111 * T) * Math.PI / 180;
-            const moonLon = norm360(L_moon + 6.289 * Math.sin(M_moon) + 1.274 * Math.sin(2 * D_moon - M_moon) - ayanamsa + 9.78);
+            const moonLon = norm360(L_moon + 6.289 * Math.sin(M_moon) + 1.274 * Math.sin(2 * D_moon - M_moon) - suriyaShift + 9.78);
 
-            // ดาวเคราะห์ ๓, ๔, ๕, ๖, ๗, ๘, ๙, ๐ ตามสุริยยาตร์ไทย
-            const marsLon = norm360(355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - ayanamsa + 28.41);
+            const marsLon = norm360(355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - suriyaShift + 28.41);
             const mercLon = norm360(sunLon + 16 * Math.sin((174.795 + 149472.515 * T) * Math.PI / 180) + 2.45);
-            const jupLon = norm360(34.351 + 3034.906 * T + 5.555 * Math.sin((20.020 + 3034.696 * T) * Math.PI / 180) - ayanamsa - 0.42);
+            const jupLon = norm360(34.351 + 3034.906 * T + 5.555 * Math.sin((20.020 + 3034.696 * T) * Math.PI / 180) - suriyaShift - 0.42);
             const venLon = norm360(sunLon + 30.1 * Math.sin((50.416 + 58517.803 * T) * Math.PI / 180) - 4.75);
-            const satLon = norm360(50.077 + 1222.114 * T + 6.406 * Math.sin((317.020 + 1222.114 * T) * Math.PI / 180) - ayanamsa - 4.43);
-            const rahuLon = norm360(125.0445 - 1934.1363 * T - ayanamsa - 0.26);
-            const ketuLon = norm360(46.50 + 1935.47 * T - ayanamsa - 7.40);
-            const uranLon = norm360(314.055 + 428.467 * T - ayanamsa - 3.60);
+            const satLon = norm360(50.077 + 1222.114 * T + 6.406 * Math.sin((317.020 + 1222.114 * T) * Math.PI / 180) - suriyaShift - 4.43);
+            const rahuLon = norm360(125.0445 - 1934.1363 * T - suriyaShift - 0.26);
+            const ketuLon = norm360(46.50 + 1935.47 * T - suriyaShift - 7.40);
+            const uranLon = norm360(314.055 + 428.467 * T - suriyaShift - 3.60);
 
             const rawLons = { 1: sunLon, 2: moonLon, 3: marsLon, 4: mercLon, 5: jupLon, 6: venLon, 7: satLon, 8: rahuLon, 9: ketuLon, 0: uranLon };
+            const planets = [], rasiPos = {}, navamsaPos = {};
+            const order =;
 
+            order.forEach(id => {
+                const lonVal = rawLons[id];
+                const rasi = Math.floor(lonVal / 30);
+                const degF = lonVal % 30, deg = Math.floor(degF), min = Math.floor((degF - deg) * 60);
+                const navInfo = getNavamsaAndNakshatra(lonVal);
 
-            const planetPos = {}, planetDet = {}, navamsaPos = {};
+                // ดาวดับ: ใกล้และอยู่ด้านหลังดวงอาทิตย์ (ไม่เกิน 8 องศา)
+                const diffSun = norm360(sunLon - lonVal);
+                const isCombust = ([2, 3, 4, 5, 6, 7].includes(id) && diffSun > 0 && diffSun <= 8);
 
-            Object.keys(rawLons).forEach(k => {
-                const lv = rawLons[k], rasi = Math.floor(lv / 30), degF = lv % 30;
-                const extra = getNavamsaAndNakshatra(lv);
-                planetPos[k] = rasi;
-                navamsaPos[k] = extra.navamsaRasi;
-                planetDet[k] = { rasi, deg: Math.floor(degF), min: Math.floor((degF % 1) * 60), nakshatra: extra.nakshatra, navamsaRasi: extra.navamsaRasi };
+                // โคจรวิกลคติ (พักร์ / มนท์ / ปกติ)
+                let motion = 'ปกติ';
+                if (id === 8 || id === 9) motion = 'พักร์(ปกติ)';
+                else if ([3, 5, 7, 0].includes(id)) {
+                    const synAngle = norm360(lonVal - sunLon);
+                    if (synAngle > 135 && synAngle < 225) motion = 'พักร์ (R)';
+                    else if (synAngle >= 115 && synAngle <= 135) motion = 'มนท์ (S)';
+                }
+
+                const dignity = (id === 8 && rasi === 10) ? 'เกษตร (เจ้าเรือนกุมภ์)' : getPlanetDignity(id, rasi);
+                const status = isCombust ? `ดับ • ${dignity}` : dignity;
+                planets.push({ id, lon: lonVal, rasi, deg, min, nakshatra: navInfo.nakshatra, navamsaRasi: navInfo.navamsaRasi, status, motion });
+                rasiPos[id] = rasi;
+                navamsaPos[id] = navInfo.navamsaRasi;
             });
 
-            const sunRasi = Math.floor(sunLon / 30);
-            const sunDegInRasi = sunLon % 30;
-            let ascLon = 0;
+            // ลัคนาอันโตนาที + พระอาทิตย์ขึ้นเวลาจริง + ไม่ตัด LMT + เลขตั้งค่าลัคนา -17
+            const sunRasi = Math.floor(sunLon / 30), sunDegInRasi = sunLon % 30;
+            const dayOfYear = Math.floor((jd - (367 * y - Math.floor(7 * (y + 1) / 4) + 31 + 1721013.5)) + 1);
+            const declRad = 23.44 * Math.PI / 180 * Math.sin(2 * Math.PI * (dayOfYear - 81) / 365);
+            const latRad = (lat || 13.7563) * Math.PI / 180;
+            const ha = Math.acos(Math.max(-1, Math.min(1, -Math.tan(latRad) * Math.tan(declRad)))) * 180 / Math.PI;
+            const trueSunriseMin = 720 - (ha * 4);
+            let elapsedMin = (((hh * 60 + mm) - trueSunriseMin) + 1440) % 1440 - 17;
+            if (elapsedMin < 0) elapsedMin += 1440;
 
-            if (method === 'lahiri') {
-                const gmst = norm360(280.46061837 + 360.98564736629 * (jd - 2451545.0));
-                const ramc = norm360(gmst + lon) * Math.PI / 180;
-                const eps = 23.4393 * Math.PI / 180, latR = lat * Math.PI / 180;
-                ascLon = norm360(Math.atan2(Math.cos(ramc), -Math.sin(ramc) * Math.cos(eps) - Math.tan(latR) * Math.sin(eps)) * 180 / Math.PI - ayanamsa);
+            const antoTable = ASTRO_CONST.ANTO_STD;
+            let remMin = elapsedMin, curR = sunRasi, ascLon = 0;
+            const firstSignRem = antoTable[curR] * ((30 - sunDegInRasi) / 30);
+            if (remMin <= firstSignRem) {
+                ascLon = curR * 30 + sunDegInRasi + (remMin / antoTable[curR]) * 30;
             } else {
-                const stdLon = tz * 15;
-                let sunriseMin = 393 - ((lon - stdLon) * 4), totalMin = hh * 60 + mm;
-                if (method === 'anto_lmt') totalMin += (lon - stdLon) * 4;
-                if (method === 'anto_lat') {
-                    const doy = Math.floor((new Date(y, m - 1, d) - new Date(y, 0, 0)) / 86400000);
-                    sunriseMin = 360 - Math.sin((doy - 80) * 2 * Math.PI / 365) * (lat * 1.4) - ((lon - stdLon) * 4);
-                }
-                let elapsed = (totalMin - sunriseMin + 1440) % 1440;
-                const remSunMin = ASTRO_CONST.ANTO_STD[sunRasi] * ((30 - sunDegInRasi) / 30);
-                if (elapsed < remSunMin) {
-                    ascLon = norm360(sunLon + (elapsed / ASTRO_CONST.ANTO_STD[sunRasi]) * 30);
-                } else {
-                    elapsed -= remSunMin;
-                    let currR = (sunRasi + 1) % 12;
-                    while (elapsed >= ASTRO_CONST.ANTO_STD[currR]) {
-                        elapsed -= ASTRO_CONST.ANTO_STD[currR];
-                        currR = (currR + 1) % 12;
-                    }
-                    ascLon = currR * 30 + (elapsed / ASTRO_CONST.ANTO_STD[currR]) * 30;
-                }
+                remMin -= firstSignRem;
+                curR = (curR + 1) % 12;
+                while (remMin > antoTable[curR]) { remMin -= antoTable[curR]; curR = (curR + 1) % 12; }
+                ascLon = curR * 30 + (remMin / antoTable[curR]) * 30;
             }
-
+            ascLon = norm360(ascLon);
             const ascRasi = Math.floor(ascLon / 30), ascDegF = ascLon % 30;
-            const ascExtra = getNavamsaAndNakshatra(ascLon);
-            const lordRasi = planetPos[ASTRO_CONST.LORDS[ascRasi]];
-            const stepsTanu = (lordRasi - ascRasi + 12) % 12;
+            const ascDeg = Math.floor(ascDegF), ascMin = Math.floor((ascDegF - ascDeg) * 60);
+            const ascNav = getNavamsaAndNakshatra(ascLon);
+
+            // เจ้าเรือนกุมภ์ = ราหู (๘) -> หาตนุเศษ & ปริวรรตเกษตร (ไม่เกิน 3 เรือน)
+            const LORDS_PLACHOT =;
+            const ascLord = LORDS_PLACHOT[ascRasi];
+            const stepsTanu = (rasiPos[ascLord] - ascRasi + 12) % 12;
             const tanuRasi = (ascRasi + stepsTanu) % 12;
-            const lunarInfo = getThaiLunarCalendar100Y(dobStr, tobStr);
+            const tanuPlanet = LORDS_PLACHOT[tanuRasi];
 
-            return {
-                ascRasi, ascDeg: Math.floor(ascDegF), ascMin: Math.floor((ascDegF % 1) * 60),
-                ascNakshatra: ascExtra.nakshatra, ascNavamsa: ascExtra.navamsaRasi,
-                sunRasi, planetPos, navamsaPos, planetDet, tanuPlanet: ASTRO_CONST.LORDS[tanuRasi],
-                lunarText: lunarInfo.lunarText
-            };
-        }
+            const pariwatList = [];
+            planets.forEach(p1 => {
+                if (p1.id === 9 || p1.id === 0) return;
+                const ow1 = LORDS_PLACHOT[p1.rasi];
+                if (ow1 === p1.id) return;
+                const p2 = planets.find(x => x.id === ow1);
+                if (p2 && LORDS_PLACHOT[p2.rasi] === p1.id && p1.id < p2.id) {
+                    pariwatList.push(`ปริวรรต 2 เรือน (${ASTRO_CONST.FULL_NAMES[p1.id]} ↔ ${ASTRO_CONST.FULL_NAMES[p2.id]})`);
+                } else if (p2 && LORDS_PLACHOT[p2.rasi] !== p2.id) {
+                    const p3 = planets.find(x => x.id === LORDS_PLACHOT[p2.rasi]);
+                    if (p3 && LORDS_PLACHOT[p3.rasi] === p1.id && p1.id < p2.id && p1.id < p3.id) {
+                        pariwatList.push(`ปริวรรต 3 เรือน (${ASTRO_CONST.FULL_NAMES[p1.id]} → ${ASTRO_CONST.FULL_NAMES[p2.id]} → ${ASTRO_CONST.FULL_NAMES[p3.id]})`);
+                    }
+                }
+            });
 
-                function getMonth5NewYearBE(dobStr) {
-            const [y, m, d] = dobStr.split('-').map(Number);
-            const jd = 367 * y - Math.floor(7 * (y + Math.floor((m + 9) / 12)) / 4) + Math.floor(275 * m / 9) + d + 1721013.5;
-            const synodic = 29.530588853;
-            const lunarAge = (((jd - 2451550.26) % synodic) + synodic) % synodic;
-            const tithi = Math.floor((lunarAge / synodic) * 30) + 1;
-            const info = getThaiLunarCalendar100Y(dobStr, '09:00');
-            let be = y + 543;
-            // เปลี่ยนปีนักษัตรตรงวันขึ้น 1 ค่ำ เดือน 5 (สายพลโชติ)
-            if (info.astroMonth < 5 && m <= 4) be -= 1;
-            return { be, astroMonth: info.astroMonth, tithi };
-        }
+            // กลุ่มองค์เกณฑ์ (กรกฎ=อัมพุช, ธนู=นระ, มังกร=อัมพุช, เฉพาะดาวตามเกณฑ์)
+            const ongKhenList = [];
+            const rasiType = ['ปัสวะ', 'ปัสวะ', 'นระ', 'อัมพุช', 'ปัสวะ', 'นระ', 'นระ', 'กีฏะ', 'นระ', 'อัมพุช', 'นระ', 'อัมพุช'];
+            const ascType = rasiType[ascRasi];
+            planets.forEach(p => {
+                const bhava = ((p.rasi - ascRasi + 12) % 12) + 1;
+                if (ascType === 'อัมพุช' && [2, 4, 5, 6].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`อัมพุชองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+                if (ascType === 'นระ' && [1, 4, 5, 7].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`นระองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+                if (ascType === 'ปัสวะ' && [1, 3, 5, 7].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`ปัสวะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+                if (ascType === 'กีฏะ' && [2, 3, 6, 8].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`กีฏะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+            });
 
-        function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD, dobStr, tobStr) {
-            const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
-            const seq = '0,1,2,3,4,5,6'.split(',').map(Number);
-            const r1 = seq.map(i => mod7(d7 + i));
-            const r2 = seq.map(i => mod7(m7 + i));
-            const r3 = seq.map(i => mod7(y7 + i));
-            const r4 = seq.map(i => r1[i] + r2[i] + r3[i]);
-            const r5 = r4.map(n => mod7(n));
-            const r6 = seq.map(i => mod7(r5[i] * 2));
-            const r7 = seq.map(i => mod7(r6[i] * 2));
-            const r8 = seq.map(i => mod7(r4[i] + r7[i]));
-            const r9 = seq.map(i => mod7(r5[i] + r6[i]));
-            const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
-
-            const age = Math.max(1, targetBE - birthYearBE + 1);
-            const yCol = (age - 1) % 7;
-            const mCol = (yCol + (addM || 0)) % 7;
-            const dCol = (mCol + (addD || 0)) % 7;
-
-            // ลัคนา 3 ฐาน (ตำราพรหมชาติ) จากยามเกิด (06:00 เป็นยาม 1)
-            const [hh, mm] = (tobStr || '03:38').split(':').map(Number);
-            const minFrom6 = ((hh * 60 + mm) - 360 + 1440) % 1440;
-            const yamNum = Math.floor(minFrom6 / 90) + 1;
-            const lakBase1 = (yamNum - 1) % 7;
-            const lakBase2 = (lakBase1 + (m7 - 1)) % 7;
-            const lakBase3 = (lakBase2 + (y7 - 1)) % 7;
-            const lakJor = (lakBase1 + (age - 1)) % 7;
-
-            // ผังมหาภูติ (กำเนิด vs จร)
-            const calcMahaphut = (be) => {
-                const js = be - 1181;
-                const dharmachai = ((js * 5 + 3) % 7) + 1;
-                return {
-                    js,
-                    raja: mod7(dharmachai + 6),
-                    athibodi: mod7(dharmachai + 5),
-                    dharmachai,
-                    khumsap: mod7(dharmachai + 3)
-                };
-            };
-
-            return {
-                rows, age, yCol, mCol, dCol,
-                lak3: [lakBase1, lakBase2, lakBase3], lakJor,
-                mpBirth: calcMahaphut(birthYearBE), mpJor: calcMahaphut(targetBE)
-            };
-        }
-
-        function computeTaksaAndKalayok(birthDay, steps, yearBE) {
-            const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
-            const roles = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
-            const sIdx = seq.indexOf(birthDay);
-            const cIdx = steps === 0 ? sIdx : (sIdx + steps + 2) % 8;
-            const roleMap = {};
-            for (let i = 0; i < 8; i++) roleMap[seq[(cIdx + i) % 8]] = roles[i];
-
-            const js = yearBE - 1181;
-            const dharmachai = ((js * 5 + 2) % 7) + 1;
-            const athibodi = mod7(dharmachai + 1);
-            const ubat = ((js * 3 + 5) % 7) + 1;
-            const lokawinart = ((js * 4 + 3) % 7) + 1;
-            return { roleMap, briwan: seq[cIdx], kalayok: { dharmachai, athibodi, ubat, lokawinart } };
-        }
-
-        function analyzeCandleAndHouse(rows, tkY, yCol) {
-            // 1. คำนวณ "ดวงประทีป (แท่งเทียนชีวิต)"
-            const sri = +Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'ศรี');
-            const kali = +Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'กาลกิณี');
-            const b4Jor = rows[3][yCol];
-            const b8Jor = rows[7][yCol];
-            const activeNum = rows[0][yCol];
-            let candleScore = 50;
-            if (b4Jor >= 11 && b4Jor !== 12) candleScore += 25;
-            if (activeNum === sri || rows[1][yCol] === sri) candleScore += 20;
-            if (activeNum === kali || b4Jor === 8 || b4Jor === 12) candleScore -= 30;
-            if (b8Jor === 5 || b8Jor === 6) candleScore -= 20;
-
-            let candleState = { level: 'medium', title: '🕯️ ไฟสว่างปานกลาง (เปลวไฟนิ่ง)', color: '#D97706', desc: 'พลังชีวิตทรงตัว ดำเนินไปได้ด้วยความขยันและสติรอบคอบ' };
-            if (candleScore >= 75) candleState = { level: 'bright', title: '🔥 ไฟสว่างโชติช่วง (เปลวไฟทอง-มรกต)', color: '#059669', desc: 'ดาวศรีและฐานกำลังดีหนุนดวงเต็มเปี่ยม ทำสิ่งใดสำเร็จง่าย มีผู้ใหญ่อุปถัมภ์' };
-            else if (candleScore <= 25) candleState = { level: 'extinguished', title: '🌑 ไฟดับ (จุดวิกฤตต้องเสริมประทีป)', color: '#DC2626', desc: 'จุดจรปะทะกาลกิณีและฐานเสียพร้อมกัน ควรชะลอความเสี่ยง ระวังสุขภาพและเอกสาร' };
-            else if (candleScore <= 45) candleState = { level: 'dim', title: '💨 ไฟริบหรี่ / ใกล้ดับ (เปลวไฟเอนไหว)', color: '#EA580C', desc: 'พลังดวงอ่อนแรงลงชั่วคราว ควรรอบคอบเรื่องการเงินและหมั่นทำบุญแสงสว่างเสริมดวง' };
-
-            // 2. คำนวณ "ทรงบ้าน (เรือนชะตา 3 ฐานบน vs 6 ฐานล่าง)"
-            const isGood = (val) => {
-                const p = (val === 8 || val === 12) ? 8 : mod7(val);
-                return p !== kali && val !== 8 && val !== 12;
-            };
-            let roofScore = 0, bodyScore = 0, leftScore = 0, rightScore = 0;
-            for (let c = 0; c < 7; c++) {
-                const topOk = isGood(rows[0][c]) && isGood(rows[1][c]);
-                const botOk = (rows[3][c] >= 11 && rows[3][c] !== 12) || isGood(rows[8][c]);
-                if (topOk) roofScore++;
-                if (botOk) bodyScore++;
-                if (c < 3 && (topOk || botOk)) leftScore++;
-                if (c > 3 && (topOk || botOk)) rightScore++;
-            }
-            const hasRoof = roofScore >= 4;
-            const hasBody = bodyScore >= 4;
-            let houseType = { code: 'full', title: '🏠 บ้านสมบูรณ์ (มีทั้งหลังคาและตัวบ้านครบ)', desc: 'ฐานบนและฐานล่างมั่นคง วาสนาดี มีผู้ใหญ่คุ้มครองและสร้างฐานะเป็นปึกแผ่นได้' };
-            if (leftScore >= 2 && rightScore === 0) houseType = { code: 'left', title: '◧ บ้านเอียงซ้าย (มีหลังคาและตัวบ้านด้านซ้าย)', desc: 'วัยต้นถึงวัยกลางคนรุ่งเรือง สร้างตัวได้เร็ว แต่บั้นปลายควรวางแผนสำรองเรื่องคู่ครองและบริวาร' };
-            else if (rightScore >= 2 && leftScore === 0) houseType = { code: 'right', title: '◨ บ้านเอียงขวา (มีหลังคาและตัวบ้านด้านขวา)', desc: 'ช่วงต้นชีวิตต้องบุกเบิกด้วยตนเอง แต่จะไปตั้งหลักปักฐานรุ่งเรืองมากในช่วงวัยกลางคนถึงบั้นปลาย' };
-            else if (!hasRoof && hasBody) houseType = { code: 'no-roof', title: '⛺ มีตัวบ้าน แต่ไม่มีหลังคา', desc: 'หาเงินเก่งและสร้างฐานะได้ด้วยตนเอง แต่ขาดผู้ใหญ่คอยบังแดดบังฝน ต้องพึ่งลำแข้งตนเองเป็นหลัก' };
-            else if (hasRoof && !hasBody) houseType = { code: 'no-body', title: '☂️ มีหลังคา แต่ไม่มีตัวบ้าน', desc: 'มีชื่อเสียงหน้าตาทางสังคมและผู้ใหญ่เมตตา แต่ฐานเก็บทรัพย์รั่วไหลง่าย ต้องฝึกวินัยการออม' };
-
-            return { candleState, houseType, hasRoof, hasBody, leftScore, rightScore };
-        }
-
-               function computeAtthakalaYam(astroDay, tobStr) {
-            const [hh, mm] = (tobStr || '14:03').split(':').map(Number);
-            const totalMin = hh * 60 + mm;
-            const isDay = (totalMin >= 360 && totalMin < 1080);
-            const offsetMin = isDay ? (totalMin - 360) : ((totalMin - 1080 + 1440) % 1440);
-            const yamIndex = Math.min(7, Math.floor(offsetMin / (720 / 7)) + 1);
-
-                        const daySeq = '1,6,4,2,7,5,3'.split(',').map(Number);
-            const nightSeq = '1,5,2,6,3,7,4'.split(',').map(Number);
-
-            const d7 = mod7(astroDay);
-
-            const dStart = daySeq.indexOf(d7);
-            const nStart = nightSeq.indexOf(d7);
-            const dayYams = [], nightYams = [];
-            for (let i = 0; i < 7; i++) {
-                dayYams.push(daySeq[(dStart + i) % 7]);
-                nightYams.push(nightSeq[(nStart + i) % 7]);
+            // ตรีวัย (นับจากตนุเศษ รอบอายุ 100 ปี)
+            const triOrder =;
+            const years100 = { 1: 6, 2: 15, 3: 8, 4: 17, 7: 10, 5: 19, 8: 12, 6: 13 };
+            const tIdx = Math.max(0, triOrder.indexOf(tanuPlanet));
+            let acc = 0, wai1 = '', wai2 = '', wai3 = '';
+            for (let k = 0; k < 8; k++) {
+                const pid = triOrder[(tIdx + k) % 8];
+                const nxt = acc + years100[pid];
+                const lbl = `${ASTRO_CONST.DAYS[pid]}(${acc}-${nxt}ปี) `;
+                if (k < 3) wai1 += lbl; else if (k < 6) wai2 += lbl; else wai3 += lbl;
+                acc = nxt;
             }
 
-            const activePlanet = isDay ? dayYams[yamIndex - 1] : nightYams[yamIndex - 1];
-            return { isDay, periodText: isDay ? '☀️ ยามกลางวัน' : '🌙 ยามกลางคืน', yamIndex, activePlanet, dayYams, nightYams };
+            return {
+                planets, rasiPos, navamsaPos, ascRasi, ascDeg, ascMin,
+                ascNakshatra: ascNav.nakshatra, ascNavamsa: ascNav.navamsaRasi,
+                tanuRasi, tanuPlanet, pariwatList, ongKhenList,
+                triWai: { wai1, wai2, wai3 }
+            };
         }
 
         function buildCosmicWheelSVG(title, ascRasi, sunRasi, planetPos, showBhava) {
