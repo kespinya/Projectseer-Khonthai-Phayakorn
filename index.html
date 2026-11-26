@@ -719,13 +719,13 @@
                         const isLak3 = (rIdx < 3 && data.lak3[rIdx] === cIdx);
                         const lakBadge = isLak3 ? '<span style="background:#1E3A8A;color:#FDE047;font-size:9px;padding:1px 4px;border-radius:4px;margin-right:2px;">ล</span>' : '';
 
-                        // สัญลักษณ์เรขาคณิตแบบโฮ๋ราสาด + วงกลม 2 ชั้น (◎) สูตร อ.นภา
+                       // สัญลักษณ์เรขาคณิตแยกบทบาททักษา + วงกลม 2 ชั้น (◎) จุดพยากรณ์ชี้ขาด
                         const isAnapaPoint = (cIdx === data.yCol && (rIdx === 0 || rIdx === 3 || rIdx === 7)) || (isLak3 && role === 'ศรี');
                         let geomMark = '';
                         if (role === 'ศรี') geomMark = '<span style="color:#16A34A;font-size:11px;font-weight:700;" title="วงกลมเขียว: ศรีจร">🟢</span>';
                         else if (role === 'เดช') geomMark = '<span style="color:#2563EB;font-size:11px;font-weight:700;" title="วงกลมน้ำเงิน: เดชจร">🔵</span>';
                         else if (role === 'กาลกิณี') geomMark = '<span style="color:#DC2626;font-size:11px;font-weight:700;" title="สามเหลี่ยมแดง: กาลกิณีจร">🔺</span>';
-                        const anapaMark = isAnapaPoint ? '<span style="color:#B45309;font-size:12px;font-weight:700;margin-left:2px;" title="วงกลม 2 ชั้น: จุดพยากรณ์สูตร อ.นภา">◎</span>' : '';
+                      const anapaMark = isAnapaPoint ? '<span style="color:#B45309;font-size:12px;font-weight:700;margin-left:2px;" title="วงกลม 2 ชั้น: จุดพยากรณ์ชี้ขาด">◎</span>' : '';
 
                         let subTop = '', subBot = '';
                         if (rIdx < 3) subBot = ASTRO_CONST.HOUSES[rIdx][cIdx];
@@ -734,7 +734,7 @@
                         else if (rIdx === 8) subBot = ASTRO_CONST.BASE9_MEANINGS[val - 1];
 
                         const dot = (rIdx === 0 && cIdx === data.yCol) ? '<span style="display:inline-block;width:8px;height:8px;background:#DC2626;border-radius:50%;margin-left:3px;" title="จุดอายุจร"></span>' : '';
-                        const extraTags = [isLak3 ? 'ลัคนาเดิม(พรหมชาติ)' : '', isJorStress ? 'ตัวย้ำอายุจร(แถว5-7)' : '', isAnapaPoint ? 'จุดพยากรณ์ อ.นภา(◎)' : ''].filter(Boolean).join(' • ');
+                        const extraTags = [isLak3 ? 'ลัคนาเดิม 3 ฐาน' : '', isJorStress ? 'ตัวย้ำอายุจร(แถว5-7)' : '', isAnapaPoint ? 'จุดพยากรณ์ชี้ขาด(◎)' : ''].filter(Boolean).join(' • ');
                         const msg = `🔮 <b>${subBot || ASTRO_CONST.BASE_NAMES[rIdx]} (${val})</b> • ดาว${ASTRO_CONST.DAYS[p]} • ทักษาจร: <b>${role}</b> ${extraTags ? `• <span style="color:#B45309;">[${extraTags}]</span>` : ''}`;
 
                         return `<td><button class="t7-cell-btn" data-val="${val}" onclick="highlightNumberInTable(${val}, '${msg}')" style="width:100%;padding:5px 3px;border-radius:10px;background:${bg};border:2px solid ${bd};color:${cl};cursor:pointer;transition:0.2s;">
@@ -779,7 +779,7 @@
             box.innerHTML = `
                 <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;background:#FFFBEB;padding:10px 14px;border-radius:14px;border:1.5px solid #F59E0B;">
                     <div>
-                        <h3 style="color:#B91C1C;font-size:16.5px;">📜 ตาราง 7 ตัว 9 ฐานขั้นสูง (สายพลโชติ × สูตร อ.นภา × โฮ๋ราสาด)</h3>
+                      <h3 style="color:#B91C1C;font-size:16.5px;">📜 ตาราง 7 ตัว 9 ฐานขั้นสูง (ตำรามหาสัตตเลข & ทักษาคู่ธาตุ)</h3>
                         <div style="font-size:12px;color:#047857;font-weight:600;">อายุย่าง ${data.age} ปี • 🟢 ศรีจร: ${ASTRO_CONST.DAYS[sriStar]} | 🔵 เดชจร: ${ASTRO_CONST.DAYS[dechStar]} | 🔺 กาลกิณีจร: ${ASTRO_CONST.DAYS[kaliStar]}</div>
                     </div>
                     <div style="display:flex;gap:6px;">
@@ -790,7 +790,7 @@
                 <div style="font-size:11px;color:#1E3A8A;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:10px;background:#EFF6FF;padding:6px 12px;border-radius:10px;">
                     <span><b>สัญลักษณ์:</b> <span style="background:#1E3A8A;color:#FDE047;padding:0 4px;border-radius:3px;">ล</span> ลัคนา 3 ฐาน(พรหมชาติ)</span>
                     <span>🟢 ศรีจร</span><span>🔵 เดชจร</span><span>🔺 กาลกิณีจร</span>
-                    <span style="color:#B45309;font-weight:700;">◎ จุดพยากรณ์ อ.นภา</span>
+                   <span style="color:#B45309;font-weight:700;">◎ จุดพยากรณ์ชี้ขาด</span>
                     <span style="background:#FEF3C7;border:1px solid #D97706;padding:0 5px;border-radius:4px;">กรอบทอง = ตัวย้ำอายุจร(แถว 5-7)</span>
                 </div>
                 <div style="overflow-x:auto;margin-bottom:12px;"><table style="width:100%;border-spacing:4px;text-align:center;">${tbl}</table></div>
