@@ -295,7 +295,9 @@
             const latRad = (lat || 13.7563) * Math.PI / 180;
             const ha = Math.acos(Math.max(-1, Math.min(1, -Math.tan(latRad) * Math.tan(declRad)))) * 180 / Math.PI;
             const trueSunriseMin = 720 - (ha * 4);
-            const sunriseMin = 395 - ((lon - (tz * 15)) * 4);
+            const sunriseMin = 360;
+            let elapsedMin = (((hh * 60 + mm) - sunriseMin) + 1440) % 1440 - 17;
+
             let elapsedMin = (((hh * 60 + mm) - sunriseMin) + 1440) % 1440;
 
             if (elapsedMin < 0) elapsedMin += 1440;
