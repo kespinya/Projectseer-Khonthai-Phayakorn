@@ -247,7 +247,7 @@
                 (id === 5 && rasi === 3) || (id === 6 && rasi === 3) || (id === 7 && rasi === 4) || (id === 8 && rasi === 11)) return 'ราชาโชค';
             return 'ปกติ';
         }
-            function getThaiLunarCalendar100Y(dobStr, tobStr) {
+                  function getThaiLunarCalendar100Y(dobStr, tobStr) {
             const [y, m, d] = dobStr.split('-').map(Number);
             const [hh, mm] = (tobStr || '09:00').split(':').map(Number);
             const dt = new Date(y, m - 1, d);
@@ -256,23 +256,38 @@
             let astroDay = dt.getDay() + 1;
             if (astroDay === 4 && (hh >= 18 || hh < 6)) astroDay = 8;
 
-            const jd = 367 * dt.getFullYear() - Math.floor(7 * (dt.getFullYear() + Math.floor((dt.getMonth() + 10) / 12)) / 4) + Math.floor(275 * (dt.getMonth() + 1) / 9) + dt.getDate() + 1721013.5;
+            const gy = dt.getFullYear(), gm = dt.getMonth() + 1, gd = dt.getDate();
+            const jd = 367 * gy - Math.floor(7 * (gy + Math.floor((gm + 9) / 12)) / 4) + Math.floor(275 * gm / 9) + gd + 1721013.5;
             const synodic = 29.530588853;
-            const lunarAge = (((jd - 2451550.26) % synodic) + synodic) % synodic;
-            const tithi = Math.floor((lunarAge / synodic) * 30) + 1;
+            const daysSinceNewMoon = jd - 2415020.75933;
+            const lunationIndex = Math.floor(daysSinceNewMoon / synodic);
+            const lunarAge = daysSinceNewMoon - (lunationIndex * synodic);
+            const tithi = Math.min(30, Math.floor((lunarAge / synodic) * 30) + 1);
             const paksha = tithi <= 15 ? `ขึ้น ${tithi} ค่ำ` : `แรม ${tithi - 15} ค่ำ`;
 
-                       const curM = dt.getMonth() + 1;
-            let astroMonth = (curM % 12) + 1;
-            if (dt.getDate() <= 5 && tithi > 18) astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
+            const newMoonJD = 2415020.75933 + (lunationIndex * synodic) + 0.291667;
+            const nmDate = new Date((newMoonJD - 2440587.5) * 86400000);
+            const nmMonth = nmDate.getUTCMonth() + 1;
+            const nmDay = nmDate.getUTCDate();
 
-            let be = dt.getFullYear() + 543;
-            if (curM <= 3 || (curM === 4 && astroMonth < 5)) be -= 1;
+            const baseMonthMap = { 11: 1, 12: 2, 1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 9, 8: 10, 9: 11, 10: 12 };
+            let astroMonth = baseMonthMap[nmMonth];
+            if (nmDay >= 25) astroMonth = (astroMonth % 12) + 1;
+
+            const beRaw = gy + 543;
+            const isAdhikamasa = (((beRaw * 12) + 5) % 19) < 7;
+            if (isAdhikamasa && (nmMonth === 7 || nmMonth === 8 || nmMonth === 9)) {
+                astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
+            }
+
+            let be = beRaw;
+            if (gm <= 3 || (gm === 4 && astroMonth < 5)) be -= 1;
             const astroYear = ((be - 7) % 12 + 12) % 12 + 1;
 
             const lunarText = `วัน${ASTRO_CONST.DAYS[astroDay]} ${paksha} เดือน ${ASTRO_CONST.MONTHS[astroMonth]} ปี${ASTRO_CONST.YEARS[astroYear]} พ.ศ.${be}`;
             return { astroDay, astroMonth, astroYear, birthYearBE: be, lunarText };
         }
+
 
 
         function computeFullAstrology(dobStr, tobStr, lat, lon, tz = 7) {
@@ -403,7 +418,7 @@
                 triWai: { wai1, wai2, wai3 }
             };
         }
-        function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD, dobStr, tobStr) {
+             function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD, dobStr, tobStr) {
             const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
             const seq = '0,1,2,3,4,5,6'.split(',').map(Number);
             const r1 = seq.map(i => mod7(d7 + i));
@@ -412,10 +427,11 @@
             const r4 = seq.map(i => r1[i] + r2[i] + r3[i]);
             const r5 = r4.map(n => mod7(n));
             const r6 = seq.map(i => mod7(r5[i] * 2));
-            const r7 = seq.map(i => mod7(r6[i] * 2));
-            const r8 = seq.map(i => mod7(r4[i] + r7[i]));
-            const r9 = seq.map(i => mod7(r5[i] + r6[i]));
+            const r7 = seq.map(i => mod7(r5[i] + r6[i]));
+            const r8 = seq.map(i => mod7(r6[i] + r7[i]));
+            const r9 = seq.map(i => mod7(r7[i] + r8[i]));
             const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
+
 
             const age = Math.max(1, targetBE - birthYearBE + 1);
             const yCol = (age - 1) % 7;
@@ -821,9 +837,13 @@
                 </div>`;
             triggerCatMagic();
         }
-        function renderQuickModeUI() {
-            const d1 = getThaiLunarCalendar100Y(document.getElementById('qk_dob').value, '09:00');
-            const d2 = getThaiLunarCalendar100Y(document.getElementById('qk_partner').value, '09:00');
+              function renderQuickModeUI() {
+            const dob1 = document.getElementById('qk_dob').value;
+            const dob2 = document.getElementById('qk_partner').value;
+            if (!dob1 || !dob2) return;
+
+            const d1 = getThaiLunarCalendar100Y(dob1, '09:00');
+            const d2 = getThaiLunarCalendar100Y(dob2, '09:00');
             const sum = (d1.astroDay + d2.astroDay) % 7;
             const goodSet = '1,3,5,6'.split(',').map(Number);
             const resText = goodSet.includes(sum) ? '💖 ดวงสมพงษ์เกื้อหนุนกันดีมาก เป็นคู่มิตรคู่ธาตุส่งเสริมความสำเร็จ' : '⚖️ ดวงคู่ปรับสมดุล ต้องอาศัยความเข้าใจและใจเย็นในการสื่อสาร';
