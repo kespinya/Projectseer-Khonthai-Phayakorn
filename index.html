@@ -538,7 +538,7 @@
                 </svg></div>`;
             return svg;
         }
-
+ 
         function renderZodiacModeUI() {
             const dob = document.getElementById('z_dob').value;
             const tob = document.getElementById('z_tob').value;
@@ -553,7 +553,7 @@
                 <td>${res.ascNakshatra}</td></tr>`;
 
             order.forEach(id => {
-                const d = res.planetDet[id];
+            const d = res.planets.find(p => p.id === id);
                 rows += `<tr style="border-bottom:1px solid #FDE68A;">
                     <td style="padding:7px;font-weight:700;">${ASTRO_CONST.FULL_NAMES[id]}</td>
                     <td style="color:#B91C1C;font-weight:600;">${ASTRO_CONST.ZODIACS[d.rasi]}</td>
@@ -563,8 +563,8 @@
             });
 
             const dhanamLord = ASTRO_CONST.LORDS[(res.ascRasi + 1) % 12];
-            const dhanamBhava = (res.planetPos[dhanamLord] - res.ascRasi + 12) % 12;
-            const ketuBhava = (res.planetPos['9'] - res.ascRasi + 12) % 12;
+            const dhanamBhava = (res.rasiPos[dhanamLord] - res.ascRasi + 12) % 12;
+            const ketuBhava = (res.rasiPos['9'] - res.ascRasi + 12) % 12;
 
             const box = document.getElementById('z_result');
             box.style.display = 'block';
@@ -575,7 +575,7 @@
                     <span style="background:#ECFDF5;border:1.5px solid #10B981;color:#065F46;padding:4px 12px;border-radius:99px;font-size:13px;font-weight:700;">🔮 ตนุเศษ: ${ASTRO_CONST.FULL_NAMES[res.tanuPlanet]}</span>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;background:#0F294A;padding:16px;border-radius:18px;border:2px solid #F59E0B;margin-bottom:16px;">
-                    ${buildCosmicWheelSVG('🎡 ราศีจักร', res.ascRasi, res.sunRasi, res.planetPos, true)}
+                ${buildCosmicWheelSVG('🪐 ราศีจักร', res.ascRasi, res.rasiPos[1], res.rasiPos, true)}
                     ${buildCosmicWheelSVG('💠 นวางค์จักร', res.ascNavamsa, res.navamsaPos, res.navamsaPos, false)}
                 </div>
                 <div style="overflow-x:auto;">
