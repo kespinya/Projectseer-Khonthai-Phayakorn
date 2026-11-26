@@ -429,15 +429,18 @@
                     }
                     };
             // กลุ่มองค์เกณฑ์ (กรกฎ=อัมพุช, ธนู=นระ, มังกร=อัมพุช, เฉพาะดาวตามเกณฑ์)
-            const ongKhenList = [];
+                       const ongKhenList = [];
             const rasiType = ['ปัสวะ', 'ปัสวะ', 'นระ', 'อัมพุช', 'ปัสวะ', 'นระ', 'นระ', 'กีฏะ', 'นระ', 'อัมพุช', 'นระ', 'อัมพุช'];
             const ascType = rasiType[ascRasi];
             planets.forEach(p => {
                 const bhava = ((p.rasi - ascRasi + 12) % 12) + 1;
-                if (ascType === 'อัมพุช' && '2,4,5,6'.split(',').map(Number).includes(p.id) && '1,4,7,10'.split(',').map(Number).includes(bhava)) ongKhenList.push(`อัมพุชองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
-                if (ascType === 'นระ' && '1,4,5,7'.split(',').map(Number).includes(p.id) && '1,4,7,10'.split(',').map(Number).includes(bhava)) ongKhenList.push(`นระองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
-                if (ascType === 'ปัสวะ' && '1,2,3,7'.split(',').map(Number).includes(p.id) && '1,4,7,10'.split(',').map(Number).includes(bhava)) ongKhenList.push(`ปัสวะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
-                if (ascType === 'กีฏะ' && '3,5,6,8'.split(',').map(Number).includes(p.id) && '1,4,7,10'.split(',').map(Number).includes(bhava)) ongKhenList.push(`กีฏะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+                const dName = ASTRO_CONST.FULL_NAMES[p.id];
+                if ('1,4,7,10'.split(',').map(Number).includes(bhava)) {
+                    if (ascType === 'อัมพุช' && '2,4,5,6'.split(',').map(Number).includes(p.id)) ongKhenList.push('อัมพุชองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
+                    if (ascType === 'นระ' && '1,4,5,7'.split(',').map(Number).includes(p.id)) ongKhenList.push('นระองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
+                    if (ascType === 'ปัสวะ' && '1,2,3,7'.split(',').map(Number).includes(p.id)) ongKhenList.push('ปัสวะองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
+                    if (ascType === 'กีฏะ' && '3,5,6,8'.split(',').map(Number).includes(p.id)) ongKhenList.push('กีฏะองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
+                }
             });
               
             // ตรีวัย (นับจากตนุเศษ รอบอายุ 100 ปี)
