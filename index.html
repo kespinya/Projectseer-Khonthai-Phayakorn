@@ -298,8 +298,6 @@
             const sunriseMin = 360;
             let elapsedMin = (((hh * 60 + mm) - sunriseMin) + 1440) % 1440 - 17;
 
-            let elapsedMin = (((hh * 60 + mm) - sunriseMin) + 1440) % 1440;
-
             if (elapsedMin < 0) elapsedMin += 1440;
 
             const antoTable = ASTRO_CONST.ANTO_STD;
