@@ -323,6 +323,17 @@
             const nakIdx = Math.floor(cleanLon / nakSize) % 27;
             return { nakshatra: ASTRO_CONST.NAKSHATRAS[nakIdx], navamsaRasi: navIdx };
         }
+            function getPlanetDignity(id, rasi) {
+            const own = { 1:, 2:, 3:, 4:, 5:, 6:, 7:, 8: [10] };
+            const exalt = { 1: 0, 2: 1, 3: 9, 4: 5, 5: 3, 6: 11, 7: 6, 8: 7 };
+            const debil = { 1: 6, 2: 7, 3: 3, 4: 11, 5: 9, 6: 5, 7: 0, 8: 1 };
+            const raja = { 1: 5, 2: 10, 3: 2, 4: 8, 5: 3, 6: 3, 7: 4, 8: 11 };
+            if (own[id] && own[id].includes(rasi)) return 'เกษตร';
+            if (exalt[id] === rasi) return 'มหาอุจจ์';
+            if (debil[id] === rasi) return 'นิจ';
+            if (raja[id] === rasi) return 'ราชาโชค';
+            return 'ปกติ';
+        }
 
             function computeFullAstrology(dobStr, tobStr, lat, lon, method, tz = 7) {
             const [y, m, d] = dobStr.split('-').map(Number);
