@@ -20,15 +20,53 @@
         label { display: block; font-size: 12px; font-weight: 700; color: #0369A1; margin-bottom: 4px; }
         input, select { width: 100%; padding: 9px 12px; border-radius: 12px; border: 1.5px solid #93C5FD; background: #F8FAFC; color: #1E3A8A; font-size: 13.5px; font-weight: 600; }
         .btn-main { width: 100%; padding: 12px; border-radius: 14px; border: none; background: linear-gradient(135deg, #F59E0B, #EA580C); color: #FFF; font-size: 15px; font-weight: 700; cursor: pointer; }
-        .cat-widget { position: fixed; right: 16px; bottom: 16px; z-index: 99; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
-        .cat-bubble { background: #FFFBEB; border: 2px solid #F59E0B; color: #92400E; padding: 7px 12px; border-radius: 14px; font-size: 11.5px; font-weight: 700; margin-bottom: 6px; pointer-events: auto; }
-.cat-avatar { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #FEF08A, #F59E0B); border: 3px solid #FFF; display: flex; align-items: center; justify-content: center; font-size: 34px; cursor: pointer; pointer-events: auto; }
-        .meadow-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 16px; background: linear-gradient(90deg, #10B981, #059669, #34D399); border-top: 2px solid #FDE047; z-index: 50; }
+               @keyframes catPatrol {
+            0% { left: 16px; transform: scaleX(1); }
+            48% { left: calc(100% - 135px); transform: scaleX(1); }
+            50% { left: calc(100% - 135px); transform: scaleX(-1); }
+            98% { left: 16px; transform: scaleX(-1); }
+            100% { left: 16px; transform: scaleX(1); }
+        }
+        @keyframes catBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+        @keyframes pawFront { 0%, 100% { transform: rotate(-28deg); } 50% { transform: rotate(28deg); } }
+        @keyframes pawBack { 0%, 100% { transform: rotate(28deg); } 50% { transform: rotate(-28deg); } }
+        @keyframes tailWag { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(18deg); } }
+        .cat-widget { position: fixed; bottom: 14px; left: 16px; z-index: 99; display: flex; flex-direction: column; align-items: center; animation: catPatrol 22s linear infinite; pointer-events: none; }
+        .cat-widget:hover { animation-play-state: paused; }
+        .cat-bubble { background: #FFFBEB; border: 2px solid #F59E0B; color: #92400E; padding: 6px 12px; border-radius: 14px; font-size: 11px; font-weight: 700; margin-bottom: 2px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); white-space: nowrap; pointer-events: auto; }
+        .cat-3d-runner { width: 88px; height: 76px; cursor: pointer; pointer-events: auto; animation: catBounce 0.45s ease-in-out infinite; filter: drop-shadow(0 6px 8px rgba(15,41,74,0.28)); transition: transform 0.2s; }
+        .cat-3d-runner:hover { transform: scale(1.12); }
+        .cat-paw-f { transform-origin: 58px 54px; animation: pawFront 0.45s ease-in-out infinite; }
+        .cat-paw-b { transform-origin: 30px 54px; animation: pawBack 0.45s ease-in-out infinite; }
+        .cat-tail { transform-origin: 22px 44px; animation: tailWag 0.6s ease-in-out infinite; }
+        .meadow-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 22px; background: linear-gradient(180deg, #34D399 0%, #10B981 55%, #047857 100%); border-top: 3px solid #FDE047; box-shadow: 0 -4px 14px rgba(16,185,129,0.25); z-index: 50; }
+           @keyframes catPatrol {
+            0% { left: 16px; transform: scaleX(1); }
+            48% { left: calc(100% - 135px); transform: scaleX(1); }
+            50% { left: calc(100% - 135px); transform: scaleX(-1); }
+            98% { left: 16px; transform: scaleX(-1); }
+            100% { left: 16px; transform: scaleX(1); }
+        }
+        @keyframes catBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+        @keyframes pawFront { 0%, 100% { transform: rotate(-28deg); } 50% { transform: rotate(28deg); } }
+        @keyframes pawBack { 0%, 100% { transform: rotate(28deg); } 50% { transform: rotate(-28deg); } }
+        @keyframes tailWag { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(18deg); } }
+        .cat-widget { position: fixed; bottom: 14px; left: 16px; z-index: 99; display: flex; flex-direction: column; align-items: center; animation: catPatrol 22s linear infinite; pointer-events: none; }
+        .cat-widget:hover { animation-play-state: paused; }
+        .cat-bubble { background: #FFFBEB; border: 2px solid #F59E0B; color: #92400E; padding: 6px 12px; border-radius: 14px; font-size: 11px; font-weight: 700; margin-bottom: 2px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); white-space: nowrap; pointer-events: auto; }
+        .cat-3d-runner { width: 88px; height: 76px; cursor: pointer; pointer-events: auto; animation: catBounce 0.45s ease-in-out infinite; filter: drop-shadow(0 6px 8px rgba(15,41,74,0.28)); transition: transform 0.2s; }
+        .cat-3d-runner:hover { transform: scale(1.12); }
+        .cat-paw-f { transform-origin: 58px 54px; animation: pawFront 0.45s ease-in-out infinite; }
+        .cat-paw-b { transform-origin: 30px 54px; animation: pawBack 0.45s ease-in-out infinite; }
+        .cat-tail { transform-origin: 22px 44px; animation: tailWag 0.6s ease-in-out infinite; }
+        .meadow-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 22px; background: linear-gradient(180deg, #34D399 0%, #10B981 55%, #047857 100%); border-top: 3px solid #FDE047; box-shadow: 0 -4px 14px rgba(16,185,129,0.25); z-index: 50; }
+
     </style>
 </head>
 <body>
     <div class="hero">
         <div class="nav-tabs">
+
             <button class="tab-btn active" id="tab_1" onclick="switchMode(1)">🪐 1. จักรราศี & ลัคนา</button>
             <button class="tab-btn" id="tab_2" onclick="switchMode(2)">📜 2. เลข 7 ตัว 9 ฐานชั้นสูง</button>
             <button class="tab-btn" id="tab_3" onclick="switchMode(3)">📈 3. กราฟชีวิต 12 ภพ</button>
@@ -119,12 +157,10 @@
             <div id="qk_result" class="card" style="display:none;"></div>
         </div>
     </div>
-
-    <div class="cat-widget">
+<div class="cat-widget">
         <div class="cat-bubble" id="cat_msg">✨ วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะ!</div>
         <div class="cat-avatar" onclick="triggerCatMagic()" title="คลิกเพื่อรับพรจากมาสคอต ProjectSeer">🐱</div>
     </div>
-    <div class="meadow-footer"></div>
 
     <script>
         const ASTRO_CONST = {
@@ -211,7 +247,7 @@
                 (id === 5 && rasi === 3) || (id === 6 && rasi === 3) || (id === 7 && rasi === 4) || (id === 8 && rasi === 11)) return 'ราชาโชค';
             return 'ปกติ';
         }
-                  function getThaiLunarCalendar100Y(dobStr, tobStr) {
+            function getThaiLunarCalendar100Y(dobStr, tobStr) {
             const [y, m, d] = dobStr.split('-').map(Number);
             const [hh, mm] = (tobStr || '09:00').split(':').map(Number);
             const dt = new Date(y, m - 1, d);
@@ -226,19 +262,17 @@
             const tithi = Math.floor((lunarAge / synodic) * 30) + 1;
             const paksha = tithi <= 15 ? `ขึ้น ${tithi} ค่ำ` : `แรม ${tithi - 15} ค่ำ`;
 
-            const curM = dt.getMonth() + 1;
+                       const curM = dt.getMonth() + 1;
             let astroMonth = (curM % 12) + 1;
-            if (dt.getDate() < 10 && tithi > 15) astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
-            if (curM === 8 && dt.getDate() >= 10) astroMonth = 9;
+            if (dt.getDate() <= 5 && tithi > 18) astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
 
             let be = dt.getFullYear() + 543;
             if (curM <= 3 || (curM === 4 && astroMonth < 5)) be -= 1;
-            const astroYear = ((be - 4) % 12 + 12) % 12 + 1;
+            const astroYear = ((be - 7) % 12 + 12) % 12 + 1;
 
             const lunarText = `วัน${ASTRO_CONST.DAYS[astroDay]} ${paksha} เดือน ${ASTRO_CONST.MONTHS[astroMonth]} ปี${ASTRO_CONST.YEARS[astroYear]} พ.ศ.${be}`;
             return { astroDay, astroMonth, astroYear, birthYearBE: be, lunarText };
         }
-
 
 
         function computeFullAstrology(dobStr, tobStr, lat, lon, tz = 7) {
