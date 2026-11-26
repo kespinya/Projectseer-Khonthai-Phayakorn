@@ -324,7 +324,7 @@
             return { nakshatra: ASTRO_CONST.NAKSHATRAS[nakIdx], navamsaRasi: navIdx };
         }
 
-                    function computeFullAstrology(dobStr, tobStr, lat, lon, method, tz = 7) {
+            function computeFullAstrology(dobStr, tobStr, lat, lon, method, tz = 7) {
             const [y, m, d] = dobStr.split('-').map(Number);
             const [hh, mm] = tobStr.split(':').map(Number);
             const utHour = hh + mm / 60 - tz;
@@ -352,7 +352,8 @@
 
             const rawLons = { 1: sunLon, 2: moonLon, 3: marsLon, 4: mercLon, 5: jupLon, 6: venLon, 7: satLon, 8: rahuLon, 9: ketuLon, 0: uranLon };
             const planets = [], rasiPos = {}, navamsaPos = {};
-            const order =;
+            const order = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
+
 
             order.forEach(id => {
                 const lonVal = rawLons[id];
@@ -362,12 +363,12 @@
 
                 // ดาวดับ: ใกล้และอยู่ด้านหลังดวงอาทิตย์ (ไม่เกิน 8 องศา)
                 const diffSun = norm360(sunLon - lonVal);
-                const isCombust = ([2, 3, 4, 5, 6, 7].includes(id) && diffSun > 0 && diffSun <= 8);
+                const isCombust = ('2,3,4,5,6,7'.split(',').map(Number).includes(id) && diffSun > 0 && diffSun <= 8);
 
                 // โคจรวิกลคติ (พักร์ / มนท์ / ปกติ)
                 let motion = 'ปกติ';
                 if (id === 8 || id === 9) motion = 'พักร์(ปกติ)';
-                else if ([3, 5, 7, 0].includes(id)) {
+                else if ('3,4,5,6,7'.split(',').map(Number).includes(id)) {
                     const synAngle = norm360(lonVal - sunLon);
                     if (synAngle > 135 && synAngle < 225) motion = 'พักร์ (R)';
                     else if (synAngle >= 115 && synAngle <= 135) motion = 'มนท์ (S)';
@@ -407,7 +408,7 @@
             const ascNav = getNavamsaAndNakshatra(ascLon);
 
             // เจ้าเรือนกุมภ์ = ราหู (๘) -> หาตนุเศษ & ปริวรรตเกษตร (ไม่เกิน 3 เรือน)
-            const LORDS_PLACHOT =;
+            const LORDS_PLACHOT = '3,6,4,2,1,4,6,3,5,7,8,5'.split(',').map(Number);
             const ascLord = LORDS_PLACHOT[ascRasi];
             const stepsTanu = (rasiPos[ascLord] - ascRasi + 12) % 12;
             const tanuRasi = (ascRasi + stepsTanu) % 12;
@@ -435,6 +436,12 @@
             const ascType = rasiType[ascRasi];
             planets.forEach(p => {
                 const bhava = ((p.rasi - ascRasi + 12) % 12) + 1;
+                if (ascType === 'อัมพุช' && '2,4,5,6'.split(',').map(Number).includes(p.id) && '1,4,7,10'.split(',').map(Number).includes(bhava)) ongKhenList.push(`อัมพุชองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+                if (ascType === 'นระ' && '1,4,5,7'.split(',').map(Number).includes(p.id) && '1,4,7,10'.split(',').map(Number).includes(bhava)) ongKhenList.push(`นระองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+                if (ascType === 'ปัสวะ' && '1,2,3,7'.split(',').map(Number).includes(p.id) && '1,4,7,10'.split(',').map(Number).includes(bhava)) ongKhenList.push(`ปัสวะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+                if (ascType === 'กีฏะ' && '3,5,6,8'.split(',').map(Number).includes(p.id) && '1,4,7,10'.split(',').map(Number).includes(bhava)) ongKhenList.push(`กีฏะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+            });
+                const bhava = ((p.rasi - ascRasi + 12) % 12) + 1;
                 if (ascType === 'อัมพุช' && [2, 4, 5, 6].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`อัมพุชองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
                 if (ascType === 'นระ' && [1, 4, 5, 7].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`นระองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
                 if (ascType === 'ปัสวะ' && [1, 3, 5, 7].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`ปัสวะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
@@ -442,7 +449,7 @@
             });
 
             // ตรีวัย (นับจากตนุเศษ รอบอายุ 100 ปี)
-            const triOrder =;
+            const triOrder = '1,2,3,4,7,5,8,6'.split(',').map(Number);
             const years100 = { 1: 6, 2: 15, 3: 8, 4: 17, 7: 10, 5: 19, 8: 12, 6: 13 };
             const tIdx = Math.max(0, triOrder.indexOf(tanuPlanet));
             let acc = 0, wai1 = '', wai2 = '', wai3 = '';
@@ -543,9 +550,11 @@
                     </table>
                 </div>
                 <div style="margin-top:14px;background:#ECFDF5;border:2px solid #10B981;border-radius:16px;padding:14px;font-size:13.5px;line-height:1.6;">
-                    <div style="font-weight:700;color:#065F46;margin-bottom:6px;">🤖 บทวิเคราะห์พื้นดวงอัตโนมัติ (ProjectSeer AI)</div>
-                    if (!dob || !tob) return;
-                    <p>• <b>ลัคนาราศี${(ASTRO_CONST.ZODIACS[res.ascRasi] || 'เมถุน').split(' ')[0]}:</b> เสวย <b>${res.ascNakshatra || '-'}</b> • ตนุเศษคือ <b>${ASTRO_CONST.FULL_NAMES[res.tanuPlanet] || '-'}</b></p>
+                <div style="font-weight:700;color:#065F46;margin-bottom:6px;">🤖 บทวิเคราะห์พื้นดวงอัตโนมัติ (ProjectSeer AI)</div>
+                <p>• <b>ลัคนาราศี${(ASTRO_CONST.ZODIACS[res.ascRasi] || 'เมถุน').split(' ')[0]}:</b> เสวย <b>${res.ascNakshatra || '-'}</b> • ตนุเศษคือ <b>${ASTRO_CONST.FULL_NAMES[res.tanuPlanet] || '-'}</b></p>
+                <p>• <b>เกณฑ์พิเศษ & ปริวรรตเกษตร (สายพลโชติ):</b> ${res.ongKhenList.length ? res.ongKhenList.join(', ') : 'ไม่มีองค์เกณฑ์เด่น'} ${res.pariwatList.length ? ' | ' + res.pariwatList.join(', ') : ''}</p>
+                <p>• <b>ตรีวัย (นับจากตนุเศษ รอบอายุ 100 ปี):</b> วัยต้น [${res.triWai.wai1}] • วัยกลาง [${res.triWai.wai2}] • วัยปลาย [${res.triWai.wai3}]</p>
+
                     <p>• <b>การเงิน (กฎุมพะ):</b> เจ้าเรือนคือ <b>${ASTRO_CONST.FULL_NAMES[dhanamLord]}</b> สถิตภพ <b>"${ASTRO_CONST.BHAVA_NAMES[dhanamBhava]}"</b></p>
                     <p>• <b>ดาวเกตุ (๙):</b> สถิตภพ <b>"${ASTRO_CONST.BHAVA_NAMES[ketuBhava]}"</b> เสริมลางสังหรณ์และสิ่งศักดิ์สิทธิ์คุ้มครองด้าน${ASTRO_CONST.BHAVA_NAMES[ketuBhava]}</p>
                 </div>`;
