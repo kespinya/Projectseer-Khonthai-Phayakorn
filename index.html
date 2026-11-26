@@ -227,6 +227,9 @@
             const paksha = tithi <= 15 ? `ขึ้น ${tithi} ค่ำ` : `แรม ${tithi - 15} ค่ำ`;
 
             let astroMonth = ((dt.getMonth() + 1) % 12) + 1;
+            if (tithi <= 15 && dt.getDate() < 15) astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
+
+
             if (tithi > 15 && dt.getDate() < 15) astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
 
             let be = dt.getFullYear() + 543;
@@ -292,10 +295,13 @@
             const latRad = (lat || 13.7563) * Math.PI / 180;
             const ha = Math.acos(Math.max(-1, Math.min(1, -Math.tan(latRad) * Math.tan(declRad)))) * 180 / Math.PI;
             const trueSunriseMin = 720 - (ha * 4);
-            let elapsedMin = (((hh * 60 + mm) - trueSunriseMin) + 1440) % 1440 - 17;
+            const sunriseMin = 395 - ((lon - (tz * 15)) * 4);
+            let elapsedMin = (((hh * 60 + mm) - sunriseMin) + 1440) % 1440;
+
             if (elapsedMin < 0) elapsedMin += 1440;
 
             const antoTable = ASTRO_CONST.ANTO_STD;
+
             let remMin = elapsedMin, curR = sunRasi, ascLon = 0;
             const firstSignRem = antoTable[curR] * ((30 - sunDegInRasi) / 30);
             if (remMin <= firstSignRem) {
@@ -636,11 +642,13 @@
                         const extraTags = [isLak3 ? 'ลัคนาเดิม 3 ฐาน' : '', isJorStress ? 'ตัวย้ำอายุจร(แถว5-7)' : '', isKeyPoint ? 'จุดพยากรณ์ชี้ขาด(◎)' : ''].filter(Boolean).join(' • ');
                         const msg = `🔮 <b>${subBot || ASTRO_CONST.BASE_NAMES[rIdx]} (${val})</b> • ดาว${ASTRO_CONST.DAYS[p]} • ทักษาจร: <b>${role}</b> ${extraTags ? `• <span style="color:#B45309;">[${extraTags}]</span>` : ''}`;
 
-                        return `<td><button class="t7-cell-btn" data-val="${val}" onclick="highlightNumberInTable(${val}, '${msg}')" style="width:100%;padding:5px 3px;border-radius:10px;background:${bg};border:2px solid ${bd};color:${cl};cursor:pointer;transition:0.2s;">
+                        const safeMsg = msg.replace(/'/g, "");
+                        return `<td><button class="t7-cell-btn" data-val="${val}" data-msg="${safeMsg}" onclick="highlightNumberInTable(${val}, this.getAttribute('data-msg'))" style="width:100%;padding:5px 3px;border-radius:10px;background:${bg};border:2px solid ${bd};color:${cl};cursor:pointer;transition:0.2s;">
                             <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;padding:0 2px;"><span>${lakBadge}${geomMark}</span><span>${keyPointMark}</span></div>
                             <div style="font-size:15px;font-weight:700;line-height:1.1;">${val}${dot}</div>
                             ${subTop ? `<div style="font-size:8.5px;color:#0369A1;">${subTop}</div>` : ''}
                             <div style="font-size:9.5px;font-weight:600;">${subBot}</div></button></td>`;
+
                     }).join('') + '</tr>';
             });
             tbl += '</tbody>';
