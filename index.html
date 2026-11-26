@@ -645,7 +645,7 @@
             });
             tbl += '</tbody>';
             const adv = analyzeCandleAndHouse(data.rows, tkY, data.yCol);
-            const tanuJor = ASTRO_CONST.HOUSES[data.yCol];
+            const tanuJor = ASTRO_CONST.HOUSES[0][data.yCol];
             const sriStar = Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'ศรี');
             const dechStar = Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'เดช');
             const kaliStar = Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'กาลกิณี');
@@ -709,7 +709,7 @@
                 <div style="background:#EFF6FF;border:1.5px solid #3B82F6;border-radius:14px;padding:10px;margin-bottom:12px;">
                     <div style="font-size:12.5px;font-weight:700;color:#1E3A8A;margin-bottom:6px;">🧭 ระบบทักษาคู่ธาตุ (กำเนิด vs จรอายุย่าง ${data.age} ปี)</div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;text-align:center;font-size:11px;">
-                        ${seqTaksa.map(p => `<div style="background:${tkY.roleMap[p] === 'ศรี' ? '#DCFCE7' : (tkY.roleMap[p] === 'กาลกิณี' ? '#FEE2E2' : '#FFF')};border:1.5px solid #93C5FD;border-radius:10px;padding:6px;"><div style="color:#047857;">เดิม: ${tkB.roleMap[p]}</div><div style="font-size:14px;font-weight:700;color:#1E3A8A;">ดาว ${p} (${ASTRO_CONST.DAYS[p].split(' ')})</div><div style="font-size:9.5px;color:#B45309;">${pairElement[p]}</div><div style="font-weight:700;color:#DC2626;">จร: ${tkY.roleMap[p]}</div></div>`).join('')}
+                        ${seqTaksa.map(p => `<div style="background:${tkY.roleMap[p] === 'ศรี' ? '#DCFCE7' : (tkY.roleMap[p] === 'กาลกิณี' ? '#FEE2E2' : '#FFF')};border:1.5px solid #93C5FD;border-radius:10px;padding:6px;"><div style="color:#047857;">เดิม: ${tkB.roleMap[p]}</div><div style="font-size:14px;font-weight:700;color:#1E3A8A;">ดาว ${p} (${ASTRO_CONST.DAYS[p].split(' ')[0]})</div><div style="font-size:9.5px;color:#B45309;">${pairElement[p]}</div><div style="font-weight:700;color:#DC2626;">จร: ${tkY.roleMap[p]}</div></div>`).join('')}
                     </div>
                 </div>
                 <div style="background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:12px;padding:10px;margin-bottom:12px;">
@@ -729,3 +729,132 @@
 `;
           triggerCatMagic();
 }
+        function renderGraphModeUI() {
+            const d = +document.getElementById('gr_day').value;
+            const m = +document.getElementById('gr_month').value;
+            const y = +document.getElementById('gr_year').value;
+            const age = +document.getElementById('gr_age').value || 48;
+            const labels = ['1.อัตตะ', '2.หินะ', '3.ธานัง', '4.ปิตา', '5.มาตา', '6.โภคา', '7.มัชฌิมา', '8.ตะนุ', '9.กดุมภะ', '10.สหัชชะ', '11.พันธุ', '12.ปุตตะ'];
+            const scores = labels.map((_, i) => ((d + i) % 7 + (m + i) % 7 + (y + i) % 7) % 12 + 1);
+            const curIdx = (age - 1) % 12;
+
+            let pts = scores.map((s, i) => `${30 + i * 52},${175 - s * 11}`).join(' ');
+            let circles = scores.map((s, i) => `<circle cx="${30 + i * 52}" cy="${175 - s * 11}" r="${i === curIdx ? 7 : 4.5}" fill="${i === curIdx ? '#DC2626' : '#0284C7'}"/>
+                <text x="${30 + i * 52}" y="${162 - s * 11}" text-anchor="middle" font-size="10" font-weight="700" fill="#1E3A8A">${s}</text>
+                <text x="${30 + i * 52}" y="196" text-anchor="middle" font-size="9" fill="#0369A1">${labels[i].split('.')[1]}</text>`).join('');
+
+            const box = document.getElementById('gr_result');
+            box.style.display = 'block';
+            box.innerHTML = `<h3 style="color:#B91C1C;font-size:16px;margin-bottom:8px;">📈 กราฟชีวิต 12 ภพ (อายุย่าง ${age} ปี ตกภพ ${labels[curIdx]} คะแนน ${scores[curIdx]}/12)</h3>
+                <div style="overflow-x:auto;"><svg width="650" height="210" style="background:#F8FAFC;border-radius:14px;border:1.5px solid #93C5FD;">
+                <polyline fill="none" stroke="#F59E0B" stroke-width="3" points="${pts}"/>${circles}</svg></div>`;
+            triggerCatMagic();
+        }
+
+        function renderTaksaModeUI() {
+            const d = +document.getElementById('tk_day').value;
+            const age = +document.getElementById('tk_age').value || 48;
+            const be = +document.getElementById('tk_be').value || 2569;
+            const tk = computeTaksaAndKalayok(d, age, be);
+            const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
+
+            const box = document.getElementById('tk_result');
+            box.style.display = 'block';
+            box.innerHTML = `<h3 style="color:#B91C1C;font-size:16px;margin-bottom:10px;">🧭 มหาทักษาจร (อายุย่าง ${age} ปี) & กาลโยค พ.ศ. ${be}</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px;text-align:center;">
+                    ${seq.map(p => `<div style="padding:10px;border-radius:12px;border:1.5px solid #F59E0B;background:${tk.roleMap[p] === 'ศรี' ? '#DCFCE7' : (tk.roleMap[p] === 'กาลกิณี' ? '#FEE2E2' : '#FFFBEB')};">
+                        <div style="font-size:13px;font-weight:700;">ดาว ${ASTRO_CONST.DAYS[p]}</div><div style="font-size:15px;font-weight:700;color:#B91C1C;">${tk.roleMap[p]}</div></div>`).join('')}
+                </div>
+                <div style="background:#EFF6FF;border:1.5px solid #3B82F6;border-radius:12px;padding:10px;font-size:13px;">
+                    <b>กาลโยคประจำปี ${be}:</b> ธงชัย = ดาว${ASTRO_CONST.DAYS[tk.kalayok.dharmachai]} | อธิบดี = ดาว${ASTRO_CONST.DAYS[tk.kalayok.athibodi]} | อุบาทว์ = ดาว${ASTRO_CONST.DAYS[tk.kalayok.ubat]} | โลกาวินาศ = ดาว${ASTRO_CONST.DAYS[tk.kalayok.lokawinart]}
+                </div>`;
+            triggerCatMagic();
+        }
+        function renderQuickModeUI() {
+            const d1 = getThaiLunarCalendar100Y(document.getElementById('qk_dob').value, '09:00');
+            const d2 = getThaiLunarCalendar100Y(document.getElementById('qk_partner').value, '09:00');
+            const sum = (d1.astroDay + d2.astroDay) % 7;
+            const goodSet = '1,3,5,6'.split(',').map(Number);
+            const resText = goodSet.includes(sum) ? '💖 ดวงสมพงษ์เกื้อหนุนกันดีมาก เป็นคู่มิตรคู่ธาตุส่งเสริมความสำเร็จ' : '⚖️ ดวงคู่ปรับสมดุล ต้องอาศัยความเข้าใจและใจเย็นในการสื่อสาร';
+            const box = document.getElementById('qk_result');
+            box.style.display = 'block';
+            box.innerHTML = `<h3 style="color:#B91C1C;font-size:16px;margin-bottom:8px;">💑 ผลตรวจสมพงษ์ดวงชะตา</h3>
+                <p style="font-size:13.5px;margin-bottom:6px;">• เจ้าชะตา: <b>${d1.lunarText}</b></p>
+                <p style="font-size:13.5px;margin-bottom:8px;">• คู่ครอง/หุ้นส่วน: <b>${d2.lunarText}</b></p>
+                <div style="background:#ECFDF5;border:1.5px solid #10B981;padding:10px;border-radius:12px;font-weight:700;color:#065F46;">${resText}</div>`;
+            triggerCatMagic();
+        }
+
+        function switchMode(m) {
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById('mode_' + i).style.display = (i === m) ? 'block' : 'none';
+                document.getElementById('tab_' + i).classList.toggle('active', i === m);
+            }
+            if (m === 1) renderZodiacModeUI();
+            if (m === 2) render7TuaModeUI();
+            if (m === 3) renderGraphModeUI();
+            if (m === 4) renderTaksaModeUI();
+            if (m === 5) renderQuickModeUI();
+        }
+
+        function triggerCatMagic() {
+            const msgs = ['✨ ดาวศรีส่องแสง ขอให้สมหวังทุกประการ!', '🔮 พลังจักรราศีหนุนนำ โชคลาภกำลังมา!', '🌟 วันนี้เหมาะแก่การเริ่มต้นสิ่งดีๆ!', '🍀 บุญรักษา เทวดาคุ้มครองดวงชะตา!'];
+            document.getElementById('cat_msg').innerText = msgs[Math.floor(Math.random() * msgs.length)];
+        }
+
+        function setJorNow() {
+            const now = new Date();
+            document.getElementById('jor_date').value = now.toISOString().slice(0, 10);
+            document.getElementById('jor_time').value = now.toTimeString().slice(0, 5);
+            updateJorDateTime();
+        }
+
+        function updateJorDateTime() {
+            const jDate = document.getElementById('jor_date').value;
+            if (!jDate) return;
+            const be = +jDate.split('-') + 543;
+            document.getElementById('t7_targetBE').value = be;
+            document.getElementById('tk_be').value = be;
+            const birthBE = +document.getElementById('t7_birthBE').value || 2522;
+            const age = Math.max(1, be - birthBE + 1);
+            document.getElementById('gr_age').value = age;
+            document.getElementById('tk_age').value = age;
+            if (document.getElementById('mode_2').style.display === 'block') render7TuaModeUI();
+            if (document.getElementById('mode_4').style.display === 'block') renderTaksaModeUI();
+        }
+
+        function syncAllForms() {
+            const dob = document.getElementById('z_dob').value;
+            const tob = document.getElementById('z_tob').value;
+            if (!dob) return;
+            const l = getThaiLunarCalendar100Y(dob, tob);
+            ['t7_day', 'gr_day', 'tk_day'].forEach(id => document.getElementById(id).value = l.astroDay);
+            ['t7_month', 'gr_month'].forEach(id => document.getElementById(id).value = l.astroMonth);
+            ['t7_year', 'gr_year'].forEach(id => document.getElementById(id).value = l.astroYear);
+            document.getElementById('t7_birthBE').value = l.birthYearBE;
+            document.getElementById('qk_dob').value = dob;
+            updateJorDateTime();
+        }
+
+        function buildAllForms() {
+            document.getElementById('z_prov').innerHTML = ASTRO_CONST.PROVINCES.map((p, i) => `<option value="${i}">${p}</option>`).join('');
+            const dList = '1,2,3,4,5,6,7,8'.split(',').map(Number);
+            const mList = '1,2,3,4,5,6,7,8,9,10,11,12'.split(',').map(Number);
+            document.getElementById('t7_day').innerHTML = dList.map(d => `<option value="${d}">${ASTRO_CONST.DAYS[d]}</option>`).join('');
+            document.getElementById('gr_day').innerHTML = dList.map(d => `<option value="${d}">${ASTRO_CONST.DAYS[d]}</option>`).join('');
+            document.getElementById('tk_day').innerHTML = dList.map(d => `<option value="${d}">${ASTRO_CONST.DAYS[d]}</option>`).join('');
+            document.getElementById('t7_month').innerHTML = mList.map(m => `<option value="${m}">เดือน ${ASTRO_CONST.MONTHS[m]}</option>`).join('');
+            document.getElementById('gr_month').innerHTML = mList.map(m => `<option value="${m}">เดือน ${ASTRO_CONST.MONTHS[m]}</option>`).join('');
+            document.getElementById('t7_year').innerHTML = mList.map(y => `<option value="${y}">ปี${ASTRO_CONST.YEARS[y]}</option>`).join('');
+            document.getElementById('gr_year').innerHTML = mList.map(y => `<option value="${y}">ปี${ASTRO_CONST.YEARS[y]}</option>`).join('');
+        }
+
+        window.onload = function() {
+            buildAllForms();
+            syncAllForms();
+            setJorNow();
+            renderZodiacModeUI();
+        };
+    </script>
+</body>
+</html>
