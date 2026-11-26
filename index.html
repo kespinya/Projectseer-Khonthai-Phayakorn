@@ -442,8 +442,9 @@
                 const bhava = ((p.rasi - ascRasi + 12) % 12) + 1;
                 if (ascType === 'อัมพุช' && [2, 4, 5, 6].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`อัมพุชองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
                 if (ascType === 'นระ' && [1, 4, 5, 7].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`นระองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
-                if (ascType === 'ปัสวะ' && [1, 3, 5, 7].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`ปัสวะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
-                if (ascType === 'กีฏะ' && [2, 3, 6, 8].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`กีฏะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+                if (ascType === 'ปัสวะ' && [1, 2, 3, 7].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`ปัสวะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+                if (ascType === 'กีฏะ' && [3, 5, 6, 8].includes(p.id) && [1, 4, 7, 10].includes(bhava)) ongKhenList.push(`กีฏะองค์เกณฑ์ (${ASTRO_CONST.FULL_NAMES[p.id]} ภพ ${bhava})`);
+
             };
             // ตรีวัย (นับจากตนุเศษ รอบอายุ 100 ปี)
             const triOrder = '1,2,3,4,7,5,8,6'.split(',').map(Number);
