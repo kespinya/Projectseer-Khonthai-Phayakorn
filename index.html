@@ -211,24 +211,10 @@
                 (id === 5 && rasi === 3) || (id === 6 && rasi === 3) || (id === 7 && rasi === 4) || (id === 8 && rasi === 11)) return 'ราชาโชค';
             return 'ปกติ';
         }
-        function getThaiLunarCalendar100Y(dobStr, tobStr) {
-            const [y, m, d] = dobStr.split('-').map(Number);
-            const [hh, mm] = (tobStr || '09:00').split(':').map(Number);
-            const dt = new Date(y, m - 1, d);
-            if (hh < 6) dt.setDate(dt.getDate() - 1);
-
-            let astroDay = dt.getDay() + 1;
-            if (astroDay === 4 && (hh >= 18 || hh < 6)) astroDay = 8;
-
-            const jd = 367 * dt.getFullYear() - Math.floor(7 * (dt.getFullYear() + Math.floor((dt.getMonth() + 10) / 12)) / 4) + Math.floor(275 * (dt.getMonth() + 1) / 9) + dt.getDate() + 1721013.5;
-            const synodic = 29.530588853;
-            const lunarAge = (((jd - 2451550.26) % synodic) + synodic) % synodic;
-            const tithi = Math.floor((lunarAge / synodic) * 30) + 1;
-            const paksha = tithi <= 15 ? `ขึ้น ${tithi} ค่ำ` : `แรม ${tithi - 15} ค่ำ`;
-
             const curM = dt.getMonth() + 1;
             let astroMonth = (curM % 12) + 1;
             if (dt.getDate() < 10 && tithi > 15) astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
+            if (curM === 8 && dt.getDate() >= 10) astroMonth = 9;
 
             let be = dt.getFullYear() + 543;
             if (curM <= 3 || (curM === 4 && astroMonth < 5)) be -= 1;
@@ -236,7 +222,6 @@
 
             const lunarText = `วัน${ASTRO_CONST.DAYS[astroDay]} ${paksha} เดือน ${ASTRO_CONST.MONTHS[astroMonth]} ปี${ASTRO_CONST.YEARS[astroYear]} พ.ศ.${be}`;
             return { astroDay, astroMonth, astroYear, birthYearBE: be, lunarText };
-        }
 
 
 
@@ -650,7 +635,7 @@
                         const extraTags = [isLak3 ? 'ลัคนาเดิม 3 ฐาน' : '', isJorStress ? 'ตัวย้ำอายุจร(แถว5-7)' : '', isKeyPoint ? 'จุดพยากรณ์ชี้ขาด(◎)' : ''].filter(Boolean).join(' • ');
                         const msg = `🔮 <b>${subBot || ASTRO_CONST.BASE_NAMES[rIdx]} (${val})</b> • ดาว${ASTRO_CONST.DAYS[p]} • ทักษาจร: <b>${role}</b> ${extraTags ? `• <span style="color:#B45309;">[${extraTags}]</span>` : ''}`;
 
-                        const safeMsg = msg.replace(/'/g, "");
+                        const safeMsg = msg.replace(/<[^>]*>/g, '').replace(/['"]/g, '');
                         return `<td><button class="t7-cell-btn" data-val="${val}" data-msg="${safeMsg}" onclick="highlightNumberInTable(${val}, this.getAttribute('data-msg'))" style="width:100%;padding:5px 3px;border-radius:10px;background:${bg};border:2px solid ${bd};color:${cl};cursor:pointer;transition:0.2s;">
                             <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;padding:0 2px;"><span>${lakBadge}${geomMark}</span><span>${keyPointMark}</span></div>
                             <div style="font-size:15px;font-weight:700;line-height:1.1;">${val}${dot}</div>
@@ -853,7 +838,7 @@
         }
 
         function buildAllForms() {
-          document.getElementById('z_prov').innerHTML = ASTRO_CONST.PROVINCES.map((p, i) => `<option value="${i}">${p}</option>`).join('');
+        document.getElementById('z_prov').innerHTML = ASTRO_CONST.PROVINCES.map((p, i) => `<option value="${i}">${p[0]}</option>`).join('');
             const dList = '1,2,3,4,5,6,7,8'.split(',').map(Number);
             const mList = '1,2,3,4,5,6,7,8,9,10,11,12'.split(',').map(Number);
             document.getElementById('t7_day').innerHTML = dList.map(d => `<option value="${d}">${ASTRO_CONST.DAYS[d]}</option>`).join('');
