@@ -510,17 +510,6 @@
             const lunar = getThaiLunarCalendar100Y(dob, tob);
             const order = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
 
-            const rowsHtml = order.map(id => {
-                const d = res.planets.find(p => p.id === id);
-                return `<tr style="border-bottom:1px solid #E2E8F0;">
-                    <td style="padding:7px;font-weight:700;color:#1E3A8A;">${ASTRO_CONST.FULL_NAMES[id]}</td>
-                    <td style="padding:7px;font-weight:600;">${ASTRO_CONST.ZODIACS[d.rasi]}</td>
-                    <td style="padding:7px;">${d.deg}° ${String(d.min).padStart(2, '0')}'</td>
-                    <td style="padding:7px;color:#0369A1;">${ASTRO_CONST.ZODIACS[d.navamsaRasi]}</td>
-                    <td style="padding:7px;font-size:12px;">${d.nakshatra}</td>
-                    <td style="padding:7px;font-size:12px;font-weight:700;color:${d.status.includes('ดับ') || d.status === 'นิจ' ? '#DC2626' : '#059669'};">${d.status} (${d.motion})</td>
-                </tr>`;
-            }).join('');
             
                 const rowsHtml = order.map(id => {
                 const d = res.planets.find(p => p.id === id);
