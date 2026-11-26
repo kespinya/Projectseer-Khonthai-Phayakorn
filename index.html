@@ -211,8 +211,7 @@
                 (id === 5 && rasi === 3) || (id === 6 && rasi === 3) || (id === 7 && rasi === 4) || (id === 8 && rasi === 11)) return 'ราชาโชค';
             return 'ปกติ';
         }
-
-                function getThaiLunarCalendar100Y(dobStr, tobStr) {
+        function getThaiLunarCalendar100Y(dobStr, tobStr) {
             const [y, m, d] = dobStr.split('-').map(Number);
             const [hh, mm] = (tobStr || '09:00').split(':').map(Number);
             const dt = new Date(y, m - 1, d);
@@ -238,6 +237,8 @@
             const lunarText = `วัน${ASTRO_CONST.DAYS[astroDay]} ${paksha} เดือน ${ASTRO_CONST.MONTHS[astroMonth]} ปี${ASTRO_CONST.YEARS[astroYear]} พ.ศ.${be}`;
             return { astroDay, astroMonth, astroYear, birthYearBE: be, lunarText };
         }
+
+
 
         function computeFullAstrology(dobStr, tobStr, lat, lon, tz = 7) {
             const [y, m, d] = dobStr.split('-').map(Number);
@@ -296,7 +297,8 @@
             const ha = Math.acos(Math.max(-1, Math.min(1, -Math.tan(latRad) * Math.tan(declRad)))) * 180 / Math.PI;
             const trueSunriseMin = 720 - (ha * 4);
             const sunriseMin = 360;
-            let elapsedMin = (((hh * 60 + mm) - sunriseMin) + 1440) % 1440 - 68;
+            let elapsedMin = (((hh * 60 + mm) - sunriseMin) + 1440) % 1440 - 176;
+
             if (elapsedMin < 0) elapsedMin += 1440;
 
             const antoTable = ASTRO_CONST.ANTO_STD;
@@ -519,6 +521,21 @@
                     <td style="padding:7px;font-size:12px;font-weight:700;color:${d.status.includes('ดับ') || d.status === 'นิจ' ? '#DC2626' : '#059669'};">${d.status} (${d.motion})</td>
                 </tr>`;
             }).join('');
+            
+                const rowsHtml = order.map(id => {
+                const d = res.planets.find(p => p.id === id);
+                const pada = (Math.floor((d.lon % (360 / 27)) / (360 / 108)) + 1);
+                const triyang = Math.floor(d.deg / 10) + 1;
+                return `<tr style="border-bottom:1px solid #E2E8F0;">
+                    <td style="padding:7px;font-weight:700;color:#1E3A8A;">${ASTRO_CONST.FULL_NAMES[id]}</td>
+                    <td style="padding:7px;font-weight:600;">${ASTRO_CONST.ZODIACS[d.rasi]}</td>
+                    <td style="padding:7px;">${d.deg}° ${String(d.min).padStart(2, '0')}'</td>
+                    <td style="padding:7px;color:#0369A1;">${ASTRO_CONST.ZODIACS[d.navamsaRasi]}</td>
+                    <td style="padding:7px;font-size:12px;">${d.nakshatra}</td>
+                    <td style="padding:7px;font-size:12px;color:#0369A1;">บาทที่ ${pada} • ตรียางค์ ${triyang}</td>
+                    <td style="padding:7px;font-size:12px;font-weight:700;color:${d.status.includes('ดับ') || d.status === 'นิจ' ? '#DC2626' : '#059669'};">${d.status} (${d.motion})</td>
+                </tr>`;
+            }).join('');
 
             const box = document.getElementById('z_result');
             box.style.display = 'block';
@@ -539,13 +556,15 @@
                 <div style="overflow-x:auto;margin-bottom:14px;">
                     <table style="width:100%;border-collapse:collapse;text-align:center;font-size:13px;">
                         <thead><tr style="background:#1E3A8A;color:#FDE047;">
-                            <th style="padding:8px;">ดาว</th><th>ราศี</th><th>องศา</th><th>นวางค์</th><th>นักษัตร / ฤกษ์</th><th>มาตรฐาน & วิกลคติ</th>
+                            <th style="padding:8px;">ดาว</th><th>ราศี</th><th>องศา</th><th>นวางค์</th><th>นักษัตร / ฤกษ์</th><th>ฤกษ์สถิต (บาทฤกษ์)</th><th>มาตรฐาน & วิกลคติ</th>
                         </tr></thead>
                         <tbody>
                             <tr style="background:#FEF2F2;font-weight:700;border-bottom:2px solid #FCA5A5;">
                                 <td style="padding:7px;color:#B91C1C;">ลั ลัคนา</td><td>${ASTRO_CONST.ZODIACS[res.ascRasi]}</td>
                                 <td>${res.ascDeg}° ${String(res.ascMin).padStart(2, '0')}'</td><td>${ASTRO_CONST.ZODIACS[res.ascNavamsa]}</td>
-                                <td style="font-size:12px;">${res.ascNakshatra}</td><td style="color:#B45309;">อันโตนาที (-17)</td>
+                                <td style="font-size:12px;">${res.ascNakshatra}</td>
+                                <td style="font-size:12px;color:#0369A1;">บาทที่ ${(Math.floor(((res.ascRasi * 30 + res.ascDeg + res.ascMin / 60) % (360 / 27)) / (360 / 108)) + 1)} • ตรียางค์ ${Math.floor(res.ascDeg / 10) + 1}</td>
+                                <td style="color:#B45309;">อันโตนาที (-17)</td>
                             </tr>
                             ${rowsHtml}
                         </tbody>
