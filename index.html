@@ -270,15 +270,17 @@
             const nmMonth = nmDate.getUTCMonth() + 1;
             const nmDay = nmDate.getUTCDate();
 
-            const baseMonthMap = { 11: 1, 12: 2, 1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 9, 8: 10, 9: 11, 10: 12 };
+                        const baseMonthMap = { 12: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8, 8: 9, 9: 10, 10: 11, 11: 12 };
             let astroMonth = baseMonthMap[nmMonth];
-            if (nmDay >= 25) astroMonth = (astroMonth % 12) + 1;
+            if (nmDay >= 24) astroMonth = (astroMonth % 12) + 1;
 
+            // ปีอธิกมาสตามปฏิทินหลวงไทย (มีเดือน 8 สองหน -> หลังเดือน 8 แรก จะเป็นเดือน 8 หลัง ก่อนเข้าเดือน 9)
+            const adhikamasaYears =;
             const beRaw = gy + 543;
-            const isAdhikamasa = (((beRaw * 12) + 5) % 19) < 7;
-            if (isAdhikamasa && (nmMonth === 7 || nmMonth === 8 || nmMonth === 9)) {
+            if (adhikamasaYears.includes(beRaw) && (nmMonth === 7 || nmMonth === 8 || nmMonth === 9)) {
                 astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
             }
+
 
             let be = beRaw;
             if (gm <= 3 || (gm === 4 && astroMonth < 5)) be -= 1;
