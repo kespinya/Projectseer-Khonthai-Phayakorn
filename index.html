@@ -323,15 +323,25 @@
             const nakIdx = Math.floor(cleanLon / nakSize) % 27;
             return { nakshatra: ASTRO_CONST.NAKSHATRAS[nakIdx], navamsaRasi: navIdx };
         }
-            function getPlanetDignity(id, rasi) {
-            const own = { 1:, 2:, 3:, 4:, 5:, 6:, 7:, 8: [10] };
-            const exalt = { 1: 0, 2: 1, 3: 9, 4: 5, 5: 3, 6: 11, 7: 6, 8: 7 };
-            const debil = { 1: 6, 2: 7, 3: 3, 4: 11, 5: 9, 6: 5, 7: 0, 8: 1 };
-            const raja = { 1: 5, 2: 10, 3: 2, 4: 8, 5: 3, 6: 3, 7: 4, 8: 11 };
-            if (own[id] && own[id].includes(rasi)) return 'เกษตร';
-            if (exalt[id] === rasi) return 'มหาอุจจ์';
-            if (debil[id] === rasi) return 'นิจ';
-            if (raja[id] === rasi) return 'ราชาโชค';
+                    function getPlanetDignity(id, rasi) {
+            if (id === 1 && rasi === 4) return 'เกษตร';
+            if (id === 2 && rasi === 3) return 'เกษตร';
+            if (id === 3 && (rasi === 0 || rasi === 7)) return 'เกษตร';
+            if (id === 4 && (rasi === 2 || rasi === 5)) return 'เกษตร';
+            if (id === 5 && (rasi === 8 || rasi === 11)) return 'เกษตร';
+            if (id === 6 && (rasi === 1 || rasi === 6)) return 'เกษตร';
+            if (id === 7 && (rasi === 9 || rasi === 10)) return 'เกษตร';
+            if (id === 8 && rasi === 10) return 'เกษตร';
+
+            if ((id === 1 && rasi === 0) || (id === 2 && rasi === 1) || (id === 3 && rasi === 9) || (id === 4 && rasi === 5)) return 'มหาอุจจ์';
+            if ((id === 5 && rasi === 3) || (id === 6 && rasi === 11) || (id === 7 && rasi === 6) || (id === 8 && rasi === 7)) return 'มหาอุจจ์';
+
+            if ((id === 1 && rasi === 6) || (id === 2 && rasi === 7) || (id === 3 && rasi === 3) || (id === 4 && rasi === 11)) return 'นิจ';
+            if ((id === 5 && rasi === 9) || (id === 6 && rasi === 5) || (id === 7 && rasi === 0) || (id === 8 && rasi === 1)) return 'นิจ';
+
+            if ((id === 1 && rasi === 5) || (id === 2 && rasi === 10) || (id === 3 && rasi === 2) || (id === 4 && rasi === 8)) return 'ราชาโชค';
+            if ((id === 5 && rasi === 3) || (id === 6 && rasi === 3) || (id === 7 && rasi === 4) || (id === 8 && rasi === 11)) return 'ราชาโชค';
+
             return 'ปกติ';
         }
 
