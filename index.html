@@ -22,7 +22,7 @@
         .btn-main { width: 100%; padding: 12px; border-radius: 14px; border: none; background: linear-gradient(135deg, #F59E0B, #EA580C); color: #FFF; font-size: 15px; font-weight: 700; cursor: pointer; }
         .cat-widget { position: fixed; right: 16px; bottom: 16px; z-index: 99; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
         .cat-bubble { background: #FFFBEB; border: 2px solid #F59E0B; color: #92400E; padding: 7px 12px; border-radius: 14px; font-size: 11.5px; font-weight: 700; margin-bottom: 6px; pointer-events: auto; }
-        .cat-avatar { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #FEF08A, #F59E0B); border: 3px solid #FFF; display: flex; align-items: center; justify-content: center; font-size: 34px; cursor: pointer; pointer-events: auto; }
+.cat-avatar { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #FEF08A, #F59E0B); border: 3px solid #FFF; display: flex; align-items: center; justify-content: center; font-size: 34px; cursor: pointer; pointer-events: auto; }
         .meadow-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 16px; background: linear-gradient(90deg, #10B981, #059669, #34D399); border-top: 2px solid #FDE047; z-index: 50; }
     </style>
 </head>
@@ -45,7 +45,7 @@
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <input type="date" id="jor_date" onchange="updateJorDateTime()" style="width:155px;padding:6px 10px;">
                 <input type="time" id="jor_time" onchange="updateJorDateTime()" style="width:115px;padding:6px 10px;">
-                <button onclick="setJorNow()" style="padding:7px 12px;border-radius:10px;border:1.5px solid #0284C7;background:#FFF;color:#0369A1;font-size:12px;font-weight:700;cursor:pointer;">⏱️ เวลาปัจจุบัน</button>
+     <button onclick="setJorNow()" style="padding:7px 12px;border-radius:10px;border:1.5px solid #0284C7;background:#FFF;color:#0369A1;font-size:12px;font-weight:700;cursor:pointer;">⏱️ เวลาปัจจุบัน</button>
             </div>
         </div>
 
@@ -55,8 +55,8 @@
                 <div class="grid-form">
                    <div><label>วันเดือนปี เกิด (ค.ศ.)</label><input type="date" id="z_dob" onchange="syncAllForms()"></div>
                    <div><label>เวลาเกิดที่แน่นอน (น.)</label><input type="time" id="z_tob" onchange="syncAllForms()"></div>
-                    <div><label>เพศ</label><select id="z_gender"><option value="LGBTQ+">LGBTQ+</option><option value="หญิง">หญิง</option><option value="ชาย">ชาย</option></select></div>
-                    <div><label>สถานที่เกิด (ไทย 77 จังหวัด & ต่างประเทศ)</label><select id="z_prov" onchange="renderZodiacModeUI()"></select></div>
+         <div><label>เพศ</label><select id="z_gender"><option value="ไม่ระบุ">ไม่ระบุ</option><option value="LGBTQ+">LGBTQ+</option><option value="หญิง">หญิง</option><option value="ชาย">ชาย</option></select></div>
+            <div><label>สถานที่เกิด (ไทย 77 จังหวัด & ต่างประเทศ)</label><select id="z_prov" onchange="renderZodiacModeUI()"></select></div>
                 </div>
                 <button class="btn-main" onclick="renderZodiacModeUI()">✨ คำนวณสมผุสดาว 10 ดวง วางลัคนา & วิเคราะห์ดวง</button>
             </div>
@@ -135,7 +135,7 @@
             YEARS: ['', 'ชวด (1)', 'ฉลู (2)', 'ขาล (3)', 'เถาะ (4)', 'มะโรง (5)', 'มะเส็ง (6)', 'มะเมีย (7)', 'มะแม (8)', 'วอก (9)', 'ระกา (10)', 'จอ (11)', 'กุน (12)'],
             ZODIACS: ['เมษ', 'พฤษภ', 'เมถุน', 'กรกฎ', 'สิงห์', 'กันย์', 'ตุลย์', 'พิจิก', 'ธนู', 'มังกร', 'กุมภ์', 'มีน'],
             BHAVA_NAMES: ['ตนุ', 'กดุมภะ', 'สหัชชะ', 'พันธุ', 'ปุตตะ', 'อริ', 'ปัตนิ', 'มรณะ', 'ศุภะ', 'กัมมะ', 'ลาภะ', 'วินาศ'],
-            ANTO_STD: '108,120,132,144,132,120,108,96,84,72,84,96'.split(',').map(Number),
+            ANTO_STD: '110,120,128,130,128,120,110,100,92,90,92,100'.split(',').map(Number),
             NAKSHATRAS: [
                 '1.อัศวินี (ทลิทโท)', '2.ภรณี (มหัทธโน)', '3.กฤตติกา (โจโร)', '4.โรหิณี (ภูมิปาโล)', '5.มฤคศิระ (เทศาตรี)',
                 '6.อารทรา (เทวี)', '7.ปุนัพสุ (เพชฌฆาต)', '8.ปุษยะ (ราชา)', '9.อาศเลษา (สมโณ)', '10.มาฆะ (ทลิทโท)',
@@ -212,7 +212,7 @@
             return 'ปกติ';
         }
 
-        function getThaiLunarCalendar100Y(dobStr, tobStr) {
+                function getThaiLunarCalendar100Y(dobStr, tobStr) {
             const [y, m, d] = dobStr.split('-').map(Number);
             const [hh, mm] = (tobStr || '09:00').split(':').map(Number);
             const dt = new Date(y, m - 1, d);
@@ -227,19 +227,18 @@
             const tithi = Math.floor((lunarAge / synodic) * 30) + 1;
             const paksha = tithi <= 15 ? `ขึ้น ${tithi} ค่ำ` : `แรม ${tithi - 15} ค่ำ`;
 
-            let astroMonth = ((dt.getMonth() + 1) % 12) + 1;
-            if (tithi <= 15 && dt.getDate() < 15) astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
-
-
-            if (tithi > 15 && dt.getDate() < 15) astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
+            const curM = dt.getMonth() + 1;
+            let astroMonth = (curM % 12) + 1;
+            if (dt.getDate() < 10 && tithi > 15) astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
 
             let be = dt.getFullYear() + 543;
-            if (astroMonth < 5 && (dt.getMonth() + 1) <= 4) be -= 1;
+            if (curM <= 3 || (curM === 4 && astroMonth < 5)) be -= 1;
             const astroYear = ((be - 4) % 12 + 12) % 12 + 1;
 
             const lunarText = `วัน${ASTRO_CONST.DAYS[astroDay]} ${paksha} เดือน ${ASTRO_CONST.MONTHS[astroMonth]} ปี${ASTRO_CONST.YEARS[astroYear]} พ.ศ.${be}`;
             return { astroDay, astroMonth, astroYear, birthYearBE: be, lunarText };
         }
+
         function computeFullAstrology(dobStr, tobStr, lat, lon, tz = 7) {
             const [y, m, d] = dobStr.split('-').map(Number);
             const [hh, mm] = tobStr.split(':').map(Number);
@@ -297,8 +296,7 @@
             const ha = Math.acos(Math.max(-1, Math.min(1, -Math.tan(latRad) * Math.tan(declRad)))) * 180 / Math.PI;
             const trueSunriseMin = 720 - (ha * 4);
             const sunriseMin = 360;
-            let elapsedMin = (((hh * 60 + mm) - sunriseMin) + 1440) % 1440 - 17;
-
+            let elapsedMin = (((hh * 60 + mm) - sunriseMin) + 1440) % 1440 - 68;
             if (elapsedMin < 0) elapsedMin += 1440;
 
             const antoTable = ASTRO_CONST.ANTO_STD;
@@ -847,7 +845,7 @@
         }
 
         function buildAllForms() {
-           document.getElementById('z_prov').innerHTML = ASTRO_CONST.PROVINCES.map((p, i) => `<option value="${i}">${p}</option>`).join('');
+          document.getElementById('z_prov').innerHTML = ASTRO_CONST.PROVINCES.map((p, i) => `<option value="${i}">${p}</option>`).join('');
             const dList = '1,2,3,4,5,6,7,8'.split(',').map(Number);
             const mList = '1,2,3,4,5,6,7,8,9,10,11,12'.split(',').map(Number);
             document.getElementById('t7_day').innerHTML = dList.map(d => `<option value="${d}">${ASTRO_CONST.DAYS[d]}</option>`).join('');
