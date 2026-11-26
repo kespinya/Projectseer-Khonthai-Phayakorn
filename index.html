@@ -274,8 +274,8 @@
             let astroMonth = baseMonthMap[nmMonth];
             if (nmDay >= 24) astroMonth = (astroMonth % 12) + 1;
 
-            // ปีอธิกมาสตามปฏิทินหลวงไทย (มีเดือน 8 สองหน -> หลังเดือน 8 แรก จะเป็นเดือน 8 หลัง ก่อนเข้าเดือน 9)
-            const adhikamasaYears =;
+                      // ปีอธิกมาสตามปฏิทินหลวงไทย (มีเดือน 8 สองหน -> หลังเดือน 8 แรก จะเป็นเดือน 8 หลัง ก่อนเข้าเดือน 9)
+            const adhikamasaYears = '2520,2523,2526,2528,2531,2534,2537,2539,2542,2545,2547,2550,2553,2555,2558,2561,2564,2566,2569,2572'.split(',').map(Number);
             const beRaw = gy + 543;
             if (adhikamasaYears.includes(beRaw) && (nmMonth === 7 || nmMonth === 8 || nmMonth === 9)) {
                 astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
