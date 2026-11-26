@@ -478,6 +478,16 @@
                 if (k < 3) wai1 += lbl; else if (k < 6) wai2 += lbl; else wai3 += lbl;
                 acc = nxt;
             }
+            const rasiPlanets = {}, navamsaPlanets = {};
+            for (let i = 0; i < 12; i++) { rasiPlanets[i] = []; navamsaPlanets[i] = []; }
+            planets.forEach(p => { rasiPlanets[p.rasi].push(p.id); navamsaPlanets[p.navamsaRasi].push(p.id); });
+
+            return {
+                planets, rasiPos, navamsaPos, rasiPlanets, navamsaPlanets, ascRasi, ascDeg, ascMin,
+                ascNakshatra: ascNav.nakshatra, ascNavamsa: ascNav.navamsaRasi,
+                tanuRasi, tanuPlanet, pariwatList, ongKhenList,
+                triWai: { wai1, wai2, wai3 }
+            };
 
             return {
                 planets, rasiPos, navamsaPos, ascRasi, ascDeg, ascMin,
