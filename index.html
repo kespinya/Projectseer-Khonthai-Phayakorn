@@ -211,6 +211,21 @@
                 (id === 5 && rasi === 3) || (id === 6 && rasi === 3) || (id === 7 && rasi === 4) || (id === 8 && rasi === 11)) return 'ราชาโชค';
             return 'ปกติ';
         }
+                  function getThaiLunarCalendar100Y(dobStr, tobStr) {
+            const [y, m, d] = dobStr.split('-').map(Number);
+            const [hh, mm] = (tobStr || '09:00').split(':').map(Number);
+            const dt = new Date(y, m - 1, d);
+            if (hh < 6) dt.setDate(dt.getDate() - 1);
+
+            let astroDay = dt.getDay() + 1;
+            if (astroDay === 4 && (hh >= 18 || hh < 6)) astroDay = 8;
+
+            const jd = 367 * dt.getFullYear() - Math.floor(7 * (dt.getFullYear() + Math.floor((dt.getMonth() + 10) / 12)) / 4) + Math.floor(275 * (dt.getMonth() + 1) / 9) + dt.getDate() + 1721013.5;
+            const synodic = 29.530588853;
+            const lunarAge = (((jd - 2451550.26) % synodic) + synodic) % synodic;
+            const tithi = Math.floor((lunarAge / synodic) * 30) + 1;
+            const paksha = tithi <= 15 ? `ขึ้น ${tithi} ค่ำ` : `แรม ${tithi - 15} ค่ำ`;
+
             const curM = dt.getMonth() + 1;
             let astroMonth = (curM % 12) + 1;
             if (dt.getDate() < 10 && tithi > 15) astroMonth = ((astroMonth - 2 + 12) % 12) + 1;
@@ -222,6 +237,7 @@
 
             const lunarText = `วัน${ASTRO_CONST.DAYS[astroDay]} ${paksha} เดือน ${ASTRO_CONST.MONTHS[astroMonth]} ปี${ASTRO_CONST.YEARS[astroYear]} พ.ศ.${be}`;
             return { astroDay, astroMonth, astroYear, birthYearBE: be, lunarText };
+        }
 
 
 
