@@ -426,8 +426,10 @@
                     const p3 = planets.find(x => x.id === LORDS_PLACHOT[p2.rasi]);
                     if (p3 && LORDS_PLACHOT[p3.rasi] === p1.id && p1.id < p2.id && p1.id < p3.id) {
                 pariwatList.push('ปริวรรต 3 เรือน (' + ASTRO_CONST.FULL_NAMES[p1.id] + ' → ' + ASTRO_CONST.FULL_NAMES[p2.id] + ' → ' + ASTRO_CONST.FULL_NAMES[p3.id] + ')');
+                                       }
                     }
-                    };
+                });
+
             // กลุ่มองค์เกณฑ์ (กรกฎ=อัมพุช, ธนู=นระ, มังกร=อัมพุช, เฉพาะดาวตามเกณฑ์)
                        const ongKhenList = [];
             const rasiType = ['ปัสวะ', 'ปัสวะ', 'นระ', 'อัมพุช', 'ปัสวะ', 'นระ', 'นระ', 'กีฏะ', 'นระ', 'อัมพุช', 'นระ', 'อัมพุช'];
