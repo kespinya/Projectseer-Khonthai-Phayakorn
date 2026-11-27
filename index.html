@@ -455,15 +455,54 @@
             const ascLord = RASI_LORDS[ascRasi];
             const stepsTanu = (rasiPos[ascLord] - ascRasi + 12) % 12;
             const tanuRasi = (ascRasi + stepsTanu) % 12;
-            const tanuPlanet = RASI_LORDS[tanuRasi];
+                    const tanuPlanet = RASI_LORDS[tanuRasi];
 
+            const pariwatList = [];
+            planets.forEach(p1 => {
+                if (p1.id === 9 || p1.id === 0) return;
+                const ow1 = RASI_LORDS[p1.rasi];
+                if (ow1 === p1.id) return;
+                const p2 = planets.find(x => x.id === ow1);
+                if (p2 && RASI_LORDS[p2.rasi] === p1.id && p1.id < p2.id) {
+                    pariwatList.push('ปริวรรต 2 เรือน (' + ASTRO_CONST.FULL_NAMES[p1.id] + ' ↔ ' + ASTRO_CONST.FULL_NAMES[p2.id] + ')');
+                }
+            });
+
+            const ongKhenList = [];
+            const rasiType = ['ปัสวะ', 'ปัสวะ', 'นระ', 'อัมพุช', 'ปัสวะ', 'นระ', 'นระ', 'กีฏะ', 'นระ', 'อัมพุช', 'นระ', 'อัมพุช'];
+            const ascType = rasiType[ascRasi];
+            planets.forEach(p => {
+                const bhava = ((p.rasi - ascRasi + 12) % 12) + 1;
+                const dName = ASTRO_CONST.FULL_NAMES[p.id];
+                if ('1,4,7,10'.split(',').map(Number).includes(bhava)) {
+                    if (ascType === 'อัมพุช' && '2,4,5,6'.split(',').map(Number).includes(p.id)) ongKhenList.push('อัมพุชองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
+                    if (ascType === 'นระ' && '1,4,5,7'.split(',').map(Number).includes(p.id)) ongKhenList.push('นระองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
+                    if (ascType === 'ปัสวะ' && '1,2,3,7'.split(',').map(Number).includes(p.id)) ongKhenList.push('ปัสวะองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
+                    if (ascType === 'กีฏะ' && '3,5,6,8'.split(',').map(Number).includes(p.id)) ongKhenList.push('กีฏะองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
+                }
+            });
+
+            const triOrder = '1,2,3,4,7,5,8,6'.split(',').map(Number);
+            const years100 = { 1: 6, 2: 15, 3: 8, 4: 17, 7: 10, 5: 19, 8: 12, 6: 13 };
+            const tIdx = Math.max(0, triOrder.indexOf(tanuPlanet));
+            let acc = 0, wai1 = '', wai2 = '', wai3 = '';
+            for (let k = 0; k < 8; k++) {
+                const pid = triOrder[(tIdx + k) % 8];
+                const nxt = acc + years100[pid];
+                const lbl = ASTRO_CONST.DAYS[pid] + '(' + acc + '-' + nxt + 'ปี) ';
+                if (k < 3) wai1 += lbl; else if (k < 6) wai2 += lbl; else wai3 += lbl;
+                acc = nxt;
+            }
+
+            return {
                 planets, rasiPos, navamsaPos, ascRasi, ascDeg, ascMin,
                 ascNakshatra: ascNav.nakshatra, ascNavamsa: ascNav.navamsaRasi,
                 tanuRasi, tanuPlanet, pariwatList, ongKhenList,
                 triWai: { wai1, wai2, wai3 }
             };
         }
-            function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD, dobStr, tobStr) {
+
+        function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD, dobStr, tobStr) {
             const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
             const seq = '0,1,2,3,4,5,6'.split(',').map(Number);
             const yamDaySeq = '1,6,4,2,7,5,3'.split(',').map(Number);
@@ -474,14 +513,14 @@
             const r4 = seq.map(i => r1[i] + r2[i] + r3[i]);
             const r5 = r4.map(n => mod7(n));
             const r6 = seq.map(i => mod7(r5[i] * 2));
-           const r7 = seq.map(i => mod7(r6.at(i) * 2));
+            const r7 = r6.map(n => (n * 2 > 7) ? (n * 2 - 7) : (n * 2));
 
-            const idx8 = yamDaySeq.indexOf(r5[0]);
-            const r8 = seq.map(i => yamDaySeq[(idx8 + i) % 7]);
+            const idx8 = yamDaySeq.indexOf(r5.at(0));
+            const r8 = seq.map(i => yamDaySeq.at((idx8 + i) % 7));
 
-            const right9 = mod7(r5[0] + r8[0]);
+            const right9 = mod7(r5.at(6) + r8.at(6));
             const idx9 = yamDaySeq.indexOf(right9);
-            const r9 = seq.map(i => yamDaySeq[(idx9 + (6 - i)) % 7]);
+            const r9 = seq.map(i => yamDaySeq.at((idx9 + (6 - i)) % 7));
 
             const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
 
