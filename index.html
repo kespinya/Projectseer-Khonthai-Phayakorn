@@ -642,7 +642,6 @@
             el.value = dt.toISOString().slice(0, 10);
             updateJorDateTime();
         }
-
         function highlightNumberInTable(numVal, msgHtml) {
             document.getElementById('t7_meaning').innerHTML = msgHtml;
             document.querySelectorAll('.t7-cell-btn').forEach(btn => {
@@ -651,12 +650,15 @@
                 btn.style.transform = isMatch ? 'scale(1.04)' : 'scale(1)';
             });
         }
+
         function render7TuaModeUI() {
             const dVal = +document.getElementById('t7_day').value;
             const mVal = +document.getElementById('t7_month').value;
             const yVal = +document.getElementById('t7_year').value;
-            const birthBE = +document.getElementById('t7_birthBE').value || 2522;
-            const targetBE = +document.getElementById('t7_targetBE').value || 2569;
+            const curBE = new Date().getFullYear() + 543;
+            const targetBE = +document.getElementById('t7_targetBE').value || curBE;
+            const birthBE = +document.getElementById('t7_birthBE').value || curBE;
+
             const addM = +document.getElementById('t7_addM').value || 0;
             const addD = +document.getElementById('t7_addD').value || 0;
 
@@ -909,25 +911,47 @@
             document.getElementById('cat_msg').innerText = msgs[Math.floor(Math.random() * msgs.length)];
         }
 
-        function setJorNow() {
-            const now = new Date();
-            document.getElementById('jor_date').value = now.toISOString().slice(0, 10);
-            document.getElementById('jor_time').value = now.toTimeString().slice(0, 5);
-            updateJorDateTime();
-        }
-
-        function updateJorDateTime() {
+            function updateJorDateTime() {
             const jDate = document.getElementById('jor_date').value;
             if (!jDate) return;
-            const be = +jDate.split('-') + 543;
+            const curBE = new Date().getFullYear() + 543;
+            const be = Number(jDate.split('-').at(0)) + 543;
             document.getElementById('t7_targetBE').value = be;
             document.getElementById('tk_be').value = be;
-            const birthBE = +document.getElementById('t7_birthBE').value || 2522;
+            const birthBE = Number(document.getElementById('t7_birthBE').value) || curBE;
             const age = Math.max(1, be - birthBE + 1);
             document.getElementById('gr_age').value = age;
             document.getElementById('tk_age').value = age;
             if (document.getElementById('mode_2').style.display === 'block') render7TuaModeUI();
             if (document.getElementById('mode_4').style.display === 'block') renderTaksaModeUI();
+        }
+
+            function buildCosmicWheelSVG(title, ascRasi, planetPos, sunPos, showBhava) {
+            const cx = 195, cy = 195, rOut = 180, rIn = 52;
+            const sunRasi = sunPos ? sunPos : -1;
+            let svg = `<div style="text-align:center;"><div style="font-size:14px;font-weight:700;color:#1E3A8A;margin-bottom:6px;">${title}</div>
+                <svg width="100%" style="max-width:380px;" viewBox="0 0 390 390">
+                <circle cx="${cx}" cy="${cy}" r="${rOut}" fill="#0F294A" stroke="#F59E0B" stroke-width="3"/>
+                <circle cx="${cx}" cy="${cy}" r="144" fill="none" stroke="rgba(253,224,71,0.3)" stroke-width="1"/>
+                <circle cx="${cx}" cy="${cy}" r="${rIn}" fill="#1E3A8A" stroke="#FDE047" stroke-width="2"/>`;
+            for (let i = 0; i < 12; i++) {
+                const a1 = ((-90 - i * 30) * Math.PI) / 180, a2 = ((-90 - (i + 0.5) * 30) * Math.PI) / 180;
+                svg += `<line x1="${cx + rIn * Math.cos(a1)}" y1="${cy + rIn * Math.sin(a1)}" x2="${cx + rOut * Math.cos(a1)}" y2="${cy + rOut * Math.sin(a1)}" stroke="rgba(253,224,71,0.35)"/>`;
+                const isAsc = (i === ascRasi), isSun = (i === sunRasi);
+                const zName = ASTRO_CONST.ZODIACS.at(i);
+                svg += `<text x="${cx + 162 * Math.cos(a2)}" y="${cy + 162 * Math.sin(a2)}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="${isAsc ? '#FB7185' : (isSun ? '#FDE047' : '#7DD3FC')}">${zName}</text>`;
+                const pList = Object.keys(planetPos).filter(p => planetPos[p] === i).map(p => ASTRO_CONST.SYMBOLS[p]);
+                if (isAsc) pList.unshift('ลั');
+                const pRad = showBhava ? 123 : 102;
+                svg += `<text x="${cx + pRad * Math.cos(a2)}" y="${cy + pRad * Math.sin(a2)}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="#FEF08A">${pList.join(' ') || '·'}</text>`;
+                if (showBhava) {
+                    const bIdx = (i - ascRasi + 12) % 12;
+                    svg += `<text x="${cx + 81 * Math.cos(a2)}" y="${cy + 81 * Math.sin(a2)}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="${bIdx === 0 ? '#FDA4AF' : '#6EE7B7'}">${ASTRO_CONST.BHAVA_NAMES.at(bIdx)}</text>`;
+                }
+            }
+            svg += `<text x="195" y="188" text-anchor="middle" font-size="10" fill="#FECDD3">${showBhava ? 'ลัคนา (ตนุ)' : 'ลัคนานวางค์'}</text>
+                <text x="195" y="206" text-anchor="middle" font-size="13" font-weight="700" fill="#FDE047">${ASTRO_CONST.ZODIACS.at(ascRasi)}</text></svg></div>`;
+            return svg;
         }
 
         function syncAllForms() {
