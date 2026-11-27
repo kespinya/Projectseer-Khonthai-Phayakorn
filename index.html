@@ -547,17 +547,39 @@
             const b4Jor = rows[3][yCol], activeNum = rows[0][yCol], b9Jor = rows[8][yCol];
             const supaNum = rows[2][1], lapaNum = rows[2][3];
 
-            let lightScore = 50;
-            if (b4Jor >= 11 && b4Jor !== 12) lightScore += 15;
-            if (yCol === 2 || yCol === 3 || yCol === 6) lightScore += 15;
-            if (yCol === 4 || yCol === 5) lightScore -= 20;
-            if (activeNum === sri || b9Jor === sri || supaNum === sri || lapaNum === sri) lightScore += 20;
-            if (activeNum === kali || b9Jor === kali || tkY.roleMap[supaNum] === 'กาลกิณี' || tkY.roleMap[lapaNum] === 'กาลกิณี') lightScore -= 25;
+                        // 1. เช็กภพจรปี (yCol: 0=อัตตะ, 1=หินะ, 2=ธนัง, 3=ปิตา, 4=มาตา/อริ, 5=โภคา/มรณะ, 6=มัชฌิมา/วินาศ)
+            // ปรับเกณฑ์ใหม่: ให้น้ำหนัก "ภพจรปี" และ "กาลกิณีจร" เป็นตัวตัดสินแสงเทียนหลัก
+            let lightScore = 55;
 
-            let candleState = { level: 'medium', title: '🕯️ แสงสว่างทรงตัว (ประคองทิศทาง)', color: '#D97706', desc: 'ฐานกำลังพระเคราะห์และจุดไม้ตาย (ฐาน 8–9) อยู่ในเกณฑ์ปานกลาง ควรใช้สติและวางแผนรอบคอบ' };
-            if (lightScore >= 75) candleState = { level: 'bright', title: '🔥 แสงสว่างโชติช่วง (ฐานไม้ตาย & ภพสุภะหนุน)', color: '#059669', desc: 'กำลังพระเคราะห์ (ฐาน 4) จุดไม้ตาย (ฐาน 8–9) และดาวธาตุไฟ/ภพสุภะส่งกำลังดีเยี่ยม เปิดทางสำเร็จราบรื่น' };
-            else if (lightScore <= 25) candleState = { level: 'extinguished', title: '🌑 แสงอ่อนแรง (จุดไม้ตาย & ธาตุไฟปะทะเสีย)', color: '#DC2626', desc: 'จุดจรปะทะเรือนเสียในฐาน 8–9 หรือดาวธาตุไฟ/ภพสุภะต้องกาลกิณี ควรชะลอความเสี่ยงและเน้นตั้งรับ' };
-            else if (lightScore <= 45) candleState = { level: 'dim', title: '💨 แสงเอนไหว (ระวังจุดปะทะฐาน 8–9)', color: '#EA580C', desc: 'พลังภพสุภะ-ลาภะหรือฐานไม้ตายมีจุดสะดุดชั่วคราว ควรรอบคอบเรื่องการเงินและเอกสารสัญญา' };
+            // เช็กภพเสียหลัก (หินะ=1, อริ=4, มรณะ=5, วินาศ=6)
+            const isBadHouse = (yCol === 1 || yCol === 4 || yCol === 5 || yCol === 6);
+            if (yCol === 6 || yCol === 5) lightScore -= 35; // ตกวินาศ หรือ มรณะ เปลวไฟวูบหนักทันที
+            else if (yCol === 1 || yCol === 4) lightScore -= 25; // ตกหินะ หรือ อริ แสงเอนไหว
+            else if (yCol === 2 || yCol === 3) lightScore += 15; // ตกธนัง หรือ ปิตา หนุนแสงสว่าง
+
+            // เช็กดาวจรชนกาลกิณี หรือ ศรี
+            if (activeNum === kali || b9Jor === kali || tkY.roleMap[activeNum] === 'กาลกิณี') {
+                lightScore -= 30; // ชนกาลกิณีจร ไฟแทบดับ
+            }
+            if (!isBadHouse && (activeNum === sri || b9Jor === sri)) {
+                lightScore += 20; // ได้ศรีหนุน (เฉพาะปีที่ไม่ตกภพเสีย)
+            }
+
+            // เช็กกำลังพระเคราะห์ฐาน 4 (ถ้าฐาน 4 เป็นคู่ศัตรู/ราหู 12)
+            if (b4Jor === 12) lightScore -= 15;
+            else if (b4Jor >= 11 && !isBadHouse) lightScore += 10;
+
+            // 2. กำหนดสถานะและคำทำนายเปลวเทียนตามคะแนนจริง
+            let candleState = { level: 'medium', title: '🕯️ แสงสว่างทรงตัว (ประคองทิศทาง)', color: '#D97706', desc: 'จุดจรปีอยู่ในเกณฑ์ปานกลาง ควรใช้สติและวางแผนอย่างรอบคอบ' };
+            
+            if (lightScore >= 75) {
+                candleState = { level: 'bright', title: '🔥 แสงสว่างโชติช่วง (ดวงชะตาเปิดทาง)', color: '#059669', desc: 'อายุจรปีตกภพดีและมีกำลังหนุนส่ง ดวงประทีปสว่างไสว ทำสิ่งใดก็ราบรื่นสำเร็จ' };
+            } else if (lightScore <= 25) {
+                candleState = { level: 'extinguished', title: '🌑 เปลวเทียนเกือบดับ (ตนุจรตกภพเสีย/วินาศ)', color: '#DC2626', desc: 'อายุจรปีตกภพวินาศ-มรณะ หรือปะทะกาลกิณี แสงประทีปริบหรี่ ควรงดความเสี่ยงและเน้นตั้งรับ' };
+            } else if (lightScore <= 45) {
+                candleState = { level: 'dim', title: '💨 แสงริบหรี่เอนไหว (ลมมรสุมพัดผ่าน)', color: '#EA580C', desc: 'จุดจรปีเริ่มเข้ามุมอับหรือมีอุปสรรคแทรก ควรระวังเรื่องการตัดสินใจและรักษาฐานเดิมไว้' };
+            }
+
 
             // ผังทรงบ้าน 7 ช่องตามคัมภีร์เรือนชะตา
             const topPeak = rows[3][0];    // ยอดจั่ว: ฐาน 4 ช่องอัตตะ
