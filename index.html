@@ -348,30 +348,58 @@
 
         function computeFullAstrology(dobStr, tobStr, lat, lon, tz = 7) {
             const [y, m, d] = dobStr.split('-').map(Number);
-            const [hh, mm] = tobStr.split(':').map(Number);
+            const [hh, mm] = (tobStr || '06:00').split(':').map(Number);
             const utHour = hh + mm / 60 - tz;
             const jd = 367 * y - Math.floor(7 * (y + Math.floor((m + 9) / 12)) / 4) + Math.floor(275 * m / 9) + d + 1721013.5 + utHour / 24;
             const T = (jd - 2451545.0) / 36525.0;
-            const suriyaShift = 23.853056 + T * 1.396971;
+            const dDays = jd - 2451545.0;
+            const suriyaShift = 23.853056 + 1.396042 * T + 0.000308 * T * T;
 
-            const M_sun = (357.52911 + 35999.05029 * T) * Math.PI / 180;
-            const L0_sun = 280.46646 + 36000.76983 * T;
-            const sunLon = norm360(L0_sun + 1.914602 * Math.sin(M_sun) + 0.019993 * Math.sin(2 * M_sun) - suriyaShift);
+            const rad = (deg) => deg * Math.PI / 180;
+            const deg = (r) => r * 180 / Math.PI;
 
-            const L_moon = 218.3165 + 481267.8813 * T;
-            const M_moon = (134.963 + 477198.867 * T) * Math.PI / 180;
-            const D_moon = (297.850 + 445267.111 * T) * Math.PI / 180;
-            const moonLon = norm360(L_moon + 6.289 * Math.sin(M_moon) + 1.274 * Math.sin(2 * D_moon - M_moon) - suriyaShift - 0.15);
+            const M_sun = norm360(357.5291092 + 35999.0502909 * T - 0.0001536 * T * T);
+            const L0_sun = norm360(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
+            const C_sun = (1.914602 - 0.004817 * T) * Math.sin(rad(M_sun)) + (0.019993 - 0.000101 * T) * Math.sin(rad(2 * M_sun)) + 0.000289 * Math.sin(rad(3 * M_sun));
+            const sunTrop = norm360(L0_sun + C_sun);
+            const sunLon = norm360(sunTrop - suriyaShift);
+            const earthLon = norm360(sunTrop + 180);
+            const earthR = 1.00014 - 0.01671 * Math.cos(rad(M_sun)) - 0.00014 * Math.cos(rad(2 * M_sun));
 
-            const marsLon = norm360(355.433 + 19140.299 * T + 10.691 * Math.sin((19.373 + 19139.858 * T) * Math.PI / 180) - suriyaShift + 28.41);
-            const mercLon = norm360(sunLon + 16 * Math.sin((174.795 + 149472.515 * T) * Math.PI / 180) + 1.50);
-            const jupLon = norm360(34.351 + 3034.906 * T + 5.555 * Math.sin((20.020 + 3034.696 * T) * Math.PI / 180) - suriyaShift + 0.55);
-            const venLon = norm360(sunLon + 30.1 * Math.sin((50.416 + 58517.803 * T) * Math.PI / 180) - 1.65);
-            const satLon = norm360(50.077 + 1222.114 * T + 6.406 * Math.sin((317.020 + 1222.114 * T) * Math.PI / 180) - suriyaShift - 4.43);
-            const rahuLon = norm360(125.0445 - 1934.1363 * T - suriyaShift - 0.26);
-            const ketuLon = norm360(46.50 + 1935.47 * T - suriyaShift);
-            const uranLon = norm360(314.055 + 428.467 * T - suriyaShift - 3.60);
+            const calcKeplerSidereal = (N0, Nd, i0, id, w0, wd, a, e0, ed, M0, Md) => {
+                const N = rad(norm360(N0 + Nd * dDays));
+                const i = rad(i0 + id * dDays);
+                const w = rad(norm360(w0 + wd * dDays));
+                const e = e0 + ed * dDays;
+                const M = rad(norm360(M0 + Md * dDays));
+                let E = M + e * Math.sin(M) * (1.0 + e * Math.cos(M));
+                for (let k = 0; k < 4; k++) E = E - (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+                const xv = a * (Math.cos(E) - e);
+                const yv = a * (Math.sqrt(1.0 - e * e) * Math.sin(E));
+                const v = Math.atan2(yv, xv);
+                const r = Math.sqrt(xv * xv + yv * yv);
+                const xh = r * (Math.cos(N) * Math.cos(v + w) - Math.sin(N) * Math.sin(v + w) * Math.cos(i));
+                const yh = r * (Math.sin(N) * Math.cos(v + w) + Math.cos(N) * Math.sin(v + w) * Math.cos(i));
+                const xe = earthR * Math.cos(rad(earthLon));
+                const ye = earthR * Math.sin(rad(earthLon));
+                return norm360(deg(Math.atan2(yh - ye, xh - xe)) - suriyaShift);
+            };
 
+            const L_moon = norm360(218.3164477 + 481267.88123421 * T - 0.0015786 * T * T);
+            const D_moon = norm360(297.8501921 + 445267.1114034 * T - 0.0018819 * T * T);
+            const M_moon = norm360(134.9633964 + 477198.8675055 * T + 0.0087414 * T * T);
+            const F_moon = norm360(93.2720950 + 483202.0175233 * T - 0.0036539 * T * T);
+            const moonCorr = 6.288774 * Math.sin(rad(M_moon)) + 1.274027 * Math.sin(rad(2 * D_moon - M_moon)) + 0.658314 * Math.sin(rad(2 * D_moon)) + 0.213618 * Math.sin(rad(2 * M_moon)) - 0.185116 * Math.sin(rad(M_sun)) - 0.114332 * Math.sin(rad(2 * F_moon));
+            const moonLon = norm360(L_moon + moonCorr - suriyaShift);
+
+            const mercLon = calcKeplerSidereal(48.3313, 3.24587e-5, 7.0047, 5.00e-8, 29.1241, 1.01444e-5, 0.387098, 0.205635, 5.59e-10, 168.6562, 4.0923344368);
+            const venLon = calcKeplerSidereal(76.6799, 2.46590e-5, 3.3946, 2.75e-8, 54.8910, 1.38374e-5, 0.723330, 0.006773, -1.302e-9, 48.0052, 1.6021302244);
+            const marsLon = calcKeplerSidereal(49.5574, 2.11081e-5, 1.8497, -1.78e-8, 286.5016, 2.92961e-5, 1.523688, 0.093405, 2.516e-9, 18.6021, 0.5240207766);
+            const jupLon = calcKeplerSidereal(100.4542, 2.76854e-5, 1.3030, -1.557e-7, 273.8777, 1.64505e-5, 5.20256, 0.048498, 4.469e-9, 19.8950, 0.0830853001);
+            const satLon = calcKeplerSidereal(113.6634, 2.38980e-5, 2.4886, -1.081e-7, 339.3939, 2.97661e-5, 9.55475, 0.055546, -9.499e-9, 316.9670, 0.0334442282);
+            const uranLon = calcKeplerSidereal(74.0005, 1.3978e-5, 0.7733, 1.9e-8, 96.6612, 3.0565e-5, 19.18171, 0.047318, 7.45e-9, 142.5905, 0.011725806);
+            const rahuLon = norm360(125.04452 - 1934.136261 * T + 0.0020708 * T * T - suriyaShift);
+            const ketuLon = norm360(rahuLon + 180);
             const rawLons = { 1: sunLon, 2: moonLon, 3: marsLon, 4: mercLon, 5: jupLon, 6: venLon, 7: satLon, 8: rahuLon, 9: ketuLon, 0: uranLon };
             const planets = [], rasiPos = {}, navamsaPos = {};
             const order = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
@@ -381,8 +409,8 @@
                 const rasi = Math.floor(lonVal / 30);
                 const degF = lonVal % 30, deg = Math.floor(degF), min = Math.floor((degF - deg) * 60);
                 const navInfo = getNavamsaAndNakshatra(lonVal);
-                const diffSun = norm360(sunLon - lonVal);
-                const isCombust = ('2,3,4,5,6,7'.split(',').map(Number).includes(id) && diffSun > 0 && diffSun <= 8);
+                const diffSun = Math.min(Math.abs(lonVal - sunLon), 360 - Math.abs(lonVal - sunLon));
+                const isCombust = ('2,3,4,5,6,7'.split(',').map(Number).includes(id) && diffSun <= 6.0);
                 let motion = 'ปกติ';
                 if (id === 8 || id === 9) motion = 'พักร์(ปกติ)';
                 else if ('3,4,5,6,7'.split(',').map(Number).includes(id)) {
@@ -396,19 +424,18 @@
                 rasiPos[id] = rasi;
                 navamsaPos[id] = navInfo.navamsaRasi;
             });
+
             const sunRasi = Math.floor(sunLon / 30), sunDegInRasi = sunLon % 30;
             const dayOfYear = Math.floor((jd - (367 * y - Math.floor(7 * (y + 1) / 4) + 31 + 1721013.5)) + 1);
-            const declRad = 23.44 * Math.PI / 180 * Math.sin(2 * Math.PI * (dayOfYear - 81) / 365);
-            const latRad = (lat || 13.7563) * Math.PI / 180;
-            const ha = Math.acos(Math.max(-1, Math.min(1, -Math.tan(latRad) * Math.tan(declRad)))) * 180 / Math.PI;
-            const trueSunriseMin = 720 - (ha * 4);
-            const sunriseMin = 360;
-            let elapsedMin = (((hh * 60 + mm) - sunriseMin) + 1440) % 1440 - 176;
-
-            if (elapsedMin < 0) elapsedMin += 1440;
+            const declRad = rad(23.44 * Math.sin(2 * Math.PI * (dayOfYear - 81) / 365));
+            const latRad = rad(lat || 13.7563);
+            const ha = deg(Math.acos(Math.max(-1, Math.min(1, -Math.tan(latRad) * Math.tan(declRad)))));
+            const localLon = lon || 100.5018;
+            const lonDiffMin = (localLon - 105.0) * 4;
+            const trueSunriseMin = 720 - (ha * 4) - lonDiffMin;
+            let elapsedMin = ((hh * 60 + mm) - trueSunriseMin + 1440) % 1440;
 
             const antoTable = ASTRO_CONST.ANTO_STD;
-
             let remMin = elapsedMin, curR = sunRasi, ascLon = 0;
             const firstSignRem = antoTable[curR] * ((30 - sunDegInRasi) / 30);
             if (remMin <= firstSignRem) {
@@ -430,44 +457,6 @@
             const tanuRasi = (ascRasi + stepsTanu) % 12;
             const tanuPlanet = RASI_LORDS[tanuRasi];
 
-            const pariwatList = [];
-            planets.forEach(p1 => {
-                if (p1.id === 9 || p1.id === 0) return;
-                const ow1 = RASI_LORDS[p1.rasi];
-                if (ow1 === p1.id) return;
-                const p2 = planets.find(x => x.id === ow1);
-                if (p2 && RASI_LORDS[p2.rasi] === p1.id && p1.id < p2.id) {
-                    pariwatList.push('ปริวรรต 2 เรือน (' + ASTRO_CONST.FULL_NAMES[p1.id] + ' ↔ ' + ASTRO_CONST.FULL_NAMES[p2.id] + ')');
-                }
-            });
-
-            const ongKhenList = [];
-            const rasiType = ['ปัสวะ', 'ปัสวะ', 'นระ', 'อัมพุช', 'ปัสวะ', 'นระ', 'นระ', 'กีฏะ', 'นระ', 'อัมพุช', 'นระ', 'อัมพุช'];
-            const ascType = rasiType[ascRasi];
-            planets.forEach(p => {
-                const bhava = ((p.rasi - ascRasi + 12) % 12) + 1;
-                const dName = ASTRO_CONST.FULL_NAMES[p.id];
-                if ('1,4,7,10'.split(',').map(Number).includes(bhava)) {
-                    if (ascType === 'อัมพุช' && '2,4,5,6'.split(',').map(Number).includes(p.id)) ongKhenList.push('อัมพุชองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
-                    if (ascType === 'นระ' && '1,4,5,7'.split(',').map(Number).includes(p.id)) ongKhenList.push('นระองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
-                    if (ascType === 'ปัสวะ' && '1,2,3,7'.split(',').map(Number).includes(p.id)) ongKhenList.push('ปัสวะองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
-                    if (ascType === 'กีฏะ' && '3,5,6,8'.split(',').map(Number).includes(p.id)) ongKhenList.push('กีฏะองค์เกณฑ์ (' + dName + ' ภพ ' + bhava + ')');
-                }
-            });
-
-            const triOrder = '1,2,3,4,7,5,8,6'.split(',').map(Number);
-            const years100 = { 1: 6, 2: 15, 3: 8, 4: 17, 7: 10, 5: 19, 8: 12, 6: 13 };
-            const tIdx = Math.max(0, triOrder.indexOf(tanuPlanet));
-            let acc = 0, wai1 = '', wai2 = '', wai3 = '';
-            for (let k = 0; k < 8; k++) {
-                const pid = triOrder[(tIdx + k) % 8];
-                const nxt = acc + years100[pid];
-                const lbl = ASTRO_CONST.DAYS[pid] + '(' + acc + '-' + nxt + 'ปี) ';
-                if (k < 3) wai1 += lbl; else if (k < 6) wai2 += lbl; else wai3 += lbl;
-                acc = nxt;
-            }
-
-            return {
                 planets, rasiPos, navamsaPos, ascRasi, ascDeg, ascMin,
                 ascNakshatra: ascNav.nakshatra, ascNavamsa: ascNav.navamsaRasi,
                 tanuRasi, tanuPlanet, pariwatList, ongKhenList,
