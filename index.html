@@ -564,14 +564,14 @@
             const r4 = seq.map(i => r1[i] + r2[i] + r3[i]);
             const r5 = r4.map(n => mod7(n));
             const r6 = seq.map(i => mod7(r5[i] * 2));
-            const r7 = seq.map(i => mod7(r5[i] + r6[i]));
+                       const r7 = r6.map(n => (n * 2 > 7) ? (n * 2 - 7) : (n * 2));
 
-            const idx8 = yamDaySeq.indexOf(r5.at(0));
-            const r8 = seq.map(i => yamDaySeq.at((idx8 + i) % 7));
+            const idx8 = yamDaySeq.indexOf(r5[0]);
+            const r8 = seq.map(i => yamDaySeq[(idx8 + i) % 7]);
 
-            const right9 = mod7(r5.at(6) + r8.at(6));
+            const right9 = mod7(r5[6] + r8[6]);
             const idx9 = yamDaySeq.indexOf(right9);
-            const r9 = seq.map(i => yamDaySeq.at((idx9 + (6 - i)) % 7));
+            const r9 = seq.map(i => yamDaySeq[(idx9 + (6 - i)) % 7]);
 
             const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
 
