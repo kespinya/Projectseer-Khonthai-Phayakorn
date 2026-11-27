@@ -1159,14 +1159,14 @@
                         <tbody>${ageRowsHtml}</tbody>
                     </table>
                 </div>`;
-            triggerCatMagic();
+                      triggerCatMagic();
         }
 
-        }
-              function renderQuickModeUI() {
+        function renderQuickModeUI() {
             const dob1 = document.getElementById('qk_dob').value;
             const dob2 = document.getElementById('qk_partner').value;
             if (!dob1 || !dob2) return;
+
 
             const d1 = getThaiLunarCalendar100Y(dob1, '09:00');
             const d2 = getThaiLunarCalendar100Y(dob2, '09:00');
