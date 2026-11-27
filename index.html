@@ -910,6 +910,13 @@
             const msgs = ['✨ ดาวศรีส่องแสง ขอให้สมหวังทุกประการ!', '🔮 พลังจักรราศีหนุนนำ โชคลาภกำลังมา!', '🌟 วันนี้เหมาะแก่การเริ่มต้นสิ่งดีๆ!', '🍀 บุญรักษา เทวดาคุ้มครองดวงชะตา!'];
             document.getElementById('cat_msg').innerText = msgs[Math.floor(Math.random() * msgs.length)];
         }
+        
+        function setJorNow() {
+            const now = new Date();
+            document.getElementById('jor_date').value = now.toISOString().slice(0, 10);
+            document.getElementById('jor_time').value = now.toTimeString().slice(0, 5);
+            updateJorDateTime();
+        }
 
             function updateJorDateTime() {
             const jDate = document.getElementById('jor_date').value;
