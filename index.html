@@ -3,14 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ProjectSeer">
     <meta name="theme-color" content="#0F294A">
     <title>ProjectSeer Astrology — จักรราศี & มหาโหราศาสตร์ไทย</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://w3.org' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔮</text></svg>">
+    
+    <!-- 1. เพิ่มบรรทัดโหลดฟอนต์ไทย (Mali และ Anuphan) ตรงนี้ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
     <link href="https://googleapis.com" rel="stylesheet">
+
     <style>
+        /* 2. เพิ่มคำสั่งบังคับใช้ฟอนต์ทั้งหน้าเว็บไว้บรรทัดแรกของ <style> */
+        body, button, input, select, textarea {
+            font-family: 'Mali', 'Anuphan', sans-serif !important;
+            -webkit-font-smoothing: antialiased;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; }
         body { background: linear-gradient(135deg, #FFFDF7 0%, #EFF6FF 50%, #ECFDF5 100%); color: #1E3A8A; min-height: 100vh; padding-bottom: 100px; }
         .hero { background: linear-gradient(135deg, #0F294A 0%, #1E3A8A 65%, #0369A1 100%); color: #FFFBEB; padding: 20px 16px 24px; text-align: center; border-bottom: 4px solid #F59E0B; box-shadow: 0 8px 24px rgba(15,41,74,0.2); }
