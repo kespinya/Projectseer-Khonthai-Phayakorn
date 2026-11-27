@@ -1109,10 +1109,57 @@
             document.getElementById('gr_year').innerHTML = mList.map(y => `<option value="${y}">ปี${ASTRO_CONST.YEARS[y]}</option>`).join('');
         }
 
+               function saveAstroSession(activeTab) {
+            const state = {
+                dob: document.getElementById('z_dob')?.value || '',
+                tob: document.getElementById('z_tob')?.value || '',
+                gender: document.getElementById('z_gender')?.value || '',
+                prov: document.getElementById('z_prov')?.value || '',
+                tab: activeTab || Number(localStorage.getItem('ps_active_tab')) || 1
+            };
+            if (state.dob) {
+                localStorage.setItem('ps_astro_state', JSON.stringify(state));
+            }
+            if (activeTab) {
+                localStorage.setItem('ps_active_tab', String(activeTab));
+            }
+        }
+
+        function restoreAstroSession() {
+            const raw = localStorage.getItem('ps_astro_state');
+            if (!raw) return false;
+            try {
+                const state = JSON.parse(raw);
+                if (!state.dob) return false;
+                document.getElementById('z_dob').value = state.dob;
+                if (state.tob) document.getElementById('z_tob').value = state.tob;
+                if (state.gender) document.getElementById('z_gender').value = state.gender;
+                if (state.prov) document.getElementById('z_prov').value = state.prov;
+                if (typeof syncAllForms === 'function') syncAllForms();
+                if (typeof switchMode === 'function') switchMode(state.tab || 1);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        document.addEventListener('change', () => saveAstroSession());
+        document.addEventListener('click', (e) => {
+            const tabBtn = e.target.closest('.tab-btn');
+            if (tabBtn && tabBtn.id) {
+                const tabNum = Number(tabBtn.id.replace('tab_', ''));
+                saveAstroSession(tabNum);
+            } else if (e.target.closest('button')) {
+                saveAstroSession();
+            }
+        });
+
         window.onload = function() {
             buildAllForms();
             setJorNow();
-                  };
+            restoreAstroSession();
+        };
     </script>
 </body>
 </html>
+
