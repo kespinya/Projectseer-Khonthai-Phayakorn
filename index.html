@@ -1199,10 +1199,11 @@
                 <p style="font-size:13.5px;margin-bottom:6px;">• เจ้าชะตา: <b>${d1.lunarText}</b></p>
                 <p style="font-size:13.5px;margin-bottom:8px;">• คู่ครอง/หุ้นส่วน: <b>${d2.lunarText}</b></p>
                 <div style="background:#ECFDF5;border:1.5px solid #10B981;padding:10px;border-radius:12px;font-weight:700;color:#065F46;">${resText}</div>`;
-            triggerCatMagic();
-
+                 triggerCatMagic();
+        }
 
         function switchMode(m) {
+
             for (let i = 1; i <= 5; i++) {
                 document.getElementById('mode_' + i).style.display = (i === m) ? 'block' : 'none';
                 document.getElementById('tab_' + i).classList.toggle('active', i === m);
