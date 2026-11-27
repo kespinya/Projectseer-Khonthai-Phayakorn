@@ -425,31 +425,33 @@
                 navamsaPos[id] = navInfo.navamsaRasi;
             });
 
-            const sunRasi = Math.floor(sunLon / 30), sunDegInRasi = sunLon % 30;
+                        const sunRasi = Math.floor(sunLon / 30), sunDegInRasi = sunLon % 30;
             const dayOfYear = Math.floor((jd - (367 * y - Math.floor(7 * (y + 1) / 4) + 31 + 1721013.5)) + 1);
-            const declRad = rad(23.44 * Math.sin(2 * Math.PI * (dayOfYear - 81) / 365));
-            const latRad = rad(lat || 13.7563);
-            const ha = deg(Math.acos(Math.max(-1, Math.min(1, -Math.tan(latRad) * Math.tan(declRad)))));
-            const localLon = lon || 100.5018;
-            const lonDiffMin = (localLon - 105.0) * 4;
-            const trueSunriseMin = 720 - (ha * 4) - lonDiffMin;
+            const bRad = rad((360 / 365) * (dayOfYear - 81));
+            const eqTimeMin = 9.87 * Math.sin(2 * bRad) - 7.53 * Math.cos(bRad) - 1.5 * Math.sin(bRad);
+            const safeLat = (lat >= 5 && lat <= 22) ? lat : 13.7563;
+            const declRad = rad(23.44 * Math.sin(bRad));
+            const ha = deg(Math.acos(Math.max(-1, Math.min(1, -Math.tan(rad(safeLat)) * Math.tan(declRad)))));
+            const latShiftMin = (90 - ha) * 4;
+            const trueSunriseMin = 360 - eqTimeMin + latShiftMin;
             let elapsedMin = ((hh * 60 + mm) - trueSunriseMin + 1440) % 1440;
 
-            const antoTable = ASTRO_CONST.ANTO_STD;
+            const antoTable = '96,108,120,132,144,156,156,144,132,120,108,96'.split(',').map(Number);
             let remMin = elapsedMin, curR = sunRasi, ascLon = 0;
-            const firstSignRem = antoTable[curR] * ((30 - sunDegInRasi) / 30);
+            const firstSignRem = antoTable.at(curR) * ((30 - sunDegInRasi) / 30);
             if (remMin <= firstSignRem) {
-                ascLon = curR * 30 + sunDegInRasi + (remMin / antoTable[curR]) * 30;
+                ascLon = curR * 30 + sunDegInRasi + (remMin / antoTable.at(curR)) * 30;
             } else {
                 remMin -= firstSignRem;
                 curR = (curR + 1) % 12;
-                while (remMin > antoTable[curR]) { remMin -= antoTable[curR]; curR = (curR + 1) % 12; }
-                ascLon = curR * 30 + (remMin / antoTable[curR]) * 30;
+                while (remMin > antoTable.at(curR)) { remMin -= antoTable.at(curR); curR = (curR + 1) % 12; }
+                ascLon = curR * 30 + (remMin / antoTable.at(curR)) * 30;
             }
             ascLon = norm360(ascLon);
             const ascRasi = Math.floor(ascLon / 30), ascDegF = ascLon % 30;
             const ascDeg = Math.floor(ascDegF), ascMin = Math.floor((ascDegF - ascDeg) * 60);
             const ascNav = getNavamsaAndNakshatra(ascLon);
+
 
             const RASI_LORDS = '3,6,4,2,1,4,6,3,5,7,8,5'.split(',').map(Number);
             const ascLord = RASI_LORDS[ascRasi];
