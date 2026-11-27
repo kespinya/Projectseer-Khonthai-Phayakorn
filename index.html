@@ -553,37 +553,31 @@
             const activePlanet = isDay ? dayYams[yamIndex - 1] : nightYams[yamIndex - 1];
             return { isDay, yamIndex, dayYams, nightYams, activePlanet };
         }
-              function analyzeCandleAndHouse(rows, tkY, yCol) {
+                     function analyzeCandleAndHouse(rows, tkY, yCol, tkB) {
+            const birthTk = tkB || tkY;
             const sri = +Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'ศรี');
             const kali = +Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'กาลกิณี');
+            const sriBirth = +Object.keys(birthTk.roleMap).find(k => birthTk.roleMap[k] === 'ศรี');
+            const kaliBirth = +Object.keys(birthTk.roleMap).find(k => birthTk.roleMap[k] === 'กาลกิณี');
             const b4Jor = rows[3][yCol], activeNum = rows[0][yCol], b9Jor = rows[8][yCol];
-            const supaNum = rows[2][1], lapaNum = rows[2][3];
 
-                        // 1. เช็กภพจรปี (yCol: 0=อัตตะ, 1=หินะ, 2=ธนัง, 3=ปิตา, 4=มาตา/อริ, 5=โภคา/มรณะ, 6=มัชฌิมา/วินาศ)
-            // ปรับเกณฑ์ใหม่: ให้น้ำหนัก "ภพจรปี" และ "กาลกิณีจร" เป็นตัวตัดสินแสงเทียนหลัก
+            // 1. คัมภีร์ดวงประทีป (ใช้ภพจรปี + กาลกิณีจร)
             let lightScore = 55;
-
-            // เช็กภพเสียหลัก (หินะ=1, อริ=4, มรณะ=5, วินาศ=6)
             const isBadHouse = (yCol === 1 || yCol === 4 || yCol === 5 || yCol === 6);
-            if (yCol === 6 || yCol === 5) lightScore -= 35; // ตกวินาศ หรือ มรณะ เปลวไฟวูบหนักทันที
-            else if (yCol === 1 || yCol === 4) lightScore -= 25; // ตกหินะ หรือ อริ แสงเอนไหว
-            else if (yCol === 2 || yCol === 3) lightScore += 15; // ตกธนัง หรือ ปิตา หนุนแสงสว่าง
+            if (yCol === 6 || yCol === 5) lightScore -= 35;
+            else if (yCol === 1 || yCol === 4) lightScore -= 25;
+            else if (yCol === 2 || yCol === 3) lightScore += 15;
 
-            // เช็กดาวจรชนกาลกิณี หรือ ศรี
             if (activeNum === kali || b9Jor === kali || tkY.roleMap[activeNum] === 'กาลกิณี') {
-                lightScore -= 30; // ชนกาลกิณีจร ไฟแทบดับ
+                lightScore -= 30;
             }
             if (!isBadHouse && (activeNum === sri || b9Jor === sri)) {
-                lightScore += 20; // ได้ศรีหนุน (เฉพาะปีที่ไม่ตกภพเสีย)
+                lightScore += 20;
             }
-
-            // เช็กกำลังพระเคราะห์ฐาน 4 (ถ้าฐาน 4 เป็นคู่ศัตรู/ราหู 12)
             if (b4Jor === 12) lightScore -= 15;
             else if (b4Jor >= 11 && !isBadHouse) lightScore += 10;
 
-            // 2. กำหนดสถานะและคำทำนายเปลวเทียนตามคะแนนจริง
             let candleState = { level: 'medium', title: '🕯️ แสงสว่างทรงตัว (ประคองทิศทาง)', color: '#D97706', desc: 'จุดจรปีอยู่ในเกณฑ์ปานกลาง ควรใช้สติและวางแผนอย่างรอบคอบ' };
-            
             if (lightScore >= 75) {
                 candleState = { level: 'bright', title: '🔥 แสงสว่างโชติช่วง (ดวงชะตาเปิดทาง)', color: '#059669', desc: 'อายุจรปีตกภพดีและมีกำลังหนุนส่ง ดวงประทีปสว่างไสว ทำสิ่งใดก็ราบรื่นสำเร็จ' };
             } else if (lightScore <= 25) {
@@ -592,39 +586,47 @@
                 candleState = { level: 'dim', title: '💨 แสงริบหรี่เอนไหว (ลมมรสุมพัดผ่าน)', color: '#EA580C', desc: 'จุดจรปีเริ่มเข้ามุมอับหรือมีอุปสรรคแทรก ควรระวังเรื่องการตัดสินใจและรักษาฐานเดิมไว้' };
             }
 
-
-            // ผังทรงบ้าน 7 ช่องตามคัมภีร์เรือนชะตา
-            const topPeak = rows[3][0];    // ยอดจั่ว: ฐาน 4 ช่องอัตตะ
-            const eaveLeft = rows[0][3];   // ชายคาซ้าย: ปิตา (ฐาน 1 ช่อง 4)
-            const eaveRight = rows[0][4];  // ชายคาขวา: มาตา (ฐาน 1 ช่อง 5)
-            const pillar1 = rows[1][0];    // เสาเอก: ตะนุ (ฐาน 2 ช่อง 1)
-            const hall = rows[1][1];       // ห้องโถง: กดุมภะ (ฐาน 2 ช่อง 2)
-            const vault = rows[1][3];      // ห้องนอน/คลัง: พันธุ (ฐาน 2 ช่อง 4)
-            const pillar2 = rows[2][2];    // เสาโท: กัมมะ (ฐาน 3 ช่อง 3)
-            const phokaNum = rows[0][5];   // โภคา (ฐาน 1 ช่อง 6)
+            // 2. ผังทรงบ้าน 7 ช่องตามคัมภีร์เรือนชะตา (ใช้พื้นดวงกำเนิดเท่านั้น ไม่เปลี่ยนตามปีจร)
+            const topPeak = rows[3][0];    // ยอดจั่ว: ฐาน 4 อัตตะ
+            const eaveLeft = rows[0][3];   // ชายคาซ้าย: ปิตา
+            const eaveRight = rows[0][4];  // ชายคาขวา: มาตา
+            const pillar1 = rows[1][0];    // เสาเอก: ตะนุ
+            const hall = rows[1][1];       // ห้องโถง: กดุมภะ
+            const vault = rows[1][3];      // ห้องคลัง: พันธุ
+            const pillar2 = rows[2][2];    // เสาโท: กัมมะ
+            const phokaNum = rows[0][5];   // โภคา
 
             const shubha = '2,4,5,6'.split(',').map(Number);
-            const fireStars = '1,7'.split(',').map(Number);
-            const windStars = '3,8'.split(',').map(Number);
-            const roofShubhaCount = [mod7(topPeak), eaveLeft, eaveRight].filter(n => shubha.includes(n)).length;
-            const bodyStrongCount = [pillar1, hall, vault, pillar2].filter(n => shubha.includes(n) || n === sri).length;
-            const hasRoof = roofShubhaCount >= 2;
-            const hasBody = bodyStrongCount >= 2;
+            const hasLeftRoof = (shubha.includes(eaveLeft) || eaveLeft === sriBirth || rows[3][3] >= 10) && eaveLeft !== kaliBirth;
+            const hasRightRoof = (shubha.includes(eaveRight) || eaveRight === sriBirth || rows[3][4] >= 10) && eaveRight !== kaliBirth;
+            const hasLeftPillar = (shubha.includes(pillar1) || pillar1 === sriBirth || rows[3][0] >= 8) && pillar1 !== kaliBirth;
+            const hasRightPillar = (shubha.includes(pillar2) || pillar2 === sriBirth || rows[3][2] >= 13) && pillar2 !== kaliBirth;
+            const hasLeftBody = shubha.includes(hall) && hall !== kaliBirth && rows[3][1] >= 13;
+            const hasRightBody = shubha.includes(vault) && vault !== kaliBirth && rows[3][3] >= 12 && rows[3][4] < 15;
 
-            let houseTitle = '🏠 เรือนชะตาสมดุล (หลังคาและตัวบ้านหนุนกัน)';
-            let houseDesc = 'โครงสร้างหลังคาและตัวเรือนสัมพันธ์ดี สร้างฐานะมั่นคง มีผู้ใหญ่อุปถัมภ์';
-            if (hasRoof && !hasBody) {
-                houseTitle = '☂️ หลังคาศุภเคราะห์เด่น แต่ฐานล่างต้องเสริม';
-                houseDesc = 'ภายนอกดูดีมีหน้าตา มีผู้ใหญ่เมตตาคุ้มครอง แต่ภายในตัวบ้านมีภาระรายจ่ายหรือความขัดแย้ง ต้องวางแผนการเงินให้รัดกุม';
-            } else if (!hasRoof && hasBody) {
-                houseTitle = '⛺ ตัวเรือนฐานรากแน่น ตั้งตัวได้ด้วยลำแข้ง';
-                houseDesc = 'รากฐานการเงินและทรัพย์สินแข็งแรง ตั้งตัวได้มั่นคงมีที่ดินเป็นของตัวเอง แต่ต้องพึ่งตนเองเป็นหลัก';
-            } else if (!hasRoof && !hasBody) {
-                houseTitle = '🏚️ เรือนชะตาต้องบูรณะ (บาปเคราะห์คุมทั้งจั่วและฐาน)';
-                houseDesc = 'ต้องฝ่าฟันสร้างรากฐานด้วยความอดทนสูง หลีกเลี่ยงหนี้สินและการค้ำประกัน';
+            const hasRoof = hasLeftRoof && hasRightRoof;
+            const hasBody = hasLeftBody && hasRightBody;
+
+            const parts = [];
+            if (hasLeftRoof && hasRightRoof) parts.push('หลังคาเต็ม');
+            else if (hasLeftRoof) parts.push('หลังคาเฉพาะฝั่งซ้าย');
+            else if (hasRightRoof) parts.push('หลังคาเฉพาะฝั่งขวา');
+            if (hasLeftPillar && hasRightPillar) parts.push('มีเสาคู่ค้ำจุน');
+            else if (hasLeftPillar) parts.push('มีเสาเฉพาะฝั่งซ้าย');
+            else if (hasRightPillar) parts.push('มีเสาเฉพาะฝั่งขวา');
+            if (hasLeftBody && hasRightBody) parts.push('ตัวบ้านเต็มหลัง');
+            else if (hasLeftBody) parts.push('มีตัวบ้านเฉพาะฝั่งซ้าย');
+            else if (hasRightBody) parts.push('มีตัวบ้านเฉพาะฝั่งขวา');
+            else parts.push('ไม่มีตัวบ้าน (บ้านโปร่ง)');
+
+            let houseTitle = `🏠 ทรงบ้านตามพื้นดวงเดิม: ${parts.join(' • ')}`;
+            let houseDesc = 'โครงสร้างเรือนชะตาคำนวณจากพื้นดวงกำเนิดแท้จริง (ไม่เปลี่ยนตามปีจร)';
+            if (hasRoof && (hasLeftPillar || hasRightPillar) && !hasLeftBody && !hasRightBody) {
+                houseDesc = 'ตามพื้นดวงเดิมมีหลังคาคุ้มภัยเต็มและมีเสาค้ำจุนแข็งแรง ผู้ใหญ่เมตตาอุปถัมภ์ แต่ตัวบ้านโปร่งไม่มีผนังกั้นทรัพย์ ทำให้หาเงินเก่งแต่เก็บเงินไม่อยู่ ควรแปลงทรัพย์เป็นอสังหาริมทรัพย์';
+            } else if (!hasLeftRoof && !hasRightRoof && (hasLeftBody || hasRightBody)) {
+                houseDesc = 'ตามพื้นดวงเดิมมีตัวบ้านฐานรากแน่น สร้างทรัพย์สินได้ด้วยตนเอง แต่ขาดร่มเงาผู้ใหญ่ค้ำจุน ต้องพึ่งลำแข้งตนเองเป็นหลัก';
             }
 
-            // ตรวจฮวงจุ้ย พันธุ & โภคา
             let fengShui = '🏡 ฮวงจุ้ยพันธุ-โภคา: อยู่อาศัยร่มเย็น (ธาตุดิน/น้ำหนุนทรัพย์)';
             if ([1, 7].includes(vault) || [1, 7].includes(phokaNum)) {
                 fengShui = '🔥 ฮวงจุ้ยพันธุ-โภคา: ดาวธาตุไฟ (๑/๗) คุมเรือน ระวังบ้านร้อนหรือต้องซ่อมแซมต่อเติมบ่อย';
@@ -636,10 +638,12 @@
                 candleState,
                 houseType: { title: houseTitle, desc: `${houseDesc} • <b>${fengShui}</b>` },
                 hasRoof, hasBody,
+                houseParts: { hasLeftRoof, hasRightRoof, hasLeftPillar, hasRightPillar, hasLeftBody, hasRightBody },
                 houseNums: { topPeak, eaveLeft, eaveRight, pillar1, hall, vault, pillar2 }
             };
         }
-        function renderZodiacModeUI() {
+
+           function renderZodiacModeUI() {
             const dob = document.getElementById('z_dob').value;
             const tob = document.getElementById('z_tob').value;
             if (!dob || !tob) return;
