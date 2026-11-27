@@ -532,7 +532,9 @@
             const pillar2 = rows[2][2];    // เสาโท: กัมมะ (ฐาน 3 ช่อง 3)
             const phokaNum = rows[0][5];   // โภคา (ฐาน 1 ช่อง 6)
 
-            const shubha =;
+            const shubha = '2,4,5,6'.split(',').map(Number);
+            const fireStars = '1,7'.split(',').map(Number);
+            const windStars = '3,8'.split(',').map(Number);
             const roofShubhaCount = [mod7(topPeak), eaveLeft, eaveRight].filter(n => shubha.includes(n)).length;
             const bodyStrongCount = [pillar1, hall, vault, pillar2].filter(n => shubha.includes(n) || n === sri).length;
             const hasRoof = roofShubhaCount >= 2;
