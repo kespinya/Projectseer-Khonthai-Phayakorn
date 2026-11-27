@@ -654,17 +654,24 @@
             const order = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
 
             
-                const rowsHtml = order.map(id => {
+                           const getReuk9 = (absDeg) => {
+                const names = ['ทลิทโทฤกษ์', 'มหัทธโนฤกษ์', 'โจโรฤกษ์', 'ภูมิปาโลฤกษ์', 'เทศาตรีฤกษ์', 'เทวีฤกษ์', 'เพชฌฆาตฤกษ์', 'ราชาฤกษ์', 'สมโณฤกษ์'];
+                const idx = Math.floor((absDeg * 60) / 800) % 9;
+                const pada = Math.floor((absDeg % (360 / 27)) / (360 / 108)) + 1;
+                const tri = Math.floor((absDeg % 30) / 10) + 1;
+                return `${names.at(idx)} (บาทที่ ${pada}) • ตรียางค์ ${tri}`;
+            };
+            const ascAbsDeg = res.ascRasi * 30 + res.ascDeg + res.ascMin / 60;
+
+            const rowsHtml = order.map(id => {
                 const d = res.planets.find(p => p.id === id);
-                const pada = (Math.floor((d.lon % (360 / 27)) / (360 / 108)) + 1);
-                const triyang = Math.floor(d.deg / 10) + 1;
                 return `<tr style="border-bottom:1px solid #E2E8F0;">
                     <td style="padding:7px;font-weight:700;color:#1E3A8A;">${ASTRO_CONST.FULL_NAMES[id]}</td>
                     <td style="padding:7px;font-weight:600;">${ASTRO_CONST.ZODIACS[d.rasi]}</td>
                     <td style="padding:7px;">${d.deg}° ${String(d.min).padStart(2, '0')}'</td>
                     <td style="padding:7px;color:#0369A1;">${ASTRO_CONST.ZODIACS[d.navamsaRasi]}</td>
                     <td style="padding:7px;font-size:12px;">${d.nakshatra}</td>
-                    <td style="padding:7px;font-size:12px;color:#0369A1;">บาทที่ ${pada} • ตรียางค์ ${triyang}</td>
+                    <td style="padding:7px;font-size:12px;color:#0369A1;font-weight:600;">${getReuk9(d.lon)}</td>
                     <td style="padding:7px;font-size:12px;font-weight:700;color:${d.status.includes('ดับ') || d.status === 'นิจ' ? '#DC2626' : '#059669'};">${d.status} (${d.motion})</td>
                 </tr>`;
             }).join('');
@@ -695,7 +702,7 @@
                                 <td style="padding:7px;color:#B91C1C;">ลั ลัคนา</td><td>${ASTRO_CONST.ZODIACS[res.ascRasi]}</td>
                                 <td>${res.ascDeg}° ${String(res.ascMin).padStart(2, '0')}'</td><td>${ASTRO_CONST.ZODIACS[res.ascNavamsa]}</td>
                                 <td style="font-size:12px;">${res.ascNakshatra}</td>
-                                <td style="font-size:12px;color:#0369A1;">บาทที่ ${(Math.floor(((res.ascRasi * 30 + res.ascDeg + res.ascMin / 60) % (360 / 27)) / (360 / 108)) + 1)} • ตรียางค์ ${Math.floor(res.ascDeg / 10) + 1}</td>
+                                <td style="font-size:12px;color:#0369A1;font-weight:600;">${getReuk9(ascAbsDeg)}</td>
                                 <td style="color:#B45309;">อันโตนาที (-17)</td>
                             </tr>
                             ${rowsHtml}
@@ -707,6 +714,7 @@
                     <p>• <b>ตรีวัย (นับจากตนุเศษ รอบอายุ 100 ปี):</b> วัยต้น [${res.triWai.wai1}] • วัยกลาง [${res.triWai.wai2}] • วัยปลาย [${res.triWai.wai3}]</p>
                 </div>`;
             triggerCatMagic();
+
         }
 
         function shiftJorDate(daysDelta) {
