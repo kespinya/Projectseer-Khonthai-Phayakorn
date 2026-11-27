@@ -553,6 +553,50 @@
             const activePlanet = isDay ? dayYams[yamIndex - 1] : nightYams[yamIndex - 1];
             return { isDay, yamIndex, dayYams, nightYams, activePlanet };
         }
+                function compute7Tua9Than(dVal, mVal, yVal, birthYearBE, targetBE, addM, addD, dobStr, tobStr) {
+            const d7 = mod7(dVal), m7 = mod7(mVal), y7 = mod7(yVal);
+            const seq = '0,1,2,3,4,5,6'.split(',').map(Number);
+            const yamDaySeq = '1,6,4,2,7,5,3'.split(',').map(Number);
+
+            const r1 = seq.map(i => mod7(d7 + i));
+            const r2 = seq.map(i => mod7(m7 + i));
+            const r3 = seq.map(i => mod7(y7 + i));
+            const r4 = seq.map(i => r1[i] + r2[i] + r3[i]);
+            const r5 = r4.map(n => mod7(n));
+            const r6 = seq.map(i => mod7(r5[i] * 2));
+            const r7 = seq.map(i => mod7(r5[i] + r6[i]));
+
+            const idx8 = yamDaySeq.indexOf(r5.at(0));
+            const r8 = seq.map(i => yamDaySeq.at((idx8 + i) % 7));
+
+            const right9 = mod7(r5.at(6) + r8.at(6));
+            const idx9 = yamDaySeq.indexOf(right9);
+            const r9 = seq.map(i => yamDaySeq.at((idx9 + (6 - i)) % 7));
+
+            const rows = [r1, r2, r3, r4, r5, r6, r7, r8, r9];
+
+            const age = Math.max(1, targetBE - birthYearBE + 1);
+            const yCol = (age - 1) % 7;
+            const mCol = (yCol + (addM || 0)) % 7;
+            const dCol = (mCol + (addD || 0)) % 7;
+
+            const [hh, mm] = (tobStr || '06:00').split(':').map(Number);
+            const minFrom6 = ((hh * 60 + mm) - 360 + 1440) % 1440;
+            const yamNum = Math.floor(minFrom6 / 90) + 1;
+            const lakBase1 = (yamNum - 1) % 7;
+            const lakBase2 = (lakBase1 + (m7 - 1)) % 7;
+            const lakBase3 = (lakBase2 + (y7 - 1)) % 7;
+            const lakJor = (lakBase1 + (age - 1)) % 7;
+
+            const calcMahaphut = (be) => {
+                const js = be - 1181;
+                const dharmachai = ((js * 5 + 3) % 7) + 1;
+                return { js, raja: mod7(dharmachai + 6), athibodi: mod7(dharmachai + 5), dharmachai, khumsap: mod7(dharmachai + 3) };
+            };
+
+            return { rows, age, yCol, mCol, dCol, lak3: [lakBase1, lakBase2, lakBase3], lakJor, mpBirth: calcMahaphut(birthYearBE), mpJor: calcMahaphut(targetBE) };
+        }
+
                         function analyzeCandleAndHouse(rows, tkY, yCol, tkB) {
             const birthTk = tkB || tkY;
             const sri = +Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'ศรี');
