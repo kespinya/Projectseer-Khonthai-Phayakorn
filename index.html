@@ -662,7 +662,7 @@
                 fengShui = '🌪️ ฮวงจุ้ยพันธุ-โภคา: ดาวธาตุลม (๓/๘) คุมเรือน มักมีการโยกย้ายที่อยู่หรือเดินทางบ่อย';
             }
 
-            // เกณฑ์ปลูกเรือน/ซื้อบ้านนับ 6 ตามตำราพรหมชาติ (อายุย่าง ÷ 6: แก้ว, แหวน, เงิน, ทอง, ร้าง, ผี)
+                       // เกณฑ์ปลูกเรือน/ซื้อบ้านนับ 6 ตามตำราพรหมชาติ (อายุย่าง ÷ 6: แก้ว, แหวน, เงิน, ทอง, ร้าง, ผี)
             const curBE = new Date().getFullYear() + 543;
             const curAge = Math.max(1, (Number(document.getElementById('t7_targetBE')?.value) || curBE) - (Number(document.getElementById('t7_birthBE')?.value) || curBE) + 1);
             const house6Idx = (curAge - 1) % 6;
@@ -678,7 +678,6 @@
             const reuk6Text = `<br><span style="color:${h6.color};">📐 <b>เกณฑ์ปลูกเรือนนับ 6 (อายุย่าง ${curAge} ปี): ตกช่อง "${h6.name}"</b> — ${h6.status}</span> (ภพพันธุเลข ${vault} • เคหังเลข ${kehangNum} • โภคาเลข ${phokaNum})`;
 
             return {
-                            return {
                 candleState,
                 houseType: { title: houseTitle, desc: `${houseDesc} • <b>${fengShui}</b>${reuk6Text}` },
                 hasRoof, hasBody,
@@ -686,7 +685,6 @@
                 houseNums: { topPeak, eaveLeft, eaveRight, pillar1, hall, vault, pillar2 }
             };
         }
-
 
            function renderZodiacModeUI() {
             const dob = document.getElementById('z_dob').value;
