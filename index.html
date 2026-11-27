@@ -553,13 +553,13 @@
             const activePlanet = isDay ? dayYams[yamIndex - 1] : nightYams[yamIndex - 1];
             return { isDay, yamIndex, dayYams, nightYams, activePlanet };
         }
-                     function analyzeCandleAndHouse(rows, tkY, yCol, tkB) {
+                        function analyzeCandleAndHouse(rows, tkY, yCol, tkB) {
             const birthTk = tkB || tkY;
             const sri = +Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'ศรี');
             const kali = +Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'กาลกิณี');
             const sriBirth = +Object.keys(birthTk.roleMap).find(k => birthTk.roleMap[k] === 'ศรี');
             const kaliBirth = +Object.keys(birthTk.roleMap).find(k => birthTk.roleMap[k] === 'กาลกิณี');
-            const b4Jor = rows[3][yCol], activeNum = rows[0][yCol], b9Jor = rows[8][yCol];
+            const b4Jor = rows.at(3).at(yCol), activeNum = rows.at(0).at(yCol), b9Jor = rows.at(8).at(yCol);
 
             // 1. คัมภีร์ดวงประทีป (ใช้ภพจรปี + กาลกิณีจร)
             let lightScore = 55;
@@ -577,11 +577,7 @@
             if (b4Jor === 12) lightScore -= 15;
             else if (b4Jor >= 11 && !isBadHouse) lightScore += 10;
 
-            let candleState = { level: 'medium', title: '🕯️ แสงสว่างทรงตัว (ประคองทิศทาง)', color: '#D97706', desc: 'จุดจรปีอยู่ในเกณฑ์ปานกลาง ควรใช้สติและวางแผนอย่างรอบคอบ' };
-            if (lightScore >= 75) {
-                candleState = { level: 'bright', title: '🔥 แสงสว่างโชติช่วง (ดวงชะตาเปิดทาง)', color: '#059669', desc: 'อายุจรปีตกภพดีและมีกำลังหนุนส่ง ดวงประทีปสว่างไสว ทำสิ่งใดก็ราบรื่นสำเร็จ' };
-            } else if (lightScore <= 25) {
-                           const h1 = ASTRO_CONST.HOUSES.at(0).at(yCol);
+            const h1 = ASTRO_CONST.HOUSES.at(0).at(yCol);
             const h2 = ASTRO_CONST.HOUSES.at(1).at(yCol);
             const h3 = ASTRO_CONST.HOUSES.at(2).at(yCol);
             const b8Name = ASTRO_CONST.BASE8_MEANINGS.at(yCol);
@@ -596,28 +592,29 @@
                 candleState = { level: 'dim', title: '💨 แสงริบหรี่เอนไหว (ลมมรสุมพัดผ่าน)', color: '#EA580C', desc: `${jorContext} มีจุดสะดุดหรืออุปสรรคแทรก ควรรอบคอบเรื่องการตัดสินใจและรักษาฐานเดิมไว้` };
             }
 
+            // 2. ผังทรงบ้าน 7 ช่องตามคัมภีร์เรือนชะตา (สูตรมาตรฐาน 100% ใช้พื้นดวงกำเนิดเท่านั้น)
+            const topPeak = rows.at(3).at(0);    // ยอดจั่ว: ฐาน 4 อัตตะ
+            const eaveLeft = rows.at(0).at(3);   // ชายคาซ้าย: ปิตา
+            const eaveRight = rows.at(0).at(4);  // ชายคาขวา: มาตา
+            const pillar1 = rows.at(1).at(0);    // เสาเอก: ตะนุ
+            const hall = rows.at(1).at(1);       // ห้องโถง: กดุมภะ
+            const vault = rows.at(1).at(3);      // ห้องคลัง: พันธุ
+            const pillar2 = rows.at(2).at(2);    // เสาโท: กัมมะ
+            const phokaNum = rows.at(0).at(5);   // โภคา
+            const kehangNum = rows.at(8).at(4);  // เคหัง (ฐาน 9 ช่อง 5)
 
-                       // 2. ผังทรงบ้าน 7 ช่องตามคัมภีร์เรือนชะตา (สูตรมาตรฐาน 100% ใช้พื้นดวงกำเนิดเท่านั้น)
-            const topPeak = rows[3][0];    // ยอดจั่ว: ฐาน 4 อัตตะ
-            const eaveLeft = rows[0][3];   // ชายคาซ้าย: ปิตา
-            const eaveRight = rows[0][4];  // ชายคาขวา: มาตา
-            const pillar1 = rows[1][0];    // เสาเอก: ตะนุ
-            const hall = rows[1][1];       // ห้องโถง: กดุมภะ
-            const vault = rows[1][3];      // ห้องคลัง: พันธุ
-            const pillar2 = rows[2][2];    // เสาโท: กัมมะ
-            const phokaNum = rows[0][5];   // โภคา
-            const kehangNum = rows[8][4];  // เคหัง (ฐาน 9 ช่อง 5)
-
-            const badHousesNums = [rows[0][1], rows[1][5], rows[2][0], rows[2][4], rows[7][4], rows[7][5]];
+            const badHousesNums = [rows.at(0).at(1), rows.at(1).at(5), rows.at(2).at(0), rows.at(2).at(4), rows.at(7).at(4), rows.at(7).at(5)];
             const shubha = '2,4,5,6'.split(',').map(Number);
+            const fireStars = '1,7'.split(',').map(Number);
+            const windStars = '3,8'.split(',').map(Number);
 
-            const hasLeftRoof = eaveLeft !== kaliBirth && (rows[3][3] >= 10 || shubha.includes(rows[7][3]));
-            const hasRightRoof = eaveRight !== kaliBirth && (rows[3][4] >= 10 || shubha.includes(eaveRight));
-            const hasLeftPillar = pillar1 !== kaliBirth && (rows[3][0] >= 8 || shubha.includes(pillar1));
-            const hasRightPillar = pillar2 !== kaliBirth && (rows[3][2] >= 10 || shubha.includes(pillar2));
+            const hasLeftRoof = eaveLeft !== kaliBirth && (rows.at(3).at(3) >= 10 || shubha.includes(rows.at(7).at(3)));
+            const hasRightRoof = eaveRight !== kaliBirth && (rows.at(3).at(4) >= 10 || shubha.includes(eaveRight));
+            const hasLeftPillar = pillar1 !== kaliBirth && (rows.at(3).at(0) >= 8 || shubha.includes(pillar1));
+            const hasRightPillar = pillar2 !== kaliBirth && (rows.at(3).at(2) >= 10 || shubha.includes(pillar2));
 
-            const hasLeftBody = hall !== kaliBirth && (shubha.includes(hall) || hall === sriBirth) && !badHousesNums.includes(hall) && rows[3][1] >= 12;
-            const hasRightBody = vault !== kaliBirth && (shubha.includes(vault) || vault === sriBirth) && !badHousesNums.includes(vault) && rows[3][3] >= 12;
+            const hasLeftBody = hall !== kaliBirth && (shubha.includes(hall) || hall === sriBirth) && !badHousesNums.includes(hall) && rows.at(3).at(1) >= 12;
+            const hasRightBody = vault !== kaliBirth && (shubha.includes(vault) || vault === sriBirth) && !badHousesNums.includes(vault) && rows.at(3).at(3) >= 12;
 
             const hasRoof = hasLeftRoof && hasRightRoof;
             const hasBody = hasLeftBody && hasRightBody;
@@ -659,9 +656,9 @@
 
             // ตรวจฮวงจุ้ย พันธุ & โภคา
             let fengShui = '🏡 ฮวงจุ้ยพันธุ-โภคา: อยู่อาศัยร่มเย็น (ธาตุดิน/น้ำหนุนทรัพย์)';
-            if ([1, 7].includes(vault) || [1, 7].includes(phokaNum)) {
+            if (fireStars.includes(vault) || fireStars.includes(phokaNum)) {
                 fengShui = '🔥 ฮวงจุ้ยพันธุ-โภคา: ดาวธาตุไฟ (๑/๗) คุมเรือน ระวังบ้านร้อนหรือต้องซ่อมแซมต่อเติมบ่อย';
-            } else if ([3, 8].includes(vault) || [3, 8].includes(phokaNum)) {
+            } else if (windStars.includes(vault) || windStars.includes(phokaNum)) {
                 fengShui = '🌪️ ฮวงจุ้ยพันธุ-โภคา: ดาวธาตุลม (๓/๘) คุมเรือน มักมีการโยกย้ายที่อยู่หรือเดินทางบ่อย';
             }
 
@@ -677,7 +674,7 @@
                 { name: '5. ร้าง', status: 'ไม่เป็นมงคล (ระวังเหตุให้ต้องย้ายหรือเงียบเหงา)', color: '#DC2626' },
                 { name: '6. ผี', status: 'ไม่เป็นมงคล (ควรชะลอการปลูก/ซื้อบ้านใหม่ ระวังเจ็บป่วย)', color: '#DC2626' }
             ];
-            const h6 = house6List[house6Idx];
+            const h6 = house6List.at(house6Idx);
             const reuk6Text = `<br><span style="color:${h6.color};">📐 <b>เกณฑ์ปลูกเรือนนับ 6 (อายุย่าง ${curAge} ปี): ตกช่อง "${h6.name}"</b> — ${h6.status}</span> (ภพพันธุเลข ${vault} • เคหังเลข ${kehangNum} • โภคาเลข ${phokaNum})`;
 
             return {
@@ -687,6 +684,7 @@
                 houseParts: { hasLeftRoof, hasRightRoof, hasLeftPillar, hasRightPillar, hasLeftBody, hasRightBody },
                 houseNums: { topPeak, eaveLeft, eaveRight, pillar1, hall, vault, pillar2 }
             };
+        }
 
                 candleState,
                 houseType: { title: houseTitle, desc: `${houseDesc} • <b>${fengShui}</b>` },
