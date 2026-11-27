@@ -796,7 +796,7 @@
             const dSlots = ['06:00-07:42', '07:43-09:25', '09:26-11:08', '11:09-12:51', '12:52-14:34', '14:35-16:17', '16:18-18:00'];
             const nSlots = ['18:00-19:42', '19:43-21:25', '21:26-23:08', '23:09-00:51', '00:52-02:34', '02:35-04:17', '04:18-06:00'];
 
-            const flameScale = adv.candleState.level === 'bright' ? 1.25 : (adv.candleState.level === 'medium' ? 0.9 : (adv.candleState.level === 'dim' ? 0.55 : 0));
+            const flameScale = adv.candleState.level === 'bright' ? 1.15 : (adv.candleState.level === 'medium' ? 0.9 : (adv.candleState.level === 'dim' ? 0.55 : 0.25));
                        const auraRadius = adv.candleState.level === 'bright' ? 34 : (adv.candleState.level === 'medium' ? 24 : 15);
             const flameClass = `flame-${adv.candleState.level}`;
             const candleSvg = `<svg width="90" height="125" viewBox="0 0 90 125" style="overflow: visible;">
