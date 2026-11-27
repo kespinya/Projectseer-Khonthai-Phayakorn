@@ -951,7 +951,7 @@
             const y = +document.getElementById('gr_year').value;
             const age = +document.getElementById('gr_age').value || 48;
             const labels = ['1.อัตตะ', '2.หินะ', '3.ธานัง', '4.ปิตา', '5.มาตา', '6.โภคา', '7.มัชฌิมา', '8.ตะนุ', '9.กดุมภะ', '10.สหัชชะ', '11.พันธุ', '12.ปุตตะ'];
-            const scores = labels.map((_, i) => ((d + i) % 7 + (m + i) % 7 + (y + i) % 7) % 12 + 1);
+            const scores = labels.map((_, i) => (((d + i - 1) % 7 + 1) + ((m + i - 1) % 12 + 1) + ((y + i - 1) % 12 + 1) - 1) % 12 + 1);
             const curIdx = (age - 1) % 12;
 
             let pts = scores.map((s, i) => `${30 + i * 52},${175 - s * 11}`).join(' ');
