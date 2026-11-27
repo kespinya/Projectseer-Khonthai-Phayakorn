@@ -485,7 +485,7 @@
             const r4 = seq.map(i => r1[i] + r2[i] + r3[i]);
             const r5 = r4.map(n => mod7(n));
             const r6 = seq.map(i => mod7(r5[i] * 2));
-            const r7 = seq.map(i => mod7(r5[i] + r6[i]));
+           const r7 = seq.map(i => mod7(r6.at(i) * 2));
 
             const idx8 = yamDaySeq.indexOf(r5[0]);
             const r8 = seq.map(i => yamDaySeq[(idx8 + i) % 7]);
