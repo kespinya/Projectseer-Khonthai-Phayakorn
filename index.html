@@ -678,6 +678,7 @@
             const reuk6Text = `<br><span style="color:${h6.color};">📐 <b>เกณฑ์ปลูกเรือนนับ 6 (อายุย่าง ${curAge} ปี): ตกช่อง "${h6.name}"</b> — ${h6.status}</span> (ภพพันธุเลข ${vault} • เคหังเลข ${kehangNum} • โภคาเลข ${phokaNum})`;
 
             return {
+                            return {
                 candleState,
                 houseType: { title: houseTitle, desc: `${houseDesc} • <b>${fengShui}</b>${reuk6Text}` },
                 hasRoof, hasBody,
@@ -686,13 +687,6 @@
             };
         }
 
-                candleState,
-                houseType: { title: houseTitle, desc: `${houseDesc} • <b>${fengShui}</b>` },
-                hasRoof, hasBody,
-                houseParts: { hasLeftRoof, hasRightRoof, hasLeftPillar, hasRightPillar, hasLeftBody, hasRightBody },
-                houseNums: { topPeak, eaveLeft, eaveRight, pillar1, hall, vault, pillar2 }
-            };
-        }
 
            function renderZodiacModeUI() {
             const dob = document.getElementById('z_dob').value;
