@@ -654,12 +654,10 @@
             const order = '1,2,3,4,5,6,7,8,9,0'.split(',').map(Number);
 
             
-                           const getReuk9 = (absDeg) => {
+                            const getReuk9 = (absDeg) => {
                 const names = ['ทลิทโทฤกษ์', 'มหัทธโนฤกษ์', 'โจโรฤกษ์', 'ภูมิปาโลฤกษ์', 'เทศาตรีฤกษ์', 'เทวีฤกษ์', 'เพชฌฆาตฤกษ์', 'ราชาฤกษ์', 'สมโณฤกษ์'];
                 const idx = Math.floor((absDeg * 60) / 800) % 9;
-                const pada = Math.floor((absDeg % (360 / 27)) / (360 / 108)) + 1;
-                const tri = Math.floor((absDeg % 30) / 10) + 1;
-                return `${names.at(idx)} (บาทที่ ${pada}) • ตรียางค์ ${tri}`;
+                return names.at(idx);
             };
             const ascAbsDeg = res.ascRasi * 30 + res.ascDeg + res.ascMin / 60;
 
