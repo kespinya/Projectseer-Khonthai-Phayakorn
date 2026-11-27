@@ -804,7 +804,7 @@
                     }).join('') + '</tr>';
             });
             tbl += '</tbody>';
-            const adv = analyzeCandleAndHouse(data.rows, tkY, data.yCol);
+            const adv = analyzeCandleAndHouse(data.rows, tkY, data.yCol, tkB);
             const tanuJor = ASTRO_CONST.HOUSES[0][data.yCol];
             const sriStar = Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'ศรี');
             const dechStar = Object.keys(tkY.roleMap).find(k => tkY.roleMap[k] === 'เดช');
