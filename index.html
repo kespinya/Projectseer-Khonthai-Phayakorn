@@ -179,13 +179,31 @@
             <div id="qk_result" class="card" style="display:none;"></div>
         </div>
     </div>
-<div class="cat-widget">
-       <div class="cat-widget">
+    <!-- มาสคอตน้องแมว 3D วิ่งบนสนามหญ้า (ปรับระยะไม่ให้ล้นขอบขวาแล้ว) -->
+    <div class="cat-widget" style="bottom: 18px; z-index: 99;">
         <div class="cat-bubble" id="cat_msg">✨ วันนี้ดาวศรีส่องแสง ขอให้สมหวังทุกประการนะ!</div>
-        <div class="cat-avatar" onclick="triggerCatMagic()" title="คลิกเพื่อรับพรจากมาสคอต ProjectSeer">🐱</div>
+        <div class="cat-3d-runner" onclick="triggerCatMagic()" title="คลิกเพื่อรับพรจากมาสคอต ProjectSeer">
+            <svg viewBox="0 0 100 85" width="94" height="82">
+                <path class="cat-tail" d="M22,44 Q6,30 12,16" fill="none" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/>
+                <rect class="cat-paw-b" x="26" y="52" width="8" height="16" rx="4" fill="#D97706"/>
+                <ellipse cx="44" cy="48" rx="22" ry="14" fill="#FBBF24" stroke="#B45309" stroke-width="2"/>
+                <ellipse cx="46" cy="52" rx="14" ry="8" fill="#FEF3C7"/>
+                <rect class="cat-paw-f" x="54" y="52" width="8" height="16" rx="4" fill="#F59E0B" stroke="#B45309" stroke-width="1.5"/>
+                <circle cx="68" cy="34" r="15" fill="#FBBF24" stroke="#B45309" stroke-width="2"/>
+                <polygon points="56,24 58,10 66,20" fill="#F59E0B" stroke="#B45309" stroke-width="1.5"/>
+                <polygon points="72,20 80,10 82,24" fill="#F59E0B" stroke="#B45309" stroke-width="1.5"/>
+                <circle cx="64" cy="32" r="2.2" fill="#1E3A8A"/>
+                <circle cx="74" cy="32" r="2.2" fill="#1E3A8A"/>
+                <polygon points="68,36 71,36 69.5,38.5" fill="#EC4899"/>
+                <path d="M55,44 Q68,49 79,43" fill="none" stroke="#DC2626" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="68" cy="47" r="3.5" fill="#FDE047" stroke="#B45309" stroke-width="1"/>
+            </svg>
+        </div>
     </div>
+    <div class="meadow-footer"></div>
 
     <script>
+
         const ASTRO_CONST = {
             DAYS: ['', 'อาทิตย์ (๑)', 'จันทร์ (๒)', 'อังคาร (๓)', 'พุธ (๔)', 'พฤหัสบดี (๕)', 'ศุกร์ (๖)', 'เสาร์ (๗)', 'ราหู (๘)'],
             FULL_NAMES: ['๐ มฤตยู', '๑ อาทิตย์', '๒ จันทร์', '๓ อังคาร', '๔ พุธ', '๕ พฤหัส', '๖ ศุกร์', '๗ เสาร์', '๘ ราหู', '๙ เกตุ'],
