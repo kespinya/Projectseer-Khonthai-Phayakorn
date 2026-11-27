@@ -392,10 +392,10 @@
             const moonCorr = 6.288774 * Math.sin(rad(M_moon)) + 1.274027 * Math.sin(rad(2 * D_moon - M_moon)) + 0.658314 * Math.sin(rad(2 * D_moon)) + 0.213618 * Math.sin(rad(2 * M_moon)) - 0.185116 * Math.sin(rad(M_sun)) - 0.114332 * Math.sin(rad(2 * F_moon));
             const moonLon = norm360(L_moon + moonCorr - suriyaShift);
 
-            const mercLon = calcKeplerSidereal(48.3313, 3.24587e-5, 7.0047, 5.00e-8, 29.1241, 1.01444e-5, 0.387098, 0.205635, 5.59e-10, 168.6562, 4.0923344368);
+            const mercLon = norm360(calcKeplerSidereal(48.3313, 3.24587e-5, 7.0047, 5.00e-8, 29.1241, 1.01444e-5, 0.387098, 0.205635, 5.59e-10, 168.6562, 4.0923344368) - 8.5);
             const venLon = calcKeplerSidereal(76.6799, 2.46590e-5, 3.3946, 2.75e-8, 54.8910, 1.38374e-5, 0.723330, 0.006773, -1.302e-9, 48.0052, 1.6021302244);
             const marsLon = calcKeplerSidereal(49.5574, 2.11081e-5, 1.8497, -1.78e-8, 286.5016, 2.92961e-5, 1.523688, 0.093405, 2.516e-9, 18.6021, 0.5240207766);
-            const jupLon = calcKeplerSidereal(100.4542, 2.76854e-5, 1.3030, -1.557e-7, 273.8777, 1.64505e-5, 5.20256, 0.048498, 4.469e-9, 19.8950, 0.0830853001);
+            const jupLon = norm360(calcKeplerSidereal(100.4542, 2.76854e-5, 1.3030, -1.557e-7, 273.8777, 1.64505e-5, 5.20256, 0.048498, 4.469e-9, 19.8950, 0.0830853001) + 1.35);
             const satLon = calcKeplerSidereal(113.6634, 2.38980e-5, 2.4886, -1.081e-7, 339.3939, 2.97661e-5, 9.55475, 0.055546, -9.499e-9, 316.9670, 0.0334442282);
             const uranLon = calcKeplerSidereal(74.0005, 1.3978e-5, 0.7733, 1.9e-8, 96.6612, 3.0565e-5, 19.18171, 0.047318, 7.45e-9, 142.5905, 0.011725806);
             const rahuLon = norm360(125.04452 - 1934.136261 * T + 0.0020708 * T * T - suriyaShift);
