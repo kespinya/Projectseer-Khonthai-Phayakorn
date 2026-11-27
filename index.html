@@ -1049,32 +1049,114 @@
 `;
           triggerCatMagic();
 }
-        function renderGraphModeUI() {
+              function renderGraphModeUI() {
             const d = +document.getElementById('gr_day').value;
             const m = +document.getElementById('gr_month').value;
             const y = +document.getElementById('gr_year').value;
-            const age = +document.getElementById('gr_age').value || 48;
+            const age = Math.max(1, +document.getElementById('gr_age').value || 1);
+
             const labels = ['1.อัตตะ', '2.หินะ', '3.ธานัง', '4.ปิตา', '5.มาตา', '6.โภคา', '7.มัชฌิมา', '8.ตะนุ', '9.กดุมภะ', '10.สหัชชะ', '11.พันธุ', '12.ปุตตะ'];
+            const bhavaMeanings = [
+                'ตัวตน ความคิดริเริ่ม การตัดสินใจด้วยตนเอง และภาพลักษณ์ชื่อเสียง',
+                'ความเสื่อมถอย อุปสรรค การปรับปรุงแก้ไข หรือสิ่งที่ต้องปล่อยวาง',
+                'ทรัพย์สิน การสะสมเงินทอง ความมั่งคั่ง และผลตอบแทนจากการลงทุน',
+                'ผู้ใหญ่ฝ่ายชาย บิดา เจ้านาย การสนับสนุนจากผู้มีอำนาจ',
+                'ผู้ใหญ่ฝ่ายหญิง มารดา ความเมตตาอุปถัมภ์ และความร่มเย็น',
+                'ที่ดิน อสังหาริมทรัพย์ มรดก และความมั่นคงของหลักทรัพย์',
+                'จุดสมดุลของชีวิต การเปลี่ยนแปลงวิถีชีวิต และการเดินทาง',
+                'สุขภาพร่างกาย จิตใจ ความเข้มแข็ง และภาระหน้าที่ส่วนตัว',
+                'กระแสเงินสด รายได้หมุนเวียน การค้าขาย และช่องทางทำมาหากิน',
+                'เพื่อนฝูง สังคม การเจรจาติดต่อ สัญญา และการเดินทางระยะใกล้',
+                'ครอบครัว ญาติพี่น้อง บ้านเรือน ยานพาหนะ และรากฐานชีวิต',
+                'บริวาร ลูกหลาน โครงการใหม่ สิ่งแปลกใหม่ และการเริ่มต้นสิ่งสร้างสรรค์'
+            ];
+
             const scores = labels.map((_, i) => (((d + i - 1) % 7 + 1) + ((m + i - 1) % 12 + 1) + ((y + i - 1) % 12 + 1) - 1) % 12 + 1);
             const curIdx = (age - 1) % 12;
+            const nextIdx = age % 12;
+            const curScore = scores.at(curIdx);
+            const nextScore = scores.at(nextIdx);
+
+            const maxScore = Math.max(...scores);
+            const minScore = Math.min(...scores);
+            const peakBhavas = labels.filter((_, i) => scores.at(i) === maxScore).join(', ');
+            const lowBhavas = labels.filter((_, i) => scores.at(i) === minScore).join(', ');
+
+            let levelText = 'อยู่ในเกณฑ์ปานกลาง (ประคองตัวและวางแผนอย่างรอบคอบ)';
+            let levelColor = '#D97706';
+            if (curScore >= 9) { levelText = 'อยู่ในเกณฑ์ดีมาก / ขาขึ้นเต็มตัว (จังหวะทองแห่งความสำเร็จ)'; levelColor = '#059669'; }
+            else if (curScore <= 3) { levelText = 'อยู่ในเกณฑ์จุดต่ำสุด / ควรตั้งรับ (เน้นรักษาฐานเดิม หลีกเลี่ยงความเสี่ยง)'; levelColor = '#DC2626'; }
+
+            const diff = nextScore - curScore;
+            const trendText = diff > 0
+                ? `<span style="color:#059669;font-weight:700;">📈 พุ่งขึ้น (+${diff} คะแนน)</span> เข้าสู่ภพ <b>${labels.at(nextIdx)} (${nextScore}/12)</b> เป็นจังหวะเปิดทางขยายความสำเร็จ`
+                : (diff < 0
+                    ? `<span style="color:#DC2626;font-weight:700;">📉 ชะลอตัว (${diff} คะแนน)</span> เข้าสู่ภพ <b>${labels.at(nextIdx)} (${nextScore}/12)</b> ควรเตรียมสำรองแผนรับมือล่วงหน้า`
+                    : `<span style="color:#0369A1;font-weight:700;">➡️ ทรงตัวต่อเนื่อง</span> เข้าสู่ภพ <b>${labels.at(nextIdx)} (${nextScore}/12)</b> รักษามาตรฐานเดิมได้ดี`);
 
             let pts = scores.map((s, i) => `${30 + i * 52},${175 - s * 11}`).join(' ');
             let circles = scores.map((s, i) => `<circle cx="${30 + i * 52}" cy="${175 - s * 11}" r="${i === curIdx ? 7 : 4.5}" fill="${i === curIdx ? '#DC2626' : '#0284C7'}"/>
                 <text x="${30 + i * 52}" y="${162 - s * 11}" text-anchor="middle" font-size="10" font-weight="700" fill="#1E3A8A">${s}</text>
-                <text x="${30 + i * 52}" y="196" text-anchor="middle" font-size="9" fill="#0369A1">${labels[i].split('.')[1]}</text>`).join('');
+                <text x="${30 + i * 52}" y="196" text-anchor="middle" font-size="9" fill="#0369A1">${labels.at(i).split('.').at(1)}</text>`).join('');
+
+            let ageRowsHtml = '';
+            for (let row = 0; row < 8; row++) {
+                ageRowsHtml += '<tr>';
+                for (let col = 0; col < 12; col++) {
+                    const cellAge = row * 12 + col + 1;
+                    const isCur = (cellAge === age);
+                    const isNext = (cellAge === age + 1);
+                    const bg = isCur ? '#FEE2E2' : (isNext ? '#DCFCE7' : '#FFFFFF');
+                    const cl = isCur ? '#B91C1C' : (isNext ? '#047857' : '#334155');
+                    const fw = (isCur || isNext) ? '700' : '500';
+                    const bd = isCur ? '2px solid #DC2626' : (isNext ? '1.5px solid #10B981' : '1px solid #E2E8F0');
+                    ageRowsHtml += `<td style="padding:5px 2px;background:${bg};color:${cl};font-weight:${fw};border:${bd};border-radius:6px;">${cellAge}</td>`;
+                }
+                ageRowsHtml += '</tr>';
+            }
 
             const box = document.getElementById('gr_result');
             box.style.display = 'block';
-            box.innerHTML = `<h3 style="color:#B91C1C;font-size:16px;margin-bottom:8px;">📈 กราฟชีวิต 12 ภพ (อายุย่าง ${age} ปี ตกภพ ${labels[curIdx]} คะแนน ${scores[curIdx]}/12)</h3>
-                <div style="overflow-x:auto;"><svg width="650" height="210" style="background:#F8FAFC;border-radius:14px;border:1.5px solid #93C5FD;">
-                <polyline fill="none" stroke="#F59E0B" stroke-width="3" points="${pts}"/>${circles}</svg></div>`;
+            box.innerHTML = `
+                <h3 style="color:#B91C1C;font-size:16px;margin-bottom:8px;">📈 กราฟชีวิต 12 ภพ (อายุย่าง ${age} ปี ตกภพ ${labels.at(curIdx)} คะแนน ${curScore}/12)</h3>
+                <div style="overflow-x:auto;margin-bottom:14px;">
+                    <svg width="650" height="210" style="background:#F8FAFC;border-radius:14px;border:1.5px solid #93C5FD;">
+                        <polyline fill="none" stroke="#F59E0B" stroke-width="3" points="${pts}"/>${circles}
+                    </svg>
+                </div>
+
+                <div style="background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:14px;padding:12px;font-size:13.5px;line-height:1.65;margin-bottom:14px;">
+                    <div style="font-weight:700;color:#92400E;font-size:14.5px;margin-bottom:4px;">🔮 คำทำนายกราฟชีวิตประจำปี (อายุย่าง ${age} ปี)</div>
+                    <p>• <b>สถานะปัจจุบัน (${labels.at(curIdx)} — ${curScore}/12 คะแนน):</b> <span style="color:${levelColor};font-weight:700;">${levelText}</span> — โดดเด่นเรื่อง <i>${bhavaMeanings.at(curIdx)}</i></p>
+                    <p>• <b>แนวโน้มปีถัดไป (อายุย่าง ${age + 1} ปี):</b> กราฟจะ ${trendText}</p>
+                    <p>• <b>โครงสร้างกราฟประจำตัว:</b> จุดรุ่งเรืองสูงสุด (${maxScore}/12) อยู่ที่ภพ <b>${peakBhavas}</b> | จุดที่ต้องระมัดระวัง (${minScore}/12) อยู่ที่ภพ <b>${lowBhavas}</b></p>
+                </div>
+
+                <div style="background:#F8FAFC;border:1.5px solid #CBD5E1;border-radius:14px;padding:10px;overflow-x:auto;">
+                    <div style="font-size:13px;font-weight:700;color:#1E3A8A;margin-bottom:6px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+                        <span>📅 ตารางไล่อายุ 1–96 ปี ตาม 12 ภพ</span>
+                        <span style="font-size:11.5px;font-weight:600;">
+                            <span style="background:#FEE2E2;color:#B91C1C;padding:1px 6px;border-radius:6px;border:1px solid #DC2626;">อายุปีนี้ (${age})</span>
+                            <span style="background:#DCFCE7;color:#047857;padding:1px 6px;border-radius:6px;border:1px solid #10B981;margin-left:4px;">ปีหน้า (${age + 1})</span>
+                        </span>
+                    </div>
+                    <table style="width:100%;min-width:560px;border-collapse:separate;border-spacing:3px;text-align:center;font-size:12px;">
+                        <thead>
+                            <tr style="background:#1E3A8A;color:#FDE047;">
+                                ${labels.map((lb, idx) => `<th style="padding:5px 2px;border-radius:6px;font-size:11px;">${lb.split('.').at(1)}<br><span style="color:#FFFFFF;font-size:10px;">(${scores.at(idx)})</span></th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>${ageRowsHtml}</tbody>
+                    </table>
+                </div>`;
             triggerCatMagic();
         }
 
         function renderTaksaModeUI() {
+            const curBE = new Date().getFullYear() + 543;
             const d = +document.getElementById('tk_day').value;
-            const age = +document.getElementById('tk_age').value || 48;
-            const be = +document.getElementById('tk_be').value || 2569;
+            const age = Math.max(1, +document.getElementById('tk_age').value || 1);
+            const be = +document.getElementById('tk_be').value || curBE;
             const tk = computeTaksaAndKalayok(d, age, be);
             const seq = '1,2,3,4,7,5,8,6'.split(',').map(Number);
 
@@ -1090,7 +1172,8 @@
                 </div>`;
             triggerCatMagic();
         }
-              function renderQuickModeUI() {
+
+        function renderQuickModeUI() {
             const dob1 = document.getElementById('qk_dob').value;
             const dob2 = document.getElementById('qk_partner').value;
             if (!dob1 || !dob2) return;
@@ -1099,27 +1182,6 @@
             const d2 = getThaiLunarCalendar100Y(dob2, '09:00');
             const sum = (d1.astroDay + d2.astroDay) % 7;
             const goodSet = '1,3,5,6'.split(',').map(Number);
-            const resText = goodSet.includes(sum) ? '💖 ดวงสมพงษ์เกื้อหนุนกันดีมาก เป็นคู่มิตรคู่ธาตุส่งเสริมความสำเร็จ' : '⚖️ ดวงคู่ปรับสมดุล ต้องอาศัยความเข้าใจและใจเย็นในการสื่อสาร';
-            const box = document.getElementById('qk_result');
-            box.style.display = 'block';
-            box.innerHTML = `<h3 style="color:#B91C1C;font-size:16px;margin-bottom:8px;">💑 ผลตรวจสมพงษ์ดวงชะตา</h3>
-                <p style="font-size:13.5px;margin-bottom:6px;">• เจ้าชะตา: <b>${d1.lunarText}</b></p>
-                <p style="font-size:13.5px;margin-bottom:8px;">• คู่ครอง/หุ้นส่วน: <b>${d2.lunarText}</b></p>
-                <div style="background:#ECFDF5;border:1.5px solid #10B981;padding:10px;border-radius:12px;font-weight:700;color:#065F46;">${resText}</div>`;
-            triggerCatMagic();
-        }
-
-        function switchMode(m) {
-            for (let i = 1; i <= 5; i++) {
-                document.getElementById('mode_' + i).style.display = (i === m) ? 'block' : 'none';
-                document.getElementById('tab_' + i).classList.toggle('active', i === m);
-            }
-            if (m === 1) renderZodiacModeUI();
-            if (m === 2) render7TuaModeUI();
-            if (m === 3) renderGraphModeUI();
-            if (m === 4) renderTaksaModeUI();
-            if (m === 5) renderQuickModeUI();
-        }
 
         function triggerCatMagic() {
             const msgs = ['✨ ดาวศรีส่องแสง ขอให้สมหวังทุกประการ!', '🔮 พลังจักรราศีหนุนนำ โชคลาภกำลังมา!', '🌟 วันนี้เหมาะแก่การเริ่มต้นสิ่งดีๆ!', '🍀 บุญรักษา เทวดาคุ้มครองดวงชะตา!'];
