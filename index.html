@@ -843,47 +843,55 @@
             const leftColor = (adv.hasBody || adv.leftScore >= 2) ? '#059669' : '#DC2626', leftDash = (adv.hasBody || adv.leftScore >= 2) ? '' : '5 3';
             const rightColor = (adv.hasBody || adv.rightScore >= 2) ? '#059669' : '#DC2626', rightDash = (adv.hasBody || adv.rightScore >= 2) ? '' : '5 3';
                         const hn = adv.houseNums;
+                       const hn = adv.houseNums;
+            const hp = adv.houseParts || {
+                hasLeftRoof: adv.hasRoof,
+                hasRightRoof: adv.hasRoof,
+                hasLeftPillar: adv.hasRoof || adv.hasBody,
+                hasRightPillar: adv.hasRoof || adv.hasBody,
+                hasLeftBody: adv.hasBody,
+                hasRightBody: adv.hasBody
+            };
+            const hasAnyPart = hp.hasLeftRoof || hp.hasRightRoof || hp.hasLeftPillar || hp.hasRightPillar || hp.hasLeftBody || hp.hasRightBody;
+
             const houseSvg = `<svg width="165" height="145" viewBox="0 0 165 145">
-                <!-- หน้าจั่ว 3 ช่อง (หลังคา) -->
-                               ${adv.hasRoof ? `
-                <!-- หลังคาจั่ว 3 ช่อง (แสดงเฉพาะเมื่อมีหลังคา) -->
-                <g transform="translate(0, ${!adv.hasBody ? 28 : 0})">
-                    <polygon points="82,10 14,62 150,62" fill="#FFFBEB" stroke="#059669" stroke-width="2.5"/>
-                    <line x1="82" y1="10" x2="54" y2="62" stroke="#F59E0B" stroke-width="1.2" stroke-dasharray="3 2"/>
-                    <line x1="82" y1="10" x2="110" y2="62" stroke="#F59E0B" stroke-width="1.2" stroke-dasharray="3 2"/>
-                    <text x="82" y="34" text-anchor="middle" font-size="11" font-weight="700" fill="#B91C1C">${hn.topPeak}</text>
-                    <text x="82" y="43" text-anchor="middle" font-size="6.5" fill="#78350F">ยอดจั่ว</text>
-                    <text x="44" y="53" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1E3A8A">${hn.eaveLeft}</text>
-                    <text x="44" y="60" text-anchor="middle" font-size="6" fill="#0369A1">ปิตา</text>
-                    <text x="120" y="53" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1E3A8A">${hn.eaveRight}</text>
-                    <text x="120" y="60" text-anchor="middle" font-size="6" fill="#0369A1">มาตา</text>
-                </g>
-                ` : ''}
+                <line x1="8" y1="132" x2="156" y2="132" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
 
-                ${adv.hasBody ? `
-                <!-- ตัวเรือน 4 ช่องล่าง (แสดงเฉพาะเมื่อมีตัวบ้าน) -->
-                <g transform="translate(0, ${!adv.hasRoof ? -24 : 0})">
-                    <rect x="22" y="62" width="120" height="68" fill="#ECFDF5" stroke="#059669" stroke-width="2.5"/>
-                    <line x1="52" y1="62" x2="52" y2="130" stroke="#10B981" stroke-width="1.2"/>
-                    <line x1="82" y1="62" x2="82" y2="130" stroke="#10B981" stroke-width="1.2"/>
-                    <line x1="112" y1="62" x2="112" y2="130" stroke="#10B981" stroke-width="1.2"/>
-                    <text x="37" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#065F46">${hn.pillar1}</text>
-                    <text x="37" y="106" text-anchor="middle" font-size="6.5" fill="#047857">ตะนุ</text>
-                    <text x="67" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#065F46">${hn.hall}</text>
-                    <text x="67" y="106" text-anchor="middle" font-size="6.5" fill="#047857">กดุมภะ</text>
-                    <text x="97" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#065F46">${hn.vault}</text>
-                    <text x="97" y="106" text-anchor="middle" font-size="6.5" fill="#047857">พันธุ</text>
-                    <text x="127" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#065F46">${hn.pillar2}</text>
-                    <text x="127" y="106" text-anchor="middle" font-size="6.5" fill="#047857">กัมมะ</text>
-                </g>
-                ` : ''}
+                ${hp.hasLeftRoof ? `
+                <polyline points="82,10 14,62 82,62" fill="#FEF3C7" stroke="#059669" stroke-width="2.5" stroke-linejoin="round"/>
+                <text x="46" y="53" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1E3A8A">${hn.eaveLeft}</text>
+                <text x="46" y="60" text-anchor="middle" font-size="6" fill="#0369A1">ปิตา</text>` : ''}
 
-                ${(!adv.hasRoof && !adv.hasBody) ? `
-                <!-- กรณีไม่มีทั้งหลังคาและตัวบ้าน -->
-                <line x1="20" y1="95" x2="144" y2="95" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 3"/>
+                ${hp.hasRightRoof ? `
+                <polyline points="82,10 150,62 82,62" fill="#FEF3C7" stroke="#059669" stroke-width="2.5" stroke-linejoin="round"/>
+                <text x="118" y="53" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1E3A8A">${hn.eaveRight}</text>
+                <text x="118" y="60" text-anchor="middle" font-size="6" fill="#0369A1">มาตา</text>` : ''}
+
+                ${(hp.hasLeftRoof || hp.hasRightRoof) ? `
+                <text x="82" y="34" text-anchor="middle" font-size="11" font-weight="700" fill="#B91C1C">${hn.topPeak}</text>
+                <text x="82" y="43" text-anchor="middle" font-size="6.5" fill="#78350F">ยอดจั่ว</text>` : ''}
+
+                ${hp.hasLeftBody ? `
+                <rect x="24" y="62" width="58" height="70" fill="#DCFCE7" stroke="#059669" stroke-width="2"/>
+                <text x="53" y="95" text-anchor="middle" font-size="12" font-weight="700" fill="#065F46">${hn.hall}</text>
+                <text x="53" y="107" text-anchor="middle" font-size="6.5" fill="#047857">กดุมภะ</text>` : ''}
+
+                ${hp.hasRightBody ? `
+                <rect x="82" y="62" width="58" height="70" fill="#DCFCE7" stroke="#059669" stroke-width="2"/>
+                <text x="111" y="95" text-anchor="middle" font-size="12" font-weight="700" fill="#065F46">${hn.vault}</text>
+                <text x="111" y="107" text-anchor="middle" font-size="6.5" fill="#047857">พันธุ</text>` : ''}
+
+                ${hp.hasLeftPillar ? `
+                <line x1="24" y1="62" x2="24" y2="132" stroke="#047857" stroke-width="4.5" stroke-linecap="round"/>
+                <text x="14" y="98" text-anchor="middle" font-size="10" font-weight="700" fill="#065F46">${hn.pillar1}</text>` : ''}
+
+                ${hp.hasRightPillar ? `
+                <line x1="140" y1="62" x2="140" y2="132" stroke="#047857" stroke-width="4.5" stroke-linecap="round"/>
+                <text x="151" y="98" text-anchor="middle" font-size="10" font-weight="700" fill="#065F46">${hn.pillar2}</text>` : ''}
+
+                ${!hasAnyPart ? `
                 <text x="82" y="75" text-anchor="middle" font-size="11" font-weight="700" fill="#DC2626">🏚️ ไร้โครงสร้างเรือนชะตา</text>
-                <text x="82" y="88" text-anchor="middle" font-size="8" fill="#64748B">(ต้องสร้างฐานใหม่ด้วยตนเอง)</text>
-                ` : ''}
+                <text x="82" y="88" text-anchor="middle" font-size="8" fill="#64748B">(ต้องสร้างฐานใหม่ด้วยตนเอง)</text>` : ''}
             </svg>`;
 
 
