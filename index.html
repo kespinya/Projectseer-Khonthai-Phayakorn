@@ -581,12 +581,23 @@
             if (lightScore >= 75) {
                 candleState = { level: 'bright', title: '🔥 แสงสว่างโชติช่วง (ดวงชะตาเปิดทาง)', color: '#059669', desc: 'อายุจรปีตกภพดีและมีกำลังหนุนส่ง ดวงประทีปสว่างไสว ทำสิ่งใดก็ราบรื่นสำเร็จ' };
             } else if (lightScore <= 25) {
-                candleState = { level: 'extinguished', title: '🌑 เปลวเทียนเกือบดับ (ตนุจรตกภพเสีย/วินาศ)', color: '#DC2626', desc: 'อายุจรปีตกภพวินาศ-มรณะ หรือปะทะกาลกิณี แสงประทีปริบหรี่ ควรงดความเสี่ยงและเน้นตั้งรับ' };
+                           const h1 = ASTRO_CONST.HOUSES.at(0).at(yCol);
+            const h2 = ASTRO_CONST.HOUSES.at(1).at(yCol);
+            const h3 = ASTRO_CONST.HOUSES.at(2).at(yCol);
+            const b8Name = ASTRO_CONST.BASE8_MEANINGS.at(yCol);
+            const jorContext = `จุดจรปีตกแถวภพ ${h1}–${h2}–${h3} (ฐาน 8: ${b8Name})`;
+
+            let candleState = { level: 'medium', title: '🕯️ แสงสว่างทรงตัว (ประคองทิศทาง)', color: '#D97706', desc: `${jorContext} อยู่ในเกณฑ์ปานกลาง ควรใช้สติและวางแผนอย่างรอบคอบ` };
+            if (lightScore >= 75) {
+                candleState = { level: 'bright', title: '🔥 แสงสว่างโชติช่วง (ฐานไม้ตาย & ภพดีหนุนส่ง)', color: '#059669', desc: `${jorContext} และกำลังพระเคราะห์หนุนเต็มที่ ดวงประทีปสว่างไสว ทำสิ่งใดราบรื่นสำเร็จ` };
+            } else if (lightScore <= 25) {
+                candleState = { level: 'extinguished', title: '🌑 เปลวเทียนเกือบดับ (จุดจรปะทะภพเสีย & กาลกิณี)', color: '#DC2626', desc: `${jorContext} ปะทะดาวกาลกิณีจร แสงประทีปริบหรี่ ควรงดความเสี่ยงและเน้นตั้งรับ` };
             } else if (lightScore <= 45) {
-                candleState = { level: 'dim', title: '💨 แสงริบหรี่เอนไหว (ลมมรสุมพัดผ่าน)', color: '#EA580C', desc: 'จุดจรปีเริ่มเข้ามุมอับหรือมีอุปสรรคแทรก ควรระวังเรื่องการตัดสินใจและรักษาฐานเดิมไว้' };
+                candleState = { level: 'dim', title: '💨 แสงริบหรี่เอนไหว (ลมมรสุมพัดผ่าน)', color: '#EA580C', desc: `${jorContext} มีจุดสะดุดหรืออุปสรรคแทรก ควรรอบคอบเรื่องการตัดสินใจและรักษาฐานเดิมไว้` };
             }
 
-            // 2. ผังทรงบ้าน 7 ช่องตามคัมภีร์เรือนชะตา (ใช้พื้นดวงกำเนิดเท่านั้น ไม่เปลี่ยนตามปีจร)
+
+                       // 2. ผังทรงบ้าน 7 ช่องตามคัมภีร์เรือนชะตา (สูตรมาตรฐาน 100% ใช้พื้นดวงกำเนิดเท่านั้น)
             const topPeak = rows[3][0];    // ยอดจั่ว: ฐาน 4 อัตตะ
             const eaveLeft = rows[0][3];   // ชายคาซ้าย: ปิตา
             const eaveRight = rows[0][4];  // ชายคาขวา: มาตา
@@ -595,14 +606,18 @@
             const vault = rows[1][3];      // ห้องคลัง: พันธุ
             const pillar2 = rows[2][2];    // เสาโท: กัมมะ
             const phokaNum = rows[0][5];   // โภคา
+            const kehangNum = rows[8][4];  // เคหัง (ฐาน 9 ช่อง 5)
 
+            const badHousesNums = [rows[0][1], rows[1][5], rows[2][0], rows[2][4], rows[7][4], rows[7][5]];
             const shubha = '2,4,5,6'.split(',').map(Number);
-            const hasLeftRoof = (shubha.includes(eaveLeft) || eaveLeft === sriBirth || rows[3][3] >= 10) && eaveLeft !== kaliBirth;
-            const hasRightRoof = (shubha.includes(eaveRight) || eaveRight === sriBirth || rows[3][4] >= 10) && eaveRight !== kaliBirth;
-            const hasLeftPillar = (shubha.includes(pillar1) || pillar1 === sriBirth || rows[3][0] >= 8) && pillar1 !== kaliBirth;
-            const hasRightPillar = (shubha.includes(pillar2) || pillar2 === sriBirth || rows[3][2] >= 13) && pillar2 !== kaliBirth;
-            const hasLeftBody = shubha.includes(hall) && hall !== kaliBirth && rows[3][1] >= 13;
-            const hasRightBody = shubha.includes(vault) && vault !== kaliBirth && rows[3][3] >= 12 && rows[3][4] < 15;
+
+            const hasLeftRoof = eaveLeft !== kaliBirth && (rows[3][3] >= 10 || shubha.includes(rows[7][3]));
+            const hasRightRoof = eaveRight !== kaliBirth && (rows[3][4] >= 10 || shubha.includes(eaveRight));
+            const hasLeftPillar = pillar1 !== kaliBirth && (rows[3][0] >= 8 || shubha.includes(pillar1));
+            const hasRightPillar = pillar2 !== kaliBirth && (rows[3][2] >= 10 || shubha.includes(pillar2));
+
+            const hasLeftBody = hall !== kaliBirth && (shubha.includes(hall) || hall === sriBirth) && !badHousesNums.includes(hall) && rows[3][1] >= 12;
+            const hasRightBody = vault !== kaliBirth && (shubha.includes(vault) || vault === sriBirth) && !badHousesNums.includes(vault) && rows[3][3] >= 12;
 
             const hasRoof = hasLeftRoof && hasRightRoof;
             const hasBody = hasLeftBody && hasRightBody;
@@ -611,22 +626,38 @@
             if (hasLeftRoof && hasRightRoof) parts.push('หลังคาเต็ม');
             else if (hasLeftRoof) parts.push('หลังคาเฉพาะฝั่งซ้าย');
             else if (hasRightRoof) parts.push('หลังคาเฉพาะฝั่งขวา');
+            else parts.push('ไม่มีหลังคา');
+
             if (hasLeftPillar && hasRightPillar) parts.push('มีเสาคู่ค้ำจุน');
             else if (hasLeftPillar) parts.push('มีเสาเฉพาะฝั่งซ้าย');
             else if (hasRightPillar) parts.push('มีเสาเฉพาะฝั่งขวา');
+            else parts.push('ไร้เสาหลัก');
+
             if (hasLeftBody && hasRightBody) parts.push('ตัวบ้านเต็มหลัง');
             else if (hasLeftBody) parts.push('มีตัวบ้านเฉพาะฝั่งซ้าย');
             else if (hasRightBody) parts.push('มีตัวบ้านเฉพาะฝั่งขวา');
             else parts.push('ไม่มีตัวบ้าน (บ้านโปร่ง)');
 
             let houseTitle = `🏠 ทรงบ้านตามพื้นดวงเดิม: ${parts.join(' • ')}`;
-            let houseDesc = 'โครงสร้างเรือนชะตาคำนวณจากพื้นดวงกำเนิดแท้จริง (ไม่เปลี่ยนตามปีจร)';
-            if (hasRoof && (hasLeftPillar || hasRightPillar) && !hasLeftBody && !hasRightBody) {
-                houseDesc = 'ตามพื้นดวงเดิมมีหลังคาคุ้มภัยเต็มและมีเสาค้ำจุนแข็งแรง ผู้ใหญ่เมตตาอุปถัมภ์ แต่ตัวบ้านโปร่งไม่มีผนังกั้นทรัพย์ ทำให้หาเงินเก่งแต่เก็บเงินไม่อยู่ ควรแปลงทรัพย์เป็นอสังหาริมทรัพย์';
+            let houseDesc = '';
+
+            if (hasRoof && hasBody && hasLeftPillar && hasRightPillar) {
+                houseDesc = 'เรือนชะตาสมบูรณ์ครบทุกส่วน ทั้งร่มเงาผู้ใหญ่ (หลังคา) รากฐานชีวิต (เสา) และความอบอุ่นของครอบครัว/การเก็บทรัพย์ (ตัวบ้าน) วาสนาดี ฐานะมั่นคงปึกแผ่น';
+            } else if (hasRoof && (hasLeftPillar || hasRightPillar) && !hasLeftBody && !hasRightBody) {
+                houseDesc = 'มีหลังคาคุ้มภัยและเสาค้ำจุนแข็งแรง ผู้ใหญ่เมตตาอุปถัมภ์และตั้งตัวได้ด้วยตนเอง แต่ตัวบ้านโปร่งไม่มีผนังกั้น หมายถึงมักแยกตัวห่างจากญาติพี่น้องและเก็บเงินสดไม่อยู่ ควรแปลงทรัพย์เป็นอสังหาริมทรัพย์';
             } else if (!hasLeftRoof && !hasRightRoof && (hasLeftBody || hasRightBody)) {
-                houseDesc = 'ตามพื้นดวงเดิมมีตัวบ้านฐานรากแน่น สร้างทรัพย์สินได้ด้วยตนเอง แต่ขาดร่มเงาผู้ใหญ่ค้ำจุน ต้องพึ่งลำแข้งตนเองเป็นหลัก';
+                houseDesc = 'มีตัวบ้านและฐานทรัพย์สินที่สร้างได้ด้วยลำแข้งตนเอง แต่ไม่มีหลังคาคุ้มกัน พึ่งพาผู้ใหญ่หรือที่พึ่งพิงได้น้อย ต้องสู้ชีวิตและตัดสินใจทุกอย่างด้วยตนเอง';
+            } else if ((hasLeftRoof || hasLeftBody) && !hasRightRoof && !hasRightBody) {
+                houseDesc = 'โครงสร้างเรือนชะตาเด่นฝั่งซ้าย (วัยต้น-กลางคนตั้งตัวเร็ว มีผู้ใหญ่ฝั่งพ่อหนุน) แต่ฝั่งขวาแหว่ง ควรวางแผนสำรองเรื่องครอบครัวและทรัพย์สินในบั้นปลาย';
+            } else if (!hasLeftRoof && !hasLeftBody && (hasRightRoof || hasRightBody)) {
+                houseDesc = 'โครงสร้างเรือนชะตาเด่นฝั่งขวา ช่วงต้นต้องบุกเบิกเหนื่อยยากด้วยตนเอง แต่จะไปตั้งหลักปักฐานมั่งคั่งและมีครอบครัวอบอุ่นในช่วงครึ่งชีวิตหลัง';
+            } else if (hasRoof && !hasLeftPillar && !hasRightPillar) {
+                houseDesc = 'ภายนอกดูดีมีเกียรติยศชื่อเสียงและมีผู้ใหญ่เมตตา (หลังคาเด่น) แต่ขาดเสาหลักค้ำจุน ต้องระวังเรื่องความมั่นคงในอาชีพและภาระหนี้สิน';
+            } else {
+                houseDesc = 'โครงสร้างเรือนชะตามีส่วนแหว่งตามตำแหน่งดาวชนภพเสีย ควรสร้างความมั่นคงทีละขั้น รอบคอบเรื่องการเงิน และพึ่งพาสติปัญญาของตนเองเป็นหลัก';
             }
 
+            // ตรวจฮวงจุ้ย พันธุ & โภคา
             let fengShui = '🏡 ฮวงจุ้ยพันธุ-โภคา: อยู่อาศัยร่มเย็น (ธาตุดิน/น้ำหนุนทรัพย์)';
             if ([1, 7].includes(vault) || [1, 7].includes(phokaNum)) {
                 fengShui = '🔥 ฮวงจุ้ยพันธุ-โภคา: ดาวธาตุไฟ (๑/๗) คุมเรือน ระวังบ้านร้อนหรือต้องซ่อมแซมต่อเติมบ่อย';
@@ -634,7 +665,29 @@
                 fengShui = '🌪️ ฮวงจุ้ยพันธุ-โภคา: ดาวธาตุลม (๓/๘) คุมเรือน มักมีการโยกย้ายที่อยู่หรือเดินทางบ่อย';
             }
 
+            // เกณฑ์ปลูกเรือน/ซื้อบ้านนับ 6 ตามตำราพรหมชาติ (อายุย่าง ÷ 6: แก้ว, แหวน, เงิน, ทอง, ร้าง, ผี)
+            const curBE = new Date().getFullYear() + 543;
+            const curAge = Math.max(1, (Number(document.getElementById('t7_targetBE')?.value) || curBE) - (Number(document.getElementById('t7_birthBE')?.value) || curBE) + 1);
+            const house6Idx = (curAge - 1) % 6;
+            const house6List = [
+                { name: '1. แก้ว', status: 'ดีปานกลาง (อยู่แล้วร่มเย็น มีเกียรติยศ)', color: '#0369A1' },
+                { name: '2. แหวน', status: 'ดีปานกลาง (มั่นคง สงบสุข)', color: '#0369A1' },
+                { name: '3. เงิน', status: 'ดีมาก (อยู่แล้วร่ำรวย มีโชคลาภ)', color: '#059669' },
+                { name: '4. ทอง', status: 'ดีมาก (ทรัพย์สินงอกเงย มั่งคั่ง)', color: '#059669' },
+                { name: '5. ร้าง', status: 'ไม่เป็นมงคล (ระวังเหตุให้ต้องย้ายหรือเงียบเหงา)', color: '#DC2626' },
+                { name: '6. ผี', status: 'ไม่เป็นมงคล (ควรชะลอการปลูก/ซื้อบ้านใหม่ ระวังเจ็บป่วย)', color: '#DC2626' }
+            ];
+            const h6 = house6List[house6Idx];
+            const reuk6Text = `<br><span style="color:${h6.color};">📐 <b>เกณฑ์ปลูกเรือนนับ 6 (อายุย่าง ${curAge} ปี): ตกช่อง "${h6.name}"</b> — ${h6.status}</span> (ภพพันธุเลข ${vault} • เคหังเลข ${kehangNum} • โภคาเลข ${phokaNum})`;
+
             return {
+                candleState,
+                houseType: { title: houseTitle, desc: `${houseDesc} • <b>${fengShui}</b>${reuk6Text}` },
+                hasRoof, hasBody,
+                houseParts: { hasLeftRoof, hasRightRoof, hasLeftPillar, hasRightPillar, hasLeftBody, hasRightBody },
+                houseNums: { topPeak, eaveLeft, eaveRight, pillar1, hall, vault, pillar2 }
+            };
+
                 candleState,
                 houseType: { title: houseTitle, desc: `${houseDesc} • <b>${fengShui}</b>` },
                 hasRoof, hasBody,
