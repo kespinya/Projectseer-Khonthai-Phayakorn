@@ -7,7 +7,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ProjectSeer">
     <meta name="theme-color" content="#0F294A">
-    <title>ProjectSeer Astrology — จักรราศี & มหาโหราศาสตร์ไทย</title>
+    <title>ProjectSeer Astrology — จักรราศี & มหาโหราศาสตร์ไทย</title>   
+    <!-- โหลดระบบยืนยันตัวตนและฐานข้อมูลปลอดภัยจาก Firebase -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://w3.org' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔮</text></svg>">
     
     <!-- โหลดฟอนต์ไทย Mali (น่ารัก) และ Anuphan (อ่านง่าย) แบบเต็มลิงก์ -->
@@ -95,6 +100,13 @@
             <button class="tab-btn" id="tab_4" onclick="switchMode(4)">🧭 4. มหาทักษา & เสวยอายุ</button>
             <button class="tab-btn" id="tab_5" onclick="switchMode(5)">💑 5. ดวงคู่สมพงษ์</button>
         </div>
+                <!-- แถบสถานะสมาชิก VIP -->
+        <div id="member_bar" style="margin-bottom: 10px;">
+            <button onclick="openAuthModal()" style="padding: 6px 16px; border-radius: 99px; border: 1.5px solid #FDE047; background: rgba(254, 240, 138, 0.15); color: #FDE047; font-size: 12px; font-weight: 700; cursor: pointer;">
+                🔑 เข้าสู่ระบบ / สมัครสมาชิก VIP (ปลดล็อกคำทำนายเต็มสูตร)
+            </button>
+        </div>
+
         <div style="font-size:11px;letter-spacing:2px;color:#7DD3FC;">✦ PROJECTSEER ASTROLOGY ✦</div>
         <h1>โลกแห่งดวงดาวจักรราศี & มหาโหราศาสตร์ไทย</h1>
      </div>
